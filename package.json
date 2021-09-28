@@ -1,0 +1,85 @@
+{
+  "name": "cat-customs",
+  "displayName": "Cat Customs",
+  "description": "Custom Editor API Samples",
+  "version": "0.0.1",
+  "publisher": "vscode-samples",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/vscode-extension-samples"
+  },
+  "engines": {
+    "vscode": "^1.52.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCustomEditor:catCustoms.catScratch",
+    "onCustomEditor:catCustoms.pawDraw",
+    "onCustomEditor:sqlite.view"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "catCustoms.catScratch",
+        "displayName": "Cat Scratch",
+        "selector": [
+          {
+            "filenamePattern": "*.cscratch"
+          }
+        ]
+      },
+      {
+        "viewType": "catCustoms.pawDraw",
+        "displayName": "Paw Draw",
+        "selector": [
+          {
+            "filenamePattern": "*.pawdraw"
+          }
+        ]
+      },
+      {
+        "viewType": "sqlite.view",
+        "displayName": "SQL Viewer",
+        "selector": [
+          {
+            "filenamePattern": "*.sqlite"
+          }
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "catCustoms.pawDraw.new",
+        "title": "Create new Paw Draw Document",
+        "category": "Paw Draw"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile:tsc": "tsc -p ./",
+    "compile:app": "esbuild ./app/index.jsx --bundle --define:process.env.NODE_ENV=\"'development'\" --outfile=./app/bundle.js",
+    "compile": "npm run compile:tsc && npm run compile:app",
+    "watch:tsc": "tsc -w -p ./",
+    "watch:app": "esbuild ./app/index.jsx --bundle --define:process.env.NODE_ENV=\"'development'\" --outfile=./app/bundle.js --watch",
+    "watch": "npm run watch:tsc && npm run watch:app"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.0",
+    "@types/vscode": "^1.52.0",
+    "esbuild": "^0.12.28",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-table": "^7.7.0",
+    "react-window": "^1.8.6",
+    "sql.js": "^1.6.1"
+  }
+}
