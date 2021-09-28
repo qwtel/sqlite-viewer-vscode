@@ -63,10 +63,11 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile:tsc": "tsc -p ./",
-    "compile:app": "esbuild ./app/index.jsx --bundle --define:process.env.NODE_ENV=\"'development'\" --outfile=./app/bundle.js",
-    "compile": "npm run compile:tsc && npm run compile:app",
+    "compile:app": "esbuild ./sqlite-viewer-app/src/index.js --loader:.js=jsx --bundle --define:process.env.NODE_ENV=\"'development'\" --outfile=./sqlite-viewer-app/public/bundle.js",
+    "compile:worker": "esbuild ./sqlite-viewer-app/src/worker.js --bundle --external:fs --external:path --define:process.env.NODE_ENV=\"'development'\" --outfile=./sqlite-viewer-app/public/bundle-worker.js",
+    "compile": "npm run compile:tsc & npm run compile:app & npm run compile:worker & wait",
     "watch:tsc": "tsc -w -p ./",
-    "watch:app": "esbuild ./app/index.jsx --bundle --define:process.env.NODE_ENV=\"'development'\" --outfile=./app/bundle.js --watch",
+    "watch:app": "esbuild ./sqlite-viewer-app/src/index.js --loader:.js=jsx --bundle --define:process.env.NODE_ENV=\"'development'\" --outfile=./sqlite-viewer-app/public/bundle.js --watch",
     "watch": "npm run watch:tsc && npm run watch:app"
   },
   "devDependencies": {

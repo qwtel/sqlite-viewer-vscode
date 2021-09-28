@@ -384,27 +384,18 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
    * Get the static HTML used for in our editor's webviews.
    */
   private async getHtmlForWebview(webview: vscode.Webview): Promise<string> {
-    const files = [
-      "bundle.js",
-    ].map(s => {
-      return [s, webview.asWebviewUri(vscode.Uri.joinPath(this._context.extensionUri, 'app', s))] as const;
-    });
+    const publicUri = vscode.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public');
 
-    let html = `
-      <!DOCTYPE html>
-      <html>
-        <head></head>
-        <body>
-          <div id="root"></div>
-          <script src="bundle.js"></script>
-        </body>
-      </html>
-    `;
-    for (const [path, uri] of files) {
-      html = html.replaceAll(path, uri.toString());
-    }
+    const html = new TextDecoder().decode(await vscode.workspace.fs.readFile(
+      vscode.Uri.joinPath(publicUri, 'index.html')
+    ));
 
-    return html;
+    const PUBLIC_URL = webview.asWebviewUri(
+      vscode.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public')
+    ).toString();
+
+    const prepHtml = html.replaceAll('%PUBLIC_URL%', PUBLIC_URL);
+    return prepHtml;
   }
 
   private _requestId = 1;
