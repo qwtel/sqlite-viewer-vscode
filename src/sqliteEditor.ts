@@ -195,9 +195,9 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
  * - Implementing save, undo, redo, and revert.
  * - Backing up a custom editor.
  */
-export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteDocument> {
+export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider<SQLiteDocument> {
 
-  private static newPawDrawFileId = 1;
+  // private static newPawDrawFileId = 1;
 
   public static register(context: vscode.ExtensionContext): vscode.Disposable {
     // vscode.commands.registerCommand('catCustoms.pawDraw.new', () => {
@@ -221,6 +221,7 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
         // webview alive even when it is not visible. You should avoid using this setting
         // unless is absolutely required as it does have memory overhead.
         webviewOptions: {
+          // TODO: serialize state...
           retainContextWhenHidden: true,
         },
         supportsMultipleEditorsPerDocument: false,
@@ -286,7 +287,7 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
   async resolveCustomEditor(
     document: SQLiteDocument,
     webviewPanel: vscode.WebviewPanel,
-    _token: vscode.CancellationToken
+    token: vscode.CancellationToken
   ): Promise<void> {
     // Add the webview to our internal set of active webviews
     this.webviews.add(document.uri, webviewPanel);
@@ -343,46 +344,6 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
 
   //#endregion
 
-  // /**
-  //  * Get the static HTML used for in our editor's webviews.
-  //  */
-  // private async getHtmlForWebview(webview: vscode.Webview): Promise<string> {
-  //   // Local path to script and css for the webview
-  //   const files = [
-  //     "css/main.css",
-  //     "css/bootstrap.min.css",
-  //     "css/select2.css",
-  //     "css/select2-bootstrap.css",
-  //     "css/ribbons.min.css",
-  //     "js/jquery-1.11.3.min.js",
-  //     "js/filereader.js",
-  //     "js/sql.js",
-  //     "js/select2.min.js",
-  //     "js/ace/ace.js",
-  //     "js/bootstrap.min.js",
-  //     "js/mindmup-editabletable.js",
-  //     "js/main.js",
-  //     "img/icon.png",
-  //     "img/logo.svg",
-  //     "img/seriously.png",
-  //   ].map(s => {
-  //     return [s, webview.asWebviewUri(vscode.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer', s))] as const;
-  //   });
-
-  //   // Use a nonce to whitelist which scripts can be run
-  //   // const nonce = getNonce();
-
-  //   let html = new TextDecoder().decode(
-  //     await vscode.workspace.fs.readFile(vscode.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer', 'index.html'))
-  //   );
-
-  //   for (const [path, uri] of files) {
-  //     html = html.replaceAll(path, uri.toString());
-  //   }
-
-  //   return html;
-  // }
-
   /**
    * Get the static HTML used for in our editor's webviews.
    */
@@ -421,11 +382,17 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
     panel.webview.postMessage({ type, body }, transferable);
   }
 
-  private onMessage(document: SQLiteDocument, message: any) {
+  private pathRegExp = /(?<dirname>.*)\/(?<filename>(?<basename>.*)(?<extname>\.[^.]+))$/
+
+  private async onMessage(document: SQLiteDocument, message: any) {
     switch (message.type) {
-      // case 'stroke':
-      //   document.makeEdit(message as PawDrawEdit);
-      //   return;
+      case 'blob':
+        const { dirname, basename } = document.uri.toString().match(this.pathRegExp)?.groups ?? {}
+        const dlUri = vscode.Uri.parse(`${dirname}/${basename}-${message.download}`);
+
+        await vscode.workspace.fs.writeFile(dlUri, message.data);
+        if (!message.metaKey) await vscode.commands.executeCommand('vscode.open', dlUri);
+        return;
 
       case 'response': {
         const callback = this._callbacks.get(message.requestId);
