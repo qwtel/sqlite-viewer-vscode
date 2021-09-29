@@ -394,7 +394,7 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
       vscode.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public')
     ).toString();
 
-    const prepHtml = html.replaceAll('%PUBLIC_URL%', PUBLIC_URL);
+    const prepHtml = html.replaceAll('/index.css', '/vscode.css').replaceAll('%PUBLIC_URL%', PUBLIC_URL);
     return prepHtml;
   }
 
