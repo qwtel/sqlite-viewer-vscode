@@ -273,8 +273,8 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
       for (const webviewPanel of this.webviews.get(document.uri)) {
         this.postMessage(webviewPanel, 'update', {
           edits: e.edits,
-          content: e.content,
-        });
+          content: e.content?.buffer,
+        }, [e.content?.buffer]);
       }
     }));
 
@@ -308,12 +308,15 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
             editable: true,
           });
         } else {
-          const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
+          // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
+          const editable = false
 
-          this.postMessage(webviewPanel, 'init', {
-            value: document.documentData,
-            editable,
-          });
+          // HACK: making a copy to deal with byteoffset. maybe transfer original buffer + offset + length??
+          const dd = document.documentData
+          const value = dd.buffer.slice(dd.byteOffset, dd.byteOffset + dd.byteLength);
+
+          // console.log('postMessage', document.documentData.length, value.byteLength)
+          this.postMessage(webviewPanel, 'init', { value, editable }, [value]);
         }
       }
     });
@@ -408,8 +411,9 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
     return p;
   }
 
-  private postMessage(panel: vscode.WebviewPanel, type: string, body: any): void {
-    panel.webview.postMessage({ type, body });
+  private postMessage(panel: vscode.WebviewPanel, type: string, body: any, transferable?: any[]): void {
+    // @ts-ignore
+    panel.webview.postMessage({ type, body }, transferable);
   }
 
   private onMessage(document: SQLiteDocument, message: any) {
