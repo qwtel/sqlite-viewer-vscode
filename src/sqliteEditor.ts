@@ -388,6 +388,7 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
    */
   private async getHtmlForWebview(webview: vscode.Webview): Promise<string> {
     const publicUri = vscode.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public');
+    const codiconsUri = vscode.Uri.joinPath(this._context.extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css');
 
     const html = new TextDecoder().decode(await vscode.workspace.fs.readFile(
       vscode.Uri.joinPath(publicUri, 'index.html')
@@ -397,7 +398,11 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
       vscode.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public')
     ).toString();
 
-    const prepHtml = html.replaceAll('/index.css', '/vscode.css').replaceAll('%PUBLIC_URL%', PUBLIC_URL);
+    const prepHtml = html
+      .replaceAll('/index.css', '/vscode.css').replaceAll('%PUBLIC_URL%', PUBLIC_URL)
+      .replace('<!--%HEAD%-->', `
+        <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}"/>
+      `)
     return prepHtml;
   }
 

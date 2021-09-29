@@ -11,9 +11,8 @@
     "url": "https://github.com/Microsoft/vscode-extension-samples"
   },
   "engines": {
-    "vscode": "^1.57.0"
+    "vscode": "^1.60.0"
   },
-  "enableProposedApi": true,
   "categories": [
     "Other"
   ],
@@ -24,6 +23,17 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "languages": [
+      {
+        "id": "sql",
+        "extensions": [
+          ".sqlite",
+          ".db",
+          ".sqlite3",
+          ".db3"
+        ]
+      }
+    ],
     "customEditors": [
       {
         "viewType": "catCustoms.catScratch",
@@ -45,10 +55,19 @@
       },
       {
         "viewType": "sqlite.view",
-        "displayName": "SQL Viewer",
+        "displayName": "SQLite Viewer",
         "selector": [
           {
             "filenamePattern": "*.sqlite"
+          },
+          {
+            "filenamePattern": "*.sqlite3"
+          },
+          {
+            "filenamePattern": "*.db"
+          },
+          {
+            "filenamePattern": "*.db3"
           }
         ]
       }
@@ -78,6 +97,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "@vscode/codicons": "^0.0.22",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-table": "^7.7.0",
