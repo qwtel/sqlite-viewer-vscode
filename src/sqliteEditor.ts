@@ -1,15 +1,6 @@
-import { TextDecoder } from 'util';
 import * as vscode from 'vscode';
 import { Disposable, disposeAll } from './dispose';
 import { getNonce } from './util';
-
-/**
- * Define the type of edits used in paw draw files.
- */
-interface PawDrawEdit {
-  readonly color: string;
-  readonly stroke: ReadonlyArray<[number, number]>;
-}
 
 interface SQLiteEdit {
   readonly data: Uint8Array;
@@ -19,9 +10,6 @@ interface SQLiteDocumentDelegate {
   getFileData(): Promise<Uint8Array>;
 }
 
-/**
- * Define the document (the data model) used for paw draw files.
- */
 class SQLiteDocument extends Disposable implements vscode.CustomDocument {
 
   static async create(
@@ -45,8 +33,8 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
   private readonly _uri: vscode.Uri;
 
   private _documentData: Uint8Array;
-  private _edits: Array<PawDrawEdit> = [];
-  private _savedEdits: Array<PawDrawEdit> = [];
+  private _edits: Array<SQLiteEdit> = [];
+  private _savedEdits: Array<SQLiteEdit> = [];
 
   private readonly _delegate: SQLiteDocumentDelegate;
 
@@ -73,7 +61,7 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
 
   private readonly _onDidChangeDocument = this._register(new vscode.EventEmitter<{
     readonly content?: Uint8Array;
-    readonly edits: readonly PawDrawEdit[];
+    readonly edits: readonly SQLiteEdit[];
   }>());
   /**
    * Fired to notify webviews that the document has changed.
@@ -107,7 +95,7 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
    *
    * This fires an event to notify VS Code that the document has been edited.
    */
-  makeEdit(edit: PawDrawEdit) {
+  makeEdit(edit: SQLiteEdit) {
     this._edits.push(edit);
 
     this._onDidChange.fire({
@@ -184,29 +172,15 @@ const $default = 'default-src';
 const $script = 'script-src';
 const $style = 'style-src';
 const $img = 'img-src';
-const $worker = 'worker-src'
+const $child = 'child-src';
 const $self = "'self'";
 const $vscode = 'vscode-resource:';
 const $data = 'data:'
 const $blob = 'blob:'
 const $inlineStyle = "'unsafe-inline'";
-const buildCSP = (cspObj: Record<string, string[]>) => Object.entries(cspObj).map(([k, v]) => `${k} ${v.join(' ')};`).join(' ')
+const buildCSP = (cspObj: Record<string, string[]>) =>
+  Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
 
-/**
- * Provider for paw draw editors.
- *
- * Paw draw editors are used for `.pawDraw` files, which are just `.png` files with a different file extension.
- *
- * This provider demonstrates:
- *
- * - How to implement a custom editor for binary files.
- * - Setting up the initial webview for a custom editor.
- * - Loading scripts and styles in a custom editor.
- * - Communication between VS Code and the custom editor.
- * - Using CustomDocuments to store information that is shared between multiple custom editors.
- * - Implementing save, undo, redo, and revert.
- * - Backing up a custom editor.
- */
 export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider<SQLiteDocument> {
 
   // private static newPawDrawFileId = 1;
@@ -229,11 +203,8 @@ export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider
       SQLiteEditorProvider.viewType,
       new SQLiteEditorProvider(context),
       {
-        // For this demo extension, we enable `retainContextWhenHidden` which keeps the
-        // webview alive even when it is not visible. You should avoid using this setting
-        // unless is absolutely required as it does have memory overhead.
         webviewOptions: {
-          // TODO: serialize state...
+          // TODO: serialize state!?
           retainContextWhenHidden: true,
         },
         supportsMultipleEditorsPerDocument: false,
@@ -242,9 +213,6 @@ export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider
 
   private static readonly viewType = 'sqlite.view';
 
-  /**
-   * Tracks all known webviews
-   */
   private readonly webviews = new WebviewCollection();
 
   constructor(
@@ -324,11 +292,11 @@ export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider
           // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
           const editable = false
 
-          // HACK: making a copy to deal with byteoffset. maybe transfer original buffer + offset + length??
+          // HACK: Making a copy to deal with byteoffset. 
+          // Maybe transfer original uint8array instead!?
           const dd = document.documentData
           const value = dd.buffer.slice(dd.byteOffset, dd.byteOffset + dd.byteLength);
 
-          // console.log('postMessage', document.documentData.length, value.byteLength)
           this.postMessage(webviewPanel, 'init', { value, editable }, [value]);
         }
       }
@@ -356,9 +324,6 @@ export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider
 
   //#endregion
 
-  /**
-   * Get the static HTML used for in our editor's webviews.
-   */
   private async getHtmlForWebview(webview: vscode.Webview): Promise<string> {
     const publicUri = vscode.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public');
     const codiconsUri = vscode.Uri.joinPath(this._context.extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css');
@@ -376,7 +341,7 @@ export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider
       [$script]: [$self, $vscode],
       [$style]: [$self, $vscode, $inlineStyle],
       [$img]: [$self, $vscode, $data],
-      [$worker]: [$blob],
+      [$child]: [$blob],
     };
 
     const prepHtml = html
@@ -400,9 +365,9 @@ export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider
     return p;
   }
 
-  private postMessage(panel: vscode.WebviewPanel, type: string, body: any, transferable?: any[]): void {
+  private postMessage(panel: vscode.WebviewPanel, type: string, body: any, transfer?: any[]): void {
     // @ts-ignore
-    panel.webview.postMessage({ type, body }, transferable);
+    panel.webview.postMessage({ type, body }, transfer);
   }
 
   private pathRegExp = /(?<dirname>.*)\/(?<filename>(?<basename>.*)(?<extname>\.[^.]+))$/
@@ -410,11 +375,13 @@ export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider
   private async onMessage(document: SQLiteDocument, message: any) {
     switch (message.type) {
       case 'blob':
-        const { dirname, basename } = document.uri.toString().match(this.pathRegExp)?.groups ?? {}
-        const dlUri = vscode.Uri.parse(`${dirname}/${basename}-${message.download}`);
+        const { data, download, metaKey } = message;
 
-        await vscode.workspace.fs.writeFile(dlUri, message.data);
-        if (!message.metaKey) await vscode.commands.executeCommand('vscode.open', dlUri);
+        const { dirname, basename } = document.uri.toString().match(this.pathRegExp)?.groups ?? {}
+        const dlUri = vscode.Uri.parse(`${dirname}/${basename}-${download}`);
+
+        await vscode.workspace.fs.writeFile(dlUri, data);
+        if (!metaKey) await vscode.commands.executeCommand('vscode.open', dlUri);
         return;
 
       case 'response': {
@@ -426,19 +393,12 @@ export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider
   }
 }
 
-/**
- * Tracks all webviews.
- */
 class WebviewCollection {
-
   private readonly _webviews = new Set<{
     readonly resource: string;
     readonly webviewPanel: vscode.WebviewPanel;
   }>();
 
-  /**
-   * Get all known webviews for a given uri.
-   */
   public *get(uri: vscode.Uri): Iterable<vscode.WebviewPanel> {
     const key = uri.toString();
     for (const entry of this._webviews) {
@@ -448,9 +408,6 @@ class WebviewCollection {
     }
   }
 
-  /**
-   * Add a new webview to the collection.
-   */
   public add(uri: vscode.Uri, webviewPanel: vscode.WebviewPanel) {
     const entry = { resource: uri.toString(), webviewPanel };
     this._webviews.add(entry);
