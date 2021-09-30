@@ -180,6 +180,18 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
   }
 }
 
+const $default = 'default-src';
+const $script = 'script-src';
+const $style = 'style-src';
+const $img = 'img-src';
+const $worker = 'worker-src'
+const $self = "'self'";
+const $vscode = 'vscode-resource:';
+const $data = 'data:'
+const $blob = 'blob:'
+const $inlineStyle = "'unsafe-inline'";
+const buildCSP = (cspObj: Record<string, string[]>) => Object.entries(cspObj).map(([k, v]) => `${k} ${v.join(' ')};`).join(' ')
+
 /**
  * Provider for paw draw editors.
  *
@@ -359,11 +371,22 @@ export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider
       vscode.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public')
     ).toString();
 
+    const csp = {
+      [$default]: [$self, $vscode],
+      [$script]: [$self, $vscode],
+      [$style]: [$self, $vscode, $inlineStyle],
+      [$img]: [$self, $vscode, $data],
+      [$worker]: [$blob],
+    };
+
     const prepHtml = html
-      .replaceAll('/index.css', '/vscode.css').replaceAll('%PUBLIC_URL%', PUBLIC_URL)
+      .replaceAll('/index.css', '/vscode.css')
+      .replaceAll('%PUBLIC_URL%', PUBLIC_URL)
       .replace('<!--%HEAD%-->', `
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}"/>
+        <meta http-equiv="Content-Security-Policy" content="${buildCSP(csp)}">
       `)
+      .replace('<!--%BODY%-->', '')
     return prepHtml;
   }
 
