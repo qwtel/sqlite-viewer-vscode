@@ -347,11 +347,13 @@ export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider
     const prepHtml = html
       .replaceAll('/index.css', '/vscode.css')
       .replaceAll('%PUBLIC_URL%', PUBLIC_URL)
-      .replace('<!--%HEAD%-->', `
+      .replace('<!--HEAD-->', `
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}"/>
         <meta http-equiv="Content-Security-Policy" content="${buildCSP(csp)}">
       `)
-      .replace('<!--%BODY%-->', '')
+      .replace('<!--BODY-->', `
+        <script src="${webview.asWebviewUri(vscode.Uri.joinPath(publicUri, 'bundle.js'))}"></script>
+      `)
     return prepHtml;
   }
 
