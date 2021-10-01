@@ -186,19 +186,6 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
   // private static newPawDrawFileId = 1;
 
   public static register(context: vscode.ExtensionContext): vscode.Disposable {
-    // vscode.commands.registerCommand('catCustoms.pawDraw.new', () => {
-    //   const workspaceFolders = vscode.workspace.workspaceFolders;
-    //   if (!workspaceFolders) {
-    //     vscode.window.showErrorMessage("Creating new Paw Draw files currently requires opening a workspace");
-    //     return;
-    //   }
-
-    //   const uri = vscode.Uri.joinPath(workspaceFolders[0].uri, `new-${PawDrawEditorProvider.newPawDrawFileId++}.pawdraw`)
-    //     .with({ scheme: 'untitled' });
-
-    //   vscode.commands.executeCommand('vscode.openWith', uri, PawDrawEditorProvider.viewType);
-    // });
-
     return vscode.window.registerCustomEditorProvider(
       SQLiteEditorProvider.viewType,
       new SQLiteEditorProvider(context),
@@ -282,7 +269,7 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
 
     // Wait for the webview to be properly ready before we init
     webviewPanel.webview.onDidReceiveMessage(e => {
-      if (e.type === 'ready') {
+      if (e.type === 'ready' && this.webviews.has(document.uri)) {
         if (document.uri.scheme === 'untitled') {
           this.postMessage(webviewPanel, 'init', {
             untitled: true,
@@ -405,13 +392,17 @@ class WebviewCollection {
     readonly webviewPanel: vscode.WebviewPanel;
   }>();
 
-  public *get(uri: vscode.Uri): Iterable<vscode.WebviewPanel> {
+  public *get(uri: vscode.Uri): IterableIterator<vscode.WebviewPanel> {
     const key = uri.toString();
     for (const entry of this._webviews) {
       if (entry.resource === key) {
         yield entry.webviewPanel;
       }
     }
+  }
+
+  public has(uri: vscode.Uri): boolean {
+    return !this.get(uri).next().done;
   }
 
   public add(uri: vscode.Uri, webviewPanel: vscode.WebviewPanel) {
