@@ -1,25 +1,17 @@
-# Cat Customs - Custom Editor API Samples
+# SQLite Viewer for VSCode
 
-![Paw draw editor ](documentation/example.png)
+A quick and easy SQLite viewer for VSCode
 
-Demonstrates VS Code's [custom editor API](https://code.visualstudio.com/api/extension-guides/custom-editors) using two custom editors:
+![Paw draw editor ](media/demo.gif)
 
-- Cat Scratch — Uses the finalized custom text editor api to provide a custom editor for `.cscratch` files (which are just json files)
-- Paw Draw - Uses the binary custom editor api to provide a custom editor for `.pawdraw` files (which are just png files with a different file extension).
+Features:
+- Platform-independent, no native dependencies
+- File extension association: Just click on a `.sqlite` file and the custom editor opens
+- Fast UI with infinite scroll, sorting, filtering, etc.
+- Seamlessly integrates with VSCode and matches your color theme. 
 
-## VS Code API
+Caveats:
+- Readonly
+- Only works for "small" sqlite files, as everything is kept in memory[^1]
 
-### `vscode` module
-
-- [`window.registerCustomEditorProvider`](https://code.visualstudio.com/api/references/vscode-api#window.registerCustomEditorProvider)
-- [`CustomTextEditor`](https://code.visualstudio.com/api/references/vscode-api#CustomTextEditor)
-- [`CustomEditor`](https://code.visualstudio.com/api/references/vscode-api#CustomEditor)
-
-## Running the example
-
-- Open this example in VS Code 1.46+
-- `npm install`
-- `npm run watch` or `npm run compile`
-- `F5` to start debugging
-
-Open the example files from the `exampleFiles` directory.
+[^1]: Accessing SQLite files in the canonical way, i.e. reading from disk rather than memory, from within VSCode could be done, but it would require eschewing VSCode's own `workspace.fs`, since it doesn't support random access within files (or operations like `fsync` for that matter), as well as  recompiling SQLite with Emscripten's `NODEFS` File System API or a custom SQLite VFS.  
