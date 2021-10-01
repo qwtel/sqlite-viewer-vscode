@@ -330,7 +330,7 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
 
     const csp = {
       [$default]: [$self, $vscode],
-      [$script]: [$self, $vscode],
+      [$script]: [$self, $vscode, 'unsafe-eval'], // HACK: Needed for WebAssembly in Web Extension. Needless to say, it makes the whole CSP useless...
       [$style]: [$self, $vscode, $inlineStyle],
       [$img]: [$self, $vscode, $data],
       [$font]: [$self, $vscode],
