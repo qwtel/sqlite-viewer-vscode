@@ -2,7 +2,7 @@
 
 A quick and easy SQLite viewer for VSCode
 
-![Paw draw editor ](media/demo.gif)
+![Paw draw editor ](documentation/demo.gif)
 
 Features:
 - Platform-independent, no native dependencies
