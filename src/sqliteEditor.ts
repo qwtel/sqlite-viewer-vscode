@@ -336,13 +336,13 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
       [$font]: [$self, $vscode],
       [$child]: [$blob],
     };
-    // <meta http-equiv="Content-Security-Policy" content="${buildCSP(csp)}">
 
     const prepHtml = html
       .replaceAll('/index.css', '/vscode.css')
       .replaceAll('%PUBLIC_URL%', PUBLIC_URL)
       .replace('<!--HEAD-->', `
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}"/>
+        <meta http-equiv="Content-Security-Policy" content="${buildCSP(csp)}">
       `)
       .replace('<!--BODY-->', `
         <script src="${webview.asWebviewUri(vscode.Uri.joinPath(publicUri, 'bundle.js'))}"></script>
