@@ -20,6 +20,7 @@
     "onCustomEditor:sqlite.view"
   ],
   "main": "./out/extension.js",
+  "browser": "./out/extension.js",
   "contributes": {
     "languages": [
       {
