@@ -179,6 +179,7 @@ const $vscode = 'vscode-resource: qwtel.vscode-unpkg.net'; // FIXME: find way to
 const $data = 'data:'
 const $blob = 'blob:'
 const $inlineStyle = "'unsafe-inline'";
+const $unsafeEval = "'unsafe-eval'";
 const buildCSP = (cspObj: Record<string, string[]>) =>
   Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
 
@@ -330,7 +331,7 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
 
     const csp = {
       [$default]: [$self, $vscode],
-      [$script]: [$self, $vscode, 'unsafe-eval'], // HACK: Needed for WebAssembly in Web Extension. Needless to say, it makes the whole CSP useless...
+      [$script]: [$self, $vscode, $unsafeEval], // HACK: Needed for WebAssembly in Web Extension. Needless to say, it makes the whole CSP useless...
       [$style]: [$self, $vscode, $inlineStyle],
       [$img]: [$self, $vscode, $data],
       [$font]: [$self, $vscode],
