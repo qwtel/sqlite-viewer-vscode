@@ -172,9 +172,10 @@ const $default = 'default-src';
 const $script = 'script-src';
 const $style = 'style-src';
 const $img = 'img-src';
+const $font = 'font-src';
 const $child = 'child-src';
 const $self = "'self'";
-const $vscode = 'vscode-resource:';
+const $vscode = 'vscode-resource: qwtel.vscode-unpkg.net'; // FIXME: find way to avoid hard-coding web extension domain
 const $data = 'data:'
 const $blob = 'blob:'
 const $inlineStyle = "'unsafe-inline'";
@@ -332,15 +333,16 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
       [$script]: [$self, $vscode],
       [$style]: [$self, $vscode, $inlineStyle],
       [$img]: [$self, $vscode, $data],
+      [$font]: [$self, $vscode],
       [$child]: [$blob],
     };
+    // <meta http-equiv="Content-Security-Policy" content="${buildCSP(csp)}">
 
     const prepHtml = html
       .replaceAll('/index.css', '/vscode.css')
       .replaceAll('%PUBLIC_URL%', PUBLIC_URL)
       .replace('<!--HEAD-->', `
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}"/>
-        <meta http-equiv="Content-Security-Policy" content="${buildCSP(csp)}">
       `)
       .replace('<!--BODY-->', `
         <script src="${webview.asWebviewUri(vscode.Uri.joinPath(publicUri, 'bundle.js'))}"></script>
