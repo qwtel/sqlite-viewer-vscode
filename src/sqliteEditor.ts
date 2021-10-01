@@ -181,7 +181,7 @@ const $inlineStyle = "'unsafe-inline'";
 const buildCSP = (cspObj: Record<string, string[]>) =>
   Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
 
-export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider<SQLiteDocument> {
+export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteDocument> {
 
   // private static newPawDrawFileId = 1;
 

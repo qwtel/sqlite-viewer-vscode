@@ -2,7 +2,7 @@
   "name": "sqlite-viewer",
   "displayName": "SQLite Viewer",
   "description": "SQLite Viewer for VSCode",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "qwtel",
   "private": true,
   "license": "",
@@ -17,8 +17,6 @@
     "Other"
   ],
   "activationEvents": [
-    "onCustomEditor:catCustoms.catScratch",
-    "onCustomEditor:catCustoms.pawDraw",
     "onCustomEditor:sqlite.view"
   ],
   "main": "./out/extension.js",
@@ -36,24 +34,6 @@
     ],
     "customEditors": [
       {
-        "viewType": "catCustoms.catScratch",
-        "displayName": "Cat Scratch",
-        "selector": [
-          {
-            "filenamePattern": "*.cscratch"
-          }
-        ]
-      },
-      {
-        "viewType": "catCustoms.pawDraw",
-        "displayName": "Paw Draw",
-        "selector": [
-          {
-            "filenamePattern": "*.pawdraw"
-          }
-        ]
-      },
-      {
         "viewType": "sqlite.view",
         "displayName": "SQLite Viewer",
         "selector": [
@@ -70,13 +50,6 @@
             "filenamePattern": "*.db3"
           }
         ]
-      }
-    ],
-    "commands": [
-      {
-        "command": "catCustoms.pawDraw.new",
-        "title": "Create new Paw Draw Document",
-        "category": "Paw Draw"
       }
     ]
   },
