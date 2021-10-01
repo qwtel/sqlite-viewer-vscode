@@ -292,12 +292,16 @@ export class SQLiteEditorProvider implements vscode.CustomReadonlyEditorProvider
           // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
           const editable = false
 
+          const { buffer, byteOffset, byteLength } = document.documentData
+          const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
           // HACK: Making a copy to deal with byteoffset. 
           // Maybe transfer original uint8array instead!?
-          const dd = document.documentData
-          const value = dd.buffer.slice(dd.byteOffset, dd.byteOffset + dd.byteLength);
+          // const value = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
 
-          this.postMessage(webviewPanel, 'init', { value, editable }, [value]);
+          this.postMessage(webviewPanel, 'init', { 
+            value,
+            editable,
+          }, [buffer]);
         }
       }
     });
