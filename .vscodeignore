@@ -4,3 +4,4 @@ sqlite-viewer-app/src/*
 sqlite-viewer-app/config/*
 sqlite-viewer-app/scripts/*
 exampleFiles/*
+documentation/*.gif
