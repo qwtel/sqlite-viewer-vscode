@@ -5,7 +5,7 @@
   "version": "0.0.16",
   "publisher": "qwtel",
   "private": true,
-  "license": "",
+  "license": "LICENSE.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/qwtel/sqlite-viewer-vscode"
