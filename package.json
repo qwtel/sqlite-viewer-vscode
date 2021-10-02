@@ -59,13 +59,16 @@
     "compile:ext": "esbuild ./src/extension.ts --bundle --minify --outfile=out/extension.js --external:vscode --format=cjs",
     "compile:view": "esbuild ./sqlite-viewer-app/src/index.js --loader:.js=jsx --bundle --minify --define:process.env.NODE_ENV=\"'production'\" --external:worker-loader!./worker.js --outfile=./sqlite-viewer-app/public/bundle.js",
     "compile:worker": "esbuild ./sqlite-viewer-app/src/worker.js --bundle --minify --external:fs --external:path --define:process.env.NODE_ENV=\"'production'\" --outfile=./sqlite-viewer-app/public/bundle-worker.js",
-    "compile": "npm run compile:ext & npm run compile:view & npm run compile:worker & wait"
+    "compile": "npm run compile:ext & npm run compile:view & npm run compile:worker & wait",
+    "pack": "vsce package --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
+    "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/"
   },
   "devDependencies": {
     "@types/node": "^12.12.0",
     "@types/vscode": "^1.52.0",
     "esbuild": "^0.12.28",
-    "typescript": "^4.3.5"
+    "typescript": "^4.3.5",
+    "vsce": "^1.100.1"
   },
   "dependencies": {
     "@vscode/codicons": "^0.0.22"
