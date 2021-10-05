@@ -68,6 +68,9 @@ No changes were made.
 `styled-components` : [MIT]
 > Copyright (c) 2016-present Glen Maddern and Maximilian Stoiber
 
+Chinook Database : [MIT]
+> Copyright (c) 2008-2017 Luis Rocha
+
 
 [MIT]: https://mit-license.org
 [Apache-2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
