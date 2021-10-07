@@ -4,9 +4,6 @@ All rights reserved.
 
 The distribution also includes software licensed under the following terms:
 
-`@geoffcox/react-splitter` : [MIT]
-> Copyright (c) 2020 Geoff Cox
-
 `@react-hook/resize-observer` : [MIT]
 > Copyright (c) 2019 Jared Lunde
 
