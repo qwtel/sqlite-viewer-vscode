@@ -10,6 +10,11 @@ The distribution also includes software licensed under the following terms:
 `@react-hook/resize-observer` : [MIT]
 > Copyright (c) 2019 Jared Lunde
 
+`allotment` : [MIT]
+> Copyright (c) 2021 John Walley  
+> Copyright (c) 2021 Gobalsky Labs Ltd.  
+> Copyright (c) 2015 - present Microsoft Corporation
+
 `browser-fs-access` : [Apache-2.0]
 >  Copyright 2020 Google Inc.
 
