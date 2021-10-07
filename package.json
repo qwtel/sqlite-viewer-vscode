@@ -1,4 +1,5 @@
 {
+  "icon": "documentation/icon.png",
   "name": "sqlite-viewer",
   "displayName": "SQLite Viewer",
   "description": "SQLite Viewer for VSCode",
