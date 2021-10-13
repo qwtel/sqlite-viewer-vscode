@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const esbuild = require('esbuild');
 const alias = require('esbuild-plugin-alias');
+const path = require('path');
 const cssModulesPlugin = require('esbuild-css-modules-plugin');
 
 esbuild.build({
@@ -16,7 +17,8 @@ esbuild.build({
   tsconfig: './sqlite-viewer-app/tsconfig.json',
   plugins: [
     alias({
-      './uilib': require('path').resolve('./sqlite-viewer-app/src/uilib20.js'),
+      './globalStyles': path.resolve('./sqlite-viewer-app/src/globalStyles20.js'),
+      './uilib': path.resolve('./sqlite-viewer-app/src/uilib20.js'),
     }),
     cssModulesPlugin({})
   ]
