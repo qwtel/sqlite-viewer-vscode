@@ -17,7 +17,7 @@ esbuild.build({
   tsconfig: './sqlite-viewer-app/tsconfig.json',
   plugins: [
     alias({
-      './globalStyles': path.resolve('./sqlite-viewer-app/src/globalStyles20.js'),
+      './index.css': path.resolve('./sqlite-viewer-app/src/vscode.css'),
       './uilib': path.resolve('./sqlite-viewer-app/src/uilib20.js'),
     }),
     cssModulesPlugin({})

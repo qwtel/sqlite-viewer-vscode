@@ -341,6 +341,7 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
     const prepHtml = html
       .replaceAll('%PUBLIC_URL%', PUBLIC_URL)
       .replace('<!--HEAD-->', `
+        <link rel="stylesheet" href="${webview.asWebviewUri(vscode.Uri.joinPath(publicUri, 'bundle.css'))}"/>
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}"/>
         <meta http-equiv="Content-Security-Policy" content="${buildCSP(csp)}">
       `)
