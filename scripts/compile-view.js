@@ -8,11 +8,12 @@ esbuild.build({
   loader: { '.js': 'jsx' },
   bundle: true,
   define: {
-    'process.evn.NODE_ENV': "'production'"
+    'process.env.NODE_ENV': "'production'"
   },
   external: ['worker-loader!./worker.js'],
   outfile: './sqlite-viewer-app/public/bundle.js',
   minify: true,
+  tsconfig: './sqlite-viewer-app/tsconfig.json',
   plugins: [
     alias({
       './uilib': require('path').resolve('./sqlite-viewer-app/src/uilib20.js'),
