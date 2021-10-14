@@ -340,10 +340,10 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
 
     const prepHtml = html
       .replaceAll('%PUBLIC_URL%', PUBLIC_URL)
+      .replaceAll('%REACT_APP_CSP%', buildCSP(csp))
       .replace('<!--HEAD-->', `
         <link rel="stylesheet" href="${webview.asWebviewUri(vscode.Uri.joinPath(publicUri, 'bundle.css'))}"/>
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}"/>
-        <meta http-equiv="Content-Security-Policy" content="${buildCSP(csp)}">
       `)
       .replace('<!--BODY-->', `
         <script src="${webview.asWebviewUri(vscode.Uri.joinPath(publicUri, 'bundle.js'))}"></script>
