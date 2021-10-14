@@ -16,10 +16,10 @@ esbuild.build({
   minify: true,
   tsconfig: './sqlite-viewer-app/tsconfig.json',
   plugins: [
+    cssModulesPlugin({}),
     alias({
       './index.css': path.resolve('./sqlite-viewer-app/src/vscode.css'),
       './uilib': path.resolve('./sqlite-viewer-app/src/uilib20.js'),
     }),
-    cssModulesPlugin({})
   ]
 }).catch(() => process.exit(1));
