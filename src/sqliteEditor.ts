@@ -51,6 +51,12 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
 
   public get uri() { return this._uri; }
 
+  private pathRegExp = /(?<dirname>.*)\/(?<filename>(?<basename>.*)(?<extname>\.[^.]+))$/
+  public get uriParts() {
+    const { dirname, filename, basename, extname } = this._uri.toString().match(this.pathRegExp)?.groups ?? {}
+    return { dirname, filename, basename, extname };
+  }
+
   public get documentData(): Uint8Array { return this._documentData; }
 
   private readonly _onDidDispose = this._register(new vscode.EventEmitter<void>());
@@ -147,6 +153,16 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
     });
   }
 
+  async refresh(_cancellation?: vscode.CancellationToken): Promise<void> {
+    const diskContent = await SQLiteDocument.readFile(this.uri);
+    this._documentData = diskContent;
+    this._edits = [];
+    this._onDidChangeDocument.fire({
+      content: diskContent,
+      edits: [],
+    });
+  }
+
   /**
    * Called by VS Code to backup the edited document.
    *
@@ -218,7 +234,7 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
 
     const document: SQLiteDocument = await SQLiteDocument.create(uri, openContext.backupId, {
       getFileData: async () => {
-        const webviewsForDocument = Array.from(this.webviews.get(document.uri));
+        const webviewsForDocument = [...this.webviews.get(document.uri)];
         if (!webviewsForDocument.length) {
           throw new Error('Could not find webview to save for');
         }
@@ -240,11 +256,17 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
 
     listeners.push(document.onDidChangeContent(e => {
       // Update all webviews when the document changes
+      // NOTE: per configuration there can only be one webivew per uri, so transfering the buffer is ok
       for (const webviewPanel of this.webviews.get(document.uri)) {
+        const { filename } = document.uriParts;
+        const { buffer, byteOffset, byteLength } = document.documentData
+        const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
+
         this.postMessage(webviewPanel, 'update', {
-          edits: e.edits,
-          content: e.content?.buffer,
-        }, [e.content?.buffer]);
+          filename,
+          value,
+          editable: false,
+        }, [buffer]); 
       }
     }));
 
@@ -274,8 +296,9 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
       if (e.type === 'ready' && this.webviews.has(document.uri)) {
         if (document.uri.scheme === 'untitled') {
           this.postMessage(webviewPanel, 'init', {
+            filename: 'untitled',
             untitled: true,
-            editable: true,
+            editable: false,
           });
         } else {
           // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
@@ -287,7 +310,9 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
           // Maybe transfer original uint8array instead!?
           // const value = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
 
+          const { filename } = document.uriParts;
           this.postMessage(webviewPanel, 'init', { 
+            filename,
             value,
             editable,
           }, [buffer]);
@@ -366,14 +391,17 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
     panel.webview.postMessage({ type, body }, transfer);
   }
 
-  private pathRegExp = /(?<dirname>.*)\/(?<filename>(?<basename>.*)(?<extname>\.[^.]+))$/
-
   private async onMessage(document: SQLiteDocument, message: any) {
     switch (message.type) {
+      case 'refresh':
+        if (document.uri.scheme !== 'untitled') {
+          document.refresh()
+        }
+        return;
       case 'blob':
         const { data, download, metaKey } = message;
 
-        const { dirname, basename } = document.uri.toString().match(this.pathRegExp)?.groups ?? {}
+        const { dirname, basename } = document.uriParts;
         const dlUri = vscode.Uri.parse(`${dirname}/${basename}-${download}`);
 
         await vscode.workspace.fs.writeFile(dlUri, data);
