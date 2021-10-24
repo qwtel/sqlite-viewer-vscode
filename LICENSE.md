@@ -2,10 +2,16 @@ Copyright (c) 2021 Florian Klampfer <mail@qwtel.com> (https://qwtel.com/)
 
 All rights reserved.
 
-The distribution also includes software licensed under the following terms:
+This distribution also includes software licensed under the following terms:
 
 `@react-hook/resize-observer` : [MIT]
 > Copyright (c) 2019 Jared Lunde
+
+`@react95/core` : [MIT]
+> Copyright (c) 2018 React95
+
+`@yaireo/relative-time` : [MIT]
+> Copyright 2019 Yair Even-Or
 
 `allotment` : [MIT]
 > Copyright (c) 2021 John Walley  
@@ -17,8 +23,15 @@ The distribution also includes software licensed under the following terms:
 
 No changes were made.
 
+`classnames` : [MIT]
+> Copyright (c) 2018 Jed Watson
+
 `core-js-pure` : [MIT]
 > Copyright (c) 2014-2021 Denis Pushkarev
+
+`history` : [MIT]
+> Copyright (c) React Training 2016-2020  
+> Copyright (c) Remix Software 2020-2021
 
 `kv-storage-polyfill` : [Apache-2.0]
 >  Copyright 2019 Google Inc.
@@ -41,6 +54,9 @@ No changes were made.
 > Copyright (c) 2018 Formidable Labs  
 > Copyright (c) 2017 Evgeny Poberezkin  
 
+`react-hotkeys-hook` : [MIT]
+> Copyright (c) 2018 Johannes Klauss
+
 `react-modal` : [MIT]
 > Copyright (c) 2017 Ryan Florence
 
@@ -58,6 +74,8 @@ No changes were made.
 
 `sql.js` : [MIT]
 > Copyright (c) 2017 sql.js authors (see AUTHORS)  
+
+AUTHORS
 > Ophir LOJKINE <pere.jobs@gmail.com> (https://github.com/lovasoa)  
 > @kripken  
 > @hankinsoft  
@@ -69,6 +87,9 @@ No changes were made.
 
 `styled-components` : [MIT]
 > Copyright (c) 2016-present Glen Maddern and Maximilian Stoiber
+
+Workbox : [MIT]
+> Copyright 2018 Google LLC
 
 Chinook Database : [MIT]
 > Copyright (c) 2008-2017 Luis Rocha

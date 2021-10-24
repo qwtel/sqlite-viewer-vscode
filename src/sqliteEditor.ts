@@ -347,7 +347,7 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
     const codiconsUri = vscode.Uri.joinPath(this._context.extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css');
 
     const html = new TextDecoder().decode(await vscode.workspace.fs.readFile(
-      vscode.Uri.joinPath(publicUri, 'index.html')
+      vscode.Uri.joinPath(publicUri, 'vscode.html')
     ));
 
     const PUBLIC_URL = webview.asWebviewUri(
