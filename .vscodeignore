@@ -1,6 +1,7 @@
 sqlite-viewer-app/node_modules/**/*
 sqlite-viewer-app/public/*.sqlite
 sqlite-viewer-app/public/logo*.png
+sqlite-viewer-app/public/*.webm
 sqlite-viewer-app/src/**/*
 sqlite-viewer-app/config/**/*
 sqlite-viewer-app/scripts/**/*

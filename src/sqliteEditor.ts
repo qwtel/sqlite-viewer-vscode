@@ -401,8 +401,8 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
       case 'blob':
         const { data, download, metaKey } = message;
 
-        const { dirname, basename } = document.uriParts;
-        const dlUri = vscode.Uri.parse(`${dirname}/${basename}-${download}`);
+        const { dirname } = document.uriParts;
+        const dlUri = vscode.Uri.parse(`${dirname}/${download}`);
 
         await vscode.workspace.fs.writeFile(dlUri, data);
         if (!metaKey) await vscode.commands.executeCommand('vscode.open', dlUri);
