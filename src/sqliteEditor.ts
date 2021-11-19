@@ -199,24 +199,23 @@ const $unsafeEval = "'unsafe-eval'";
 const buildCSP = (cspObj: Record<string, string[]>) =>
   Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
 
-export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteDocument> {
+const registerOptions = {
+  webviewOptions: {
+    // TODO: serialize state!?
+    retainContextWhenHidden: true,
+  },
+  supportsMultipleEditorsPerDocument: false,
+}
 
-  // private static newPawDrawFileId = 1;
+export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteDocument> {
+  static viewType = 'sqlite.view';
 
   public static register(context: vscode.ExtensionContext): vscode.Disposable {
     return vscode.window.registerCustomEditorProvider(
       SQLiteEditorProvider.viewType,
       new SQLiteEditorProvider(context),
-      {
-        webviewOptions: {
-          // TODO: serialize state!?
-          retainContextWhenHidden: true,
-        },
-        supportsMultipleEditorsPerDocument: false,
-      });
+      registerOptions);
   }
-
-  private static readonly viewType = 'sqlite.view';
 
   private readonly webviews = new WebviewCollection();
 
@@ -266,7 +265,7 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
           filename,
           value,
           editable: false,
-        }, [buffer]); 
+        }, [buffer]);
       }
     }));
 
@@ -311,7 +310,7 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
           // const value = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
 
           const { filename } = document.uriParts;
-          this.postMessage(webviewPanel, 'init', { 
+          this.postMessage(webviewPanel, 'init', {
             filename,
             value,
             editable,
@@ -414,6 +413,17 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
         return;
       }
     }
+  }
+}
+
+export class SQLiteEditorOptionProvider extends SQLiteEditorProvider {
+  static viewType = 'sqlite.option';
+
+  public static register(context: vscode.ExtensionContext): vscode.Disposable {
+    return vscode.window.registerCustomEditorProvider(
+      SQLiteEditorOptionProvider.viewType,
+      new SQLiteEditorOptionProvider(context),
+      registerOptions);
   }
 }
 

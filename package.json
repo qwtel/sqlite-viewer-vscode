@@ -47,14 +47,18 @@
           },
           {
             "filenamePattern": "*.sqlite3"
-          },
-          {
-            "filenamePattern": "*.db"
-          },
-          {
-            "filenamePattern": "*.db3"
           }
         ]
+      },
+      {
+        "viewType": "sqlite.option",
+        "displayName": "SQLite Viewer",
+        "selector": [
+          {
+            "filenamePattern": "*"
+          }
+        ],
+        "priority": "option"
       }
     ]
   },
