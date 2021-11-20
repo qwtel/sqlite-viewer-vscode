@@ -1,6 +1,6 @@
-import * as vscode from 'vscode';
+import * as vsc from 'vscode';
 import { Disposable, disposeAll } from './dispose';
-import { getNonce } from './util';
+import { WebviewCollection } from './util';
 
 interface SQLiteEdit {
   readonly data: Uint8Array;
@@ -10,27 +10,26 @@ interface SQLiteDocumentDelegate {
   getFileData(): Promise<Uint8Array>;
 }
 
-class SQLiteDocument extends Disposable implements vscode.CustomDocument {
-
+class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   static async create(
-    uri: vscode.Uri,
+    uri: vsc.Uri,
     backupId: string | undefined,
     delegate: SQLiteDocumentDelegate,
   ): Promise<SQLiteDocument | PromiseLike<SQLiteDocument>> {
     // If we have a backup, read that. Otherwise read the resource from the workspace
-    const dataFile = typeof backupId === 'string' ? vscode.Uri.parse(backupId) : uri;
+    const dataFile = typeof backupId === 'string' ? vsc.Uri.parse(backupId) : uri;
     const fileData = await SQLiteDocument.readFile(dataFile);
     return new SQLiteDocument(uri, fileData, delegate);
   }
 
-  private static async readFile(uri: vscode.Uri): Promise<Uint8Array> {
+  private static async readFile(uri: vsc.Uri): Promise<Uint8Array> {
     if (uri.scheme === 'untitled') {
       return new Uint8Array();
     }
-    return vscode.workspace.fs.readFile(uri);
+    return vsc.workspace.fs.readFile(uri);
   }
 
-  private readonly _uri: vscode.Uri;
+  private readonly _uri: vsc.Uri;
 
   private _documentData: Uint8Array;
   private _edits: Array<SQLiteEdit> = [];
@@ -39,7 +38,7 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
   private readonly _delegate: SQLiteDocumentDelegate;
 
   private constructor(
-    uri: vscode.Uri,
+    uri: vsc.Uri,
     initialContent: Uint8Array,
     delegate: SQLiteDocumentDelegate
   ) {
@@ -59,13 +58,13 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
 
   public get documentData(): Uint8Array { return this._documentData; }
 
-  private readonly _onDidDispose = this._register(new vscode.EventEmitter<void>());
+  private readonly _onDidDispose = this._register(new vsc.EventEmitter<void>());
   /**
    * Fired when the document is disposed of.
    */
   public readonly onDidDispose = this._onDidDispose.event;
 
-  private readonly _onDidChangeDocument = this._register(new vscode.EventEmitter<{
+  private readonly _onDidChangeDocument = this._register(new vsc.EventEmitter<{
     readonly content?: Uint8Array;
     readonly edits: readonly SQLiteEdit[];
   }>());
@@ -74,7 +73,7 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
    */
   public readonly onDidChangeContent = this._onDidChangeDocument.event;
 
-  private readonly _onDidChange = this._register(new vscode.EventEmitter<{
+  private readonly _onDidChange = this._register(new vsc.EventEmitter<{
     readonly label: string,
     undo(): void,
     redo(): void,
@@ -124,7 +123,7 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
   /**
    * Called by VS Code when the user saves the document.
    */
-  async save(cancellation: vscode.CancellationToken): Promise<void> {
+  async save(cancellation: vsc.CancellationToken): Promise<void> {
     await this.saveAs(this.uri, cancellation);
     this._savedEdits = Array.from(this._edits);
   }
@@ -132,18 +131,18 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
   /**
    * Called by VS Code when the user saves the document to a new location.
    */
-  async saveAs(targetResource: vscode.Uri, cancellation: vscode.CancellationToken): Promise<void> {
+  async saveAs(targetResource: vsc.Uri, cancellation: vsc.CancellationToken): Promise<void> {
     const fileData = await this._delegate.getFileData();
     if (cancellation.isCancellationRequested) {
       return;
     }
-    await vscode.workspace.fs.writeFile(targetResource, fileData);
+    await vsc.workspace.fs.writeFile(targetResource, fileData);
   }
 
   /**
    * Called by VS Code when the user calls `revert` on a document.
    */
-  async revert(_cancellation: vscode.CancellationToken): Promise<void> {
+  async revert(_cancellation: vsc.CancellationToken): Promise<void> {
     const diskContent = await SQLiteDocument.readFile(this.uri);
     this._documentData = diskContent;
     this._edits = this._savedEdits;
@@ -153,7 +152,7 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
     });
   }
 
-  async refresh(_cancellation?: vscode.CancellationToken): Promise<void> {
+  async refresh(_cancellation?: vsc.CancellationToken): Promise<void> {
     const diskContent = await SQLiteDocument.readFile(this.uri);
     this._documentData = diskContent;
     this._edits = [];
@@ -168,14 +167,14 @@ class SQLiteDocument extends Disposable implements vscode.CustomDocument {
    *
    * These backups are used to implement hot exit.
    */
-  async backup(destination: vscode.Uri, cancellation: vscode.CancellationToken): Promise<vscode.CustomDocumentBackup> {
+  async backup(destination: vsc.Uri, cancellation: vsc.CancellationToken): Promise<vsc.CustomDocumentBackup> {
     await this.saveAs(destination, cancellation);
 
     return {
       id: destination.toString(),
       delete: async () => {
         try {
-          await vscode.workspace.fs.delete(destination);
+          await vsc.workspace.fs.delete(destination);
         } catch {
           // noop
         }
@@ -199,36 +198,17 @@ const $unsafeEval = "'unsafe-eval'";
 const buildCSP = (cspObj: Record<string, string[]>) =>
   Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
 
-const registerOptions = {
-  webviewOptions: {
-    // TODO: serialize state!?
-    retainContextWhenHidden: true,
-  },
-  supportsMultipleEditorsPerDocument: false,
-}
-
-export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteDocument> {
-  static viewType = 'sqlite.view';
-
-  public static register(context: vscode.ExtensionContext): vscode.Disposable {
-    return vscode.window.registerCustomEditorProvider(
-      SQLiteEditorProvider.viewType,
-      new SQLiteEditorProvider(context),
-      registerOptions);
-  }
-
+class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   private readonly webviews = new WebviewCollection();
 
-  constructor(
-    private readonly _context: vscode.ExtensionContext
-  ) { }
+  constructor(private readonly _context: vsc.ExtensionContext) {}
 
   //#region CustomEditorProvider
 
   async openCustomDocument(
-    uri: vscode.Uri,
+    uri: vsc.Uri,
     openContext: { backupId?: string },
-    _token: vscode.CancellationToken
+    _token: vsc.CancellationToken
   ): Promise<SQLiteDocument> {
 
     const document: SQLiteDocument = await SQLiteDocument.create(uri, openContext.backupId, {
@@ -243,7 +223,7 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
       }
     });
 
-    const listeners: vscode.Disposable[] = [];
+    const listeners: vsc.Disposable[] = [];
 
     listeners.push(document.onDidChange(e => {
       // Tell VS Code that the document has been edited by the use.
@@ -276,8 +256,8 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
 
   async resolveCustomEditor(
     document: SQLiteDocument,
-    webviewPanel: vscode.WebviewPanel,
-    token: vscode.CancellationToken
+    webviewPanel: vsc.WebviewPanel,
+    token: vsc.CancellationToken
   ): Promise<void> {
     // Add the webview to our internal set of active webviews
     this.webviews.add(document.uri, webviewPanel);
@@ -320,37 +300,37 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
     });
   }
 
-  private readonly _onDidChangeCustomDocument = new vscode.EventEmitter<vscode.CustomDocumentEditEvent<SQLiteDocument>>();
+  private readonly _onDidChangeCustomDocument = new vsc.EventEmitter<vsc.CustomDocumentEditEvent<SQLiteDocument>>();
   public readonly onDidChangeCustomDocument = this._onDidChangeCustomDocument.event;
 
-  public saveCustomDocument(document: SQLiteDocument, cancellation: vscode.CancellationToken): Thenable<void> {
+  public saveCustomDocument(document: SQLiteDocument, cancellation: vsc.CancellationToken): Thenable<void> {
     return document.save(cancellation);
   }
 
-  public saveCustomDocumentAs(document: SQLiteDocument, destination: vscode.Uri, cancellation: vscode.CancellationToken): Thenable<void> {
+  public saveCustomDocumentAs(document: SQLiteDocument, destination: vsc.Uri, cancellation: vsc.CancellationToken): Thenable<void> {
     return document.saveAs(destination, cancellation);
   }
 
-  public revertCustomDocument(document: SQLiteDocument, cancellation: vscode.CancellationToken): Thenable<void> {
+  public revertCustomDocument(document: SQLiteDocument, cancellation: vsc.CancellationToken): Thenable<void> {
     return document.revert(cancellation);
   }
 
-  public backupCustomDocument(document: SQLiteDocument, context: vscode.CustomDocumentBackupContext, cancellation: vscode.CancellationToken): Thenable<vscode.CustomDocumentBackup> {
+  public backupCustomDocument(document: SQLiteDocument, context: vsc.CustomDocumentBackupContext, cancellation: vsc.CancellationToken): Thenable<vsc.CustomDocumentBackup> {
     return document.backup(context.destination, cancellation);
   }
 
   //#endregion
 
-  private async getHtmlForWebview(webview: vscode.Webview): Promise<string> {
-    const publicUri = vscode.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public');
-    const codiconsUri = vscode.Uri.joinPath(this._context.extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css');
+  private async getHtmlForWebview(webview: vsc.Webview): Promise<string> {
+    const publicUri = vsc.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public');
+    const codiconsUri = vsc.Uri.joinPath(this._context.extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css');
 
-    const html = new TextDecoder().decode(await vscode.workspace.fs.readFile(
-      vscode.Uri.joinPath(publicUri, 'vscode.html')
+    const html = new TextDecoder().decode(await vsc.workspace.fs.readFile(
+      vsc.Uri.joinPath(publicUri, 'vscode.html')
     ));
 
     const PUBLIC_URL = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public')
+      vsc.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public')
     ).toString();
 
     const csp = {
@@ -366,11 +346,11 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
       .replaceAll('%PUBLIC_URL%', PUBLIC_URL)
       .replaceAll('%REACT_APP_CSP%', buildCSP(csp))
       .replace('<!--HEAD-->', `
-        <link rel="stylesheet" href="${webview.asWebviewUri(vscode.Uri.joinPath(publicUri, 'bundle.css'))}"/>
+        <link rel="stylesheet" href="${webview.asWebviewUri(vsc.Uri.joinPath(publicUri, 'bundle.css'))}"/>
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}"/>
       `)
       .replace('<!--BODY-->', `
-        <script src="${webview.asWebviewUri(vscode.Uri.joinPath(publicUri, 'bundle.js'))}"></script>
+        <script src="${webview.asWebviewUri(vsc.Uri.joinPath(publicUri, 'bundle.js'))}"></script>
       `)
     return prepHtml;
   }
@@ -378,14 +358,14 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
   private _requestId = 1;
   private readonly _callbacks = new Map<number, (response: any) => void>();
 
-  private postMessageWithResponse<R = unknown>(panel: vscode.WebviewPanel, type: string, body: any): Promise<R> {
+  private postMessageWithResponse<R = unknown>(panel: vsc.WebviewPanel, type: string, body: any): Promise<R> {
     const requestId = this._requestId++;
     const p = new Promise<R>(resolve => this._callbacks.set(requestId, resolve));
     panel.webview.postMessage({ type, requestId, body });
     return p;
   }
 
-  private postMessage(panel: vscode.WebviewPanel, type: string, body: any, transfer?: any[]): void {
+  private postMessage(panel: vsc.WebviewPanel, type: string, body: any, transfer?: any[]): void {
     // @ts-ignore
     panel.webview.postMessage({ type, body }, transfer);
   }
@@ -401,10 +381,10 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
         const { data, download, metaKey } = message;
 
         const { dirname } = document.uriParts;
-        const dlUri = vscode.Uri.parse(`${dirname}/${download}`);
+        const dlUri = vsc.Uri.parse(`${dirname}/${download}`);
 
-        await vscode.workspace.fs.writeFile(dlUri, data);
-        if (!metaKey) await vscode.commands.executeCommand('vscode.open', dlUri);
+        await vsc.workspace.fs.writeFile(dlUri, data);
+        if (!metaKey) await vsc.commands.executeCommand('vscode.open', dlUri);
         return;
 
       case 'response': {
@@ -416,42 +396,33 @@ export class SQLiteEditorProvider implements vscode.CustomEditorProvider<SQLiteD
   }
 }
 
-export class SQLiteEditorOptionProvider extends SQLiteEditorProvider {
-  static viewType = 'sqlite.option';
+const registerOptions = {
+  webviewOptions: {
+    // TODO: serialize state!?
+    retainContextWhenHidden: true,
+  },
+  supportsMultipleEditorsPerDocument: false,
+}
 
-  public static register(context: vscode.ExtensionContext): vscode.Disposable {
-    return vscode.window.registerCustomEditorProvider(
+export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {
+  static viewType = 'sqlite-viewer.view';
+
+  public static register(context: vsc.ExtensionContext): vsc.Disposable {
+    return vsc.window.registerCustomEditorProvider(
+      SQLiteEditorDefaultProvider.viewType,
+      new SQLiteEditorDefaultProvider(context),
+      registerOptions);
+  }
+}
+
+export class SQLiteEditorOptionProvider extends SQLiteEditorProvider {
+  static viewType = 'sqlite-viewer.option';
+
+  public static register(context: vsc.ExtensionContext): vsc.Disposable {
+    return vsc.window.registerCustomEditorProvider(
       SQLiteEditorOptionProvider.viewType,
       new SQLiteEditorOptionProvider(context),
       registerOptions);
   }
 }
 
-class WebviewCollection {
-  private readonly _webviews = new Set<{
-    readonly resource: string;
-    readonly webviewPanel: vscode.WebviewPanel;
-  }>();
-
-  public *get(uri: vscode.Uri): IterableIterator<vscode.WebviewPanel> {
-    const key = uri.toString();
-    for (const entry of this._webviews) {
-      if (entry.resource === key) {
-        yield entry.webviewPanel;
-      }
-    }
-  }
-
-  public has(uri: vscode.Uri): boolean {
-    return !this.get(uri).next().done;
-  }
-
-  public add(uri: vscode.Uri, webviewPanel: vscode.WebviewPanel) {
-    const entry = { resource: uri.toString(), webviewPanel };
-    this._webviews.add(entry);
-
-    webviewPanel.onDidDispose(() => {
-      this._webviews.delete(entry);
-    });
-  }
-}

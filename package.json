@@ -18,7 +18,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onCustomEditor:sqlite.view"
+    "onCustomEditor:sqlite-viewer.view",
+    "onCustomEditor:sqlite-viewer.option"
   ],
   "main": "./out/extension.js",
   "browser": "./out/extension.js",
@@ -31,15 +32,15 @@
         "id": "sql",
         "extensions": [
           ".sqlite",
-          ".db",
           ".sqlite3",
+          ".db",
           ".db3"
         ]
       }
     ],
     "customEditors": [
       {
-        "viewType": "sqlite.view",
+        "viewType": "sqlite-viewer.view",
         "displayName": "SQLite Viewer",
         "selector": [
           {
@@ -51,7 +52,7 @@
         ]
       },
       {
-        "viewType": "sqlite.option",
+        "viewType": "sqlite-viewer.option",
         "displayName": "SQLite Viewer",
         "selector": [
           {
