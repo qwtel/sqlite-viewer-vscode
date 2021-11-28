@@ -74,7 +74,7 @@
   },
   "devDependencies": {
     "@types/node": "^16.11.10",
-    "@types/vscode": "^1.62.0",
+    "@types/vscode": "^1.60.0",
     "esbuild": "^0.14.0",
     "esbuild-css-modules-plugin": "^2.0.9",
     "esbuild-plugin-alias": "^0.2.1",
