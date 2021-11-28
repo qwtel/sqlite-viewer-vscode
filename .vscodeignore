@@ -7,4 +7,4 @@ sqlite-viewer-app/config/**/*
 sqlite-viewer-app/scripts/**/*
 sqlite-viewer-app/build/**/*
 exampleFiles/*
-documentation/demo.gif
+documentation/*.gif
