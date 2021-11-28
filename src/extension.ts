@@ -40,15 +40,15 @@ async function showWhatsNew(context: vsc.ExtensionContext) {
   ) {
     let actions;
     const result = await vsc.window.showInformationMessage(
-      `SQLite Viewer updated to v${currentVersion} — You can now configure SQLite Viewer as default viewer for any file extension`,
-      ...actions = [{ title: 'See how' }, { title: 'Changelog' }]
+      `You can now configure SQLite Viewer as default viewer for any file extension!`,
+      ...actions = [{ title: 'See how' }]
     );
 
     if (result !== null) {
       if (result === actions[0]) {
         await vsc.env.openExternal(
           vsc.Uri.parse(
-            'https://github.com/GorvGoyl/Shortcut-Menu-Bar-VSCode-Extension#create-buttons-with-custom-commands'
+            'https://github.com/qwtel/sqlite-viewer-vscode/blob/master/CHANGELOG.md#v010'
           )
         );
       }
