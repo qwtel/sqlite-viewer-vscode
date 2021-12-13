@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.1
+### Fixes
+* Show error message when trying to open SQLite file using extensions
+
 ## v0.1.0
 You can now open any file with SQLite Viewer and set SQLite Viewer as default for any file extension:
 

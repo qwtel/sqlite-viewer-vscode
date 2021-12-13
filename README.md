@@ -23,4 +23,5 @@ Inspect sqlite files from any machine, no installation or file upload required.
 - Only works for files that fit in system memory
 - No query runner
 - Requires uncorrupted files, i.e. `-journal` and `-wal` files are ignored
+- No support for SQLite extensions (e.g. `rtree`)
 
