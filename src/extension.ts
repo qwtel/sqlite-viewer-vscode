@@ -40,15 +40,15 @@ async function showWhatsNew(context: vsc.ExtensionContext) {
   ) {
     let actions;
     const result = await vsc.window.showInformationMessage(
-      `You can now configure SQLite Viewer as default viewer for any file extension!`,
-      ...actions = [{ title: 'See how' }]
+      `🆕 Try out the standalone web app — you can now use SQLite Viewer without VS Code!`,
+      ...actions = [{ title: 'Open in browser ↗️' }]
     );
 
     if (result !== null) {
       if (result === actions[0]) {
         await vsc.env.openExternal(
           vsc.Uri.parse(
-            'https://github.com/qwtel/sqlite-viewer-vscode/blob/master/CHANGELOG.md#v010'
+            'https://sqliteviewer.app'
           )
         );
       }

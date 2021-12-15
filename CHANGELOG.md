@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.1.2
+### Fixes
+* Opening files with the R*Tree extension will no longer produce an error
+* Binary values are now always rendered as download buttons, even when not specified as `BLOB` type
+
 ## v0.1.1
 ### Fixes
 * Show error message when trying to open SQLite file using extensions
@@ -13,7 +18,7 @@ You can now open any file with SQLite Viewer and set SQLite Viewer as default fo
 * Removed the `.db` file association, as it is too generic to be permanently associated with SQLite Viewer. 
 You can easily restore the old behavior through VSCode's Open With menu.
 * Updated dependencies
-  * Updated React to v18 beta
+  * Updated React to v18 Beta
   * Updated React Router to v6
 
 ### Fixes
