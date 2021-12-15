@@ -73,15 +73,15 @@
     "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/"
   },
   "devDependencies": {
-    "@types/node": "^16.11.10",
+    "@types/node": "^16.11.13",
     "@types/vscode": "^1.60.0",
-    "esbuild": "^0.14.0",
+    "esbuild": "^0.14.5",
     "esbuild-css-modules-plugin": "^2.0.9",
     "esbuild-plugin-alias": "^0.2.1",
-    "typescript": "^4.5.2",
-    "vsce": "^2.5.0"
+    "typescript": "^4.5.4",
+    "vsce": "^2.5.1"
   },
   "dependencies": {
-    "@vscode/codicons": "^0.0.26"
+    "@vscode/codicons": "^0.0.27"
   }
 }

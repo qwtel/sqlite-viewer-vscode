@@ -5,6 +5,10 @@
 * Opening files with the R*Tree extension will no longer produce an error
 * Binary values are now always rendered as download buttons, even when not specified as `BLOB` type
 
+### Other
+* Updated dependencies
+  * Updated React to v18 Release Candidate
+
 ## v0.1.1
 ### Fixes
 * Show error message when trying to open SQLite file using extensions
