@@ -8,9 +8,11 @@ A quick and easy SQLite viewer for VSCode, inspired by DB Browser for SQLite and
 
 ## [🆕 Try Out the Standalone Web App][ref]
 
-You can now use this extension as a standalone web app at [https://sqliteviewer.app][ref].
+You can now use this extension as a standalone web app at [sqliteviewer.app][ref].
 
 Inspect `.sqlite` files from any machine, no installation or file upload required.
+
+<br/>
 
 ## Features
 - Platform-independent, no native dependencies — now working on VSCode for Web
@@ -25,4 +27,4 @@ Inspect `.sqlite` files from any machine, no installation or file upload require
 - Requires uncorrupted files, i.e. `-journal` and `-wal` files are ignored
 
 
-[ref]: https://sqliteviewer.app?ref=vscode
+[ref]: https://sqliteviewer.app

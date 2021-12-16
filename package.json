@@ -70,7 +70,9 @@
     "compile:worker": "./scripts/compile-worker.js",
     "compile": "npm run compile:ext & npm run compile:view & npm run compile:worker & wait",
     "pack": "vsce package --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
-    "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/"
+    "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
+    "prepack": "sed -i '' s~https://sqliteviewer\\.app~https://sqliteviewer.app?ref=vscode~g *.md", 
+    "postpack": "sed -i '' s/\\?ref=vscode//g *.md"
   },
   "devDependencies": {
     "@types/node": "^16.11.13",
