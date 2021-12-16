@@ -48,7 +48,7 @@ async function showWhatsNew(context: vsc.ExtensionContext) {
       if (result === actions[0]) {
         await vsc.env.openExternal(
           vsc.Uri.parse(
-            'https://sqliteviewer.app'
+            'https://sqliteviewer.app?ref=vscode'
           )
         );
       }
