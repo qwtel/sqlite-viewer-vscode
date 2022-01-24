@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.1.4
+* Updated dependencies
+  * Updated SQLite to 3.37.2
+  * Updated React v18 to latest Release Candidate
+
+## v0.1.3
+* Added ref to external link
+
 ## v0.1.2
 ### Fixes
 * Opening files with the R*Tree extension will no longer produce an error
