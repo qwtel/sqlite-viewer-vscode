@@ -3,7 +3,7 @@
   "name": "sqlite-viewer",
   "displayName": "SQLite Viewer",
   "description": "SQLite Viewer for VSCode",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "publisher": "qwtel",
   "private": true,
   "license": "LICENSE.md",
@@ -71,7 +71,7 @@
     "compile": "npm run compile:ext & npm run compile:view & npm run compile:worker & wait",
     "pack": "vsce package --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
     "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
-    "prepack": "sed -i '' s~https://sqliteviewer\\.app~https://sqliteviewer.app?ref=vscode~g *.md", 
+    "prepack": "sed -i '' s~https://sqliteviewer\\.app~https://sqliteviewer.app?ref=vscode~g *.md",
     "postpack": "sed -i '' s/\\?ref=vscode//g *.md"
   },
   "devDependencies": {
