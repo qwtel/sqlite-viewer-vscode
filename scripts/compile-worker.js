@@ -7,7 +7,7 @@ esbuild.build({
   define: {
     'process.env.NODE_ENV': "'production'"
   },
-  external: ['fs', 'path'],
+  external: ['./sql-js/sql-wasm.wasm'],
   outfile: './sqlite-viewer-app/public/bundle-worker.js',
   minify: true,
   tsconfig: './sqlite-viewer-app/tsconfig.json',

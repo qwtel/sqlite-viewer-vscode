@@ -6,12 +6,16 @@ const cssModulesPlugin = require('esbuild-css-modules-plugin');
 
 esbuild.build({
   entryPoints: ['./sqlite-viewer-app/src/index.js'],
-  loader: { '.js': 'jsx', '.png': 'dataurl', '.webp': 'dataurl' },
+  loader: { 
+    '.js': 'jsx', 
+    '.png': 'dataurl', 
+    '.webp': 'dataurl',
+  },
   bundle: true,
   define: {
     'process.env.NODE_ENV': "'production'"
   },
-  external: ['worker-loader!./worker.js'],
+  external: ['./worker.js'],
   outfile: './sqlite-viewer-app/public/bundle.js',
   minify: true,
   tsconfig: './sqlite-viewer-app/tsconfig.json',
