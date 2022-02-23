@@ -40,20 +40,21 @@ async function showWhatsNew(context: vsc.ExtensionContext) {
   ) {
     let actions;
     const result = await vsc.window.showInformationMessage(
-      `SQLite updated to 3.37.2 — If you enjoy this extension, consider leaving a review. If you experience problems, consider reporting an issue.`,
-      ...actions = [{ title: 'Write a Review'}, { title: 'Report an Issue' }]
+      `Minor bug fixes and updated SQLite to 3.38.0. SQLite Viewer Web now supports Drag & Drop.`,
+      ...actions = [{ title: 'Try SQLite Viewer Web ↗'}]
     );
 
     if (result !== null) {
       if (result === actions[0]) {
         await vsc.env.openExternal(
-          vsc.Uri.parse('https://marketplace.visualstudio.com/items?itemName=qwtel.sqlite-viewer&ssr=false#review-details')
+          vsc.Uri.parse('https://sqliteviewer.app?ref=vscode')
         );
-      } else if (result === actions[1]) {
-        await vsc.env.openExternal(
-          vsc.Uri.parse('https://github.com/qwtel/sqlite-viewer-vscode/issues')
-        );
-      }
+      } 
+      // else if (result === actions[1]) {
+      //   await vsc.env.openExternal(
+      //     vsc.Uri.parse('https://github.com/qwtel/sqlite-viewer-vscode/issues')
+      //   );
+      // }
     }
   }
 }
