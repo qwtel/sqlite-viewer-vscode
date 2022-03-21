@@ -57,9 +57,6 @@ No changes were made.
 `react-hotkeys-hook` : [MIT]
 > Copyright (c) 2018 Johannes Klauss
 
-`react-modal` : [MIT]
-> Copyright (c) 2017 Ryan Florence
-
 `react-router` : [MIT]
 > Copyright (c) React Training
 
@@ -74,6 +71,9 @@ No changes were made.
 
 `sql.js` : [MIT]
 > Copyright (c) 2017 sql.js authors (see AUTHORS)  
+
+`recoil.js`: [MIT]
+> Copyright (c) Facebook, Inc. and its affiliates.
 
 AUTHORS
 > Ophir LOJKINE <pere.jobs@gmail.com> (https://github.com/lovasoa)  

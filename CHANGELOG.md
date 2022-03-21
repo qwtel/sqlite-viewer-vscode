@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## v0.2.0
+
 ## v0.1.5
 * Fixed a bug that caused the SQLite WebWorker to be initialized twice
 * Updated dependencies

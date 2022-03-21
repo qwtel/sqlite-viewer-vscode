@@ -40,7 +40,7 @@ async function showWhatsNew(context: vsc.ExtensionContext) {
   ) {
     let actions;
     const result = await vsc.window.showInformationMessage(
-      `Minor bug fixes and updated SQLite to 3.38.0. SQLite Viewer Web now supports Drag & Drop.`,
+      `SQLite Viewer now has a sidebar.`,
       ...actions = [{ title: 'Try SQLite Viewer Web ↗'}]
     );
 

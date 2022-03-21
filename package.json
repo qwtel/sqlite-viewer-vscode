@@ -13,7 +13,7 @@
     "url": "https://github.com/qwtel/sqlite-viewer-vscode"
   },
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.63.0"
   },
   "categories": [
     "Other"
@@ -72,19 +72,20 @@
     "compile": "npm run compile:ext & npm run compile:view & npm run compile:worker & wait",
     "pack": "vsce package --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
     "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
+    "publish-pre": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/ --pre-release",
     "prepack": "sed -i '' s~https://sqliteviewer\\.app~https://sqliteviewer.app?ref=vscode~g *.md",
     "postpack": "sed -i '' s/\\?ref=vscode//g *.md"
   },
   "devDependencies": {
-    "@types/node": "^17.0.19",
-    "@types/vscode": "^1.60.0",
-    "esbuild": "^0.14.23",
+    "@types/node": "^17.0.21",
+    "@types/vscode": "^1.63.0",
+    "esbuild": "^0.14.27",
     "esbuild-css-modules-plugin": "=2.0.9",
     "esbuild-plugin-alias": "^0.2.1",
-    "typescript": "^4.5.5",
-    "vsce": "^2.6.7"
+    "typescript": "^4.6.2",
+    "vsce": "^2.7.0"
   },
   "dependencies": {
-    "@vscode/codicons": "^0.0.28"
+    "@vscode/codicons": "^0.0.29"
   }
 }
