@@ -40,7 +40,7 @@ async function showWhatsNew(context: vsc.ExtensionContext) {
   ) {
     let actions;
     const result = await vsc.window.showInformationMessage(
-      `SQLite Viewer now has a sidebar.`,
+      `Bugfixes and updated to SQLite 3.39`,
       ...actions = [{ title: 'Try SQLite Viewer Web ↗'}]
     );
 

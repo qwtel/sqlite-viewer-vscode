@@ -285,9 +285,6 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
 
           const { buffer, byteOffset, byteLength } = document.documentData
           const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
-          // HACK: Making a copy to deal with byteoffset. 
-          // Maybe transfer original uint8array instead!?
-          // const value = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
 
           const { filename } = document.uriParts;
           this.postMessage(webviewPanel, 'init', {

@@ -15,6 +15,7 @@ sqlite-viewer-app/*.md
 sqlite-viewer-app/*.env*
 sqlite-viewer-app/*.json
 sqlite-viewer-app/*.yaml
+mySolidTest/**/*
 exampleFiles/*
 documentation/*.gif
 scripts/*
