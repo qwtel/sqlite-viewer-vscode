@@ -1,6 +1,19 @@
 # CHANGELOG
 
+## v0.2.3
+- Fixed opening FTS4 & FTS5 files
+- Fixed showing large integers
+- Fixed showing booleans
+- Fixed opening files exported by pandas `.to_sql`
+
+## v0.2.2
+Prerelease version
+
+## v0.2.1
+Prerelease version
+
 ## v0.2.0
+Prerelease version
 
 ## v0.1.5
 * Fixed a bug that caused the SQLite WebWorker to be initialized twice

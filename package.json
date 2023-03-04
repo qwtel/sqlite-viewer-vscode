@@ -73,6 +73,7 @@
     "pack": "vsce package --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
     "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
     "publish-pre": "vsce publish  --pre-release --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
+    "publish-codium": "ovsx publish",
     "prepack": "sed -i '' s~https://sqliteviewer\\.app~https://sqliteviewer.app?ref=vscode~g *.md",
     "postpack": "sed -i '' s/\\?ref=vscode//g *.md"
   },
@@ -82,6 +83,7 @@
     "esbuild": "^0.14.27",
     "esbuild-css-modules-plugin": "^2.2.4",
     "esbuild-plugin-alias": "^0.2.1",
+    "ovsx": "^0.8.0",
     "typescript": "^4.6.2",
     "vsce": "^2.7.0"
   },
