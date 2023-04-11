@@ -3,7 +3,7 @@
   "name": "sqlite-viewer",
   "displayName": "SQLite Viewer",
   "description": "SQLite Viewer for VSCode",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "publisher": "qwtel",
   "private": true,
   "license": "LICENSE.md",
