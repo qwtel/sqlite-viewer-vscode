@@ -40,7 +40,7 @@ async function showWhatsNew(context: vsc.ExtensionContext) {
   ) {
     let actions;
     const result = await vsc.window.showInformationMessage(
-      `Bugfixes and updated to SQLite 3.39`,
+      `Added max file size settings. This prevents SQLite Viewer from crashing when opening large files. Defaults to 200 MB`,
       ...actions = [{ title: 'Try SQLite Viewer Web ↗'}]
     );
 

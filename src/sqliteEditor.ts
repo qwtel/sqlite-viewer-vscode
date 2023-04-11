@@ -22,16 +22,24 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     return new SQLiteDocument(uri, fileData, delegate);
   }
 
-  private static async readFile(uri: vsc.Uri): Promise<Uint8Array> {
+  private static async readFile(uri: vsc.Uri): Promise<Uint8Array|null> {
     if (uri.scheme === 'untitled') {
       return new Uint8Array();
     }
+
+    const config = vsc.workspace.getConfiguration('sqliteViewer');
+    const maxFileSizeMB = config.get<number>('maxFileSize') ?? 200;
+    const maxFileSize = maxFileSizeMB * 2 ** 20;
+
+    const stat = await vsc.workspace.fs.stat(uri)
+    if (maxFileSize !== 0 && stat.size > maxFileSize)
+      return null;
     return vsc.workspace.fs.readFile(uri);
   }
 
   private readonly _uri: vsc.Uri;
 
-  private _documentData: Uint8Array;
+  private _documentData: Uint8Array|null;
   private _edits: Array<SQLiteEdit> = [];
   private _savedEdits: Array<SQLiteEdit> = [];
 
@@ -39,7 +47,7 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
   private constructor(
     uri: vsc.Uri,
-    initialContent: Uint8Array,
+    initialContent: Uint8Array|null,
     delegate: SQLiteDocumentDelegate
   ) {
     super();
@@ -56,7 +64,7 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     return { dirname, filename, basename, extname };
   }
 
-  public get documentData(): Uint8Array { return this._documentData; }
+  public get documentData(): Uint8Array|null { return this._documentData }
 
   private readonly _onDidDispose = this._register(new vsc.EventEmitter<void>());
   /**
@@ -146,7 +154,7 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     const diskContent = await SQLiteDocument.readFile(this.uri);
     this._documentData = diskContent;
     this._edits = this._savedEdits;
-    this._onDidChangeDocument.fire({
+    diskContent && this._onDidChangeDocument.fire({
       content: diskContent,
       edits: this._edits,
     });
@@ -156,7 +164,7 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     const diskContent = await SQLiteDocument.readFile(this.uri);
     this._documentData = diskContent;
     this._edits = [];
-    this._onDidChangeDocument.fire({
+    diskContent && this._onDidChangeDocument.fire({
       content: diskContent,
       edits: [],
     });
@@ -235,10 +243,10 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
 
     listeners.push(document.onDidChangeContent(e => {
       // Update all webviews when the document changes
-      // NOTE: per configuration there can only be one webivew per uri, so transfering the buffer is ok
+      // NOTE: per configuration there can only be one webview per uri, so transferring the buffer is ok
       for (const webviewPanel of this.webviews.get(document.uri)) {
         const { filename } = document.uriParts;
-        const { buffer, byteOffset, byteLength } = document.documentData
+        const { buffer, byteOffset, byteLength } = document.documentData || {}
         const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
 
         this.postMessage(webviewPanel, 'update', {
@@ -280,10 +288,10 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
             editable: false,
           });
         } else {
+          const editable = false;
           // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
-          const editable = false
 
-          const { buffer, byteOffset, byteLength } = document.documentData
+          const { buffer, byteOffset, byteLength } = document.documentData || {}
           const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
 
           const { filename } = document.uriParts;

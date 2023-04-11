@@ -62,7 +62,19 @@
         ],
         "priority": "option"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "SQLite Viewer",
+      "properties": {
+        "sqliteViewer.maxFileSize": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": false,
+          "default": 200,
+          "description": "The maximum file size the extension will attempt to load in MB. Set to 0 to disable the limit."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
