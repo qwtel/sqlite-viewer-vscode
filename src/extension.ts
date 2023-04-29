@@ -40,14 +40,14 @@ async function showWhatsNew(context: vsc.ExtensionContext) {
   ) {
     let actions;
     const result = await vsc.window.showInformationMessage(
-      `Added max file size settings. This prevents SQLite Viewer from crashing when opening large files. Defaults to 200 MB`,
-      ...actions = [{ title: 'Try SQLite Viewer Web ↗'}]
+      `SQLite Viewer 2 is under active development and looking for 🎀 Sponsors!`,
+      ...actions = [{ title: 'GitHub Sponsors ↗'}]
     );
 
     if (result !== null) {
       if (result === actions[0]) {
         await vsc.env.openExternal(
-          vsc.Uri.parse('https://sqliteviewer.app?ref=vscode')
+          vsc.Uri.parse('https://github.com/sponsors/qwtel')
         );
       } 
       // else if (result === actions[1]) {

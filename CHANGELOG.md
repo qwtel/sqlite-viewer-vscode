@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.2.5
+- Added sponsorship ship badge. 
+
+  [![Sponsor](https://img.shields.io/badge/qwtel-GitHub%20Sponsors-ff69b4?style=flat-square)][ghs]
+
+[ghs]: https://github.com/sponsors/qwtel
+
+## v0.2.4
+- Added max file size setting
+
 ## v0.2.3
 - Fixed opening FTS4 & FTS5 files
 - Fixed showing large integers
