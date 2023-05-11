@@ -1,10 +1,12 @@
 import * as vsc from 'vscode';
 import { SQLiteEditorDefaultProvider, SQLiteEditorOptionProvider  } from './sqliteEditor';
+import { Credentials } from './credentials';
 
-export function activate(context: vsc.ExtensionContext) {
+export async function activate(context: vsc.ExtensionContext) {
   showWhatsNew(context);
-  context.subscriptions.push(SQLiteEditorDefaultProvider.register(context));
-  context.subscriptions.push(SQLiteEditorOptionProvider.register(context));
+  const credentials = new Credentials(context);
+  context.subscriptions.push(SQLiteEditorDefaultProvider.register(context, credentials));
+  context.subscriptions.push(SQLiteEditorOptionProvider.register(context, credentials));
 }
 
 const extensionId = 'qwtel.sqlite-viewer'
@@ -36,7 +38,7 @@ async function showWhatsNew(context: vsc.ExtensionContext) {
   if (
     previousVersion === undefined || 
     previousVersion !== currentVersion || 
-    context.extensionMode === vsc.ExtensionMode.Development
+    false // context.extensionMode === vsc.ExtensionMode.Development
   ) {
     let actions;
     const result = await vsc.window.showInformationMessage(

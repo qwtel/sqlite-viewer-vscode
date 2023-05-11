@@ -1,6 +1,7 @@
 import * as vsc from 'vscode';
 import { Disposable, disposeAll } from './dispose';
 import { WebviewCollection } from './util';
+import { Credentials } from './credentials';
 
 interface SQLiteEdit {
   readonly data: Uint8Array;
@@ -209,7 +210,7 @@ const buildCSP = (cspObj: Record<string, string[]>) =>
 class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   private readonly webviews = new WebviewCollection();
 
-  constructor(private readonly _context: vsc.ExtensionContext) {}
+  constructor(private readonly _context: vsc.ExtensionContext, private readonly credentials: Credentials) {}
 
   //#region CustomEditorProvider
 
@@ -279,8 +280,10 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
     webviewPanel.webview.onDidReceiveMessage(e => this.onMessage(document, e));
 
     // Wait for the webview to be properly ready before we init
-    webviewPanel.webview.onDidReceiveMessage(e => {
+    webviewPanel.webview.onDidReceiveMessage(async e => {
       if (e.type === 'ready' && this.webviews.has(document.uri)) {
+        this.credentials.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
+
         if (document.uri.scheme === 'untitled') {
           this.postMessage(webviewPanel, 'init', {
             filename: 'untitled',
@@ -327,37 +330,39 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   //#endregion
 
   private async getHtmlForWebview(webview: vsc.Webview): Promise<string> {
-    const publicUri = vsc.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public');
+    const buildUri = vsc.Uri.joinPath(this._context.extensionUri, 'mySolidTest', 'build-vscode');
     const codiconsUri = vsc.Uri.joinPath(this._context.extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css');
 
+    const assetAsWebviewUri = (x: string) => webview.asWebviewUri(vsc.Uri.joinPath(buildUri, x));
+
     const html = new TextDecoder().decode(await vsc.workspace.fs.readFile(
-      vsc.Uri.joinPath(publicUri, 'vscode.html')
+      vsc.Uri.joinPath(buildUri, 'index.html')
     ));
 
-    const PUBLIC_URL = webview.asWebviewUri(
-      vsc.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public')
-    ).toString();
+    // TBD
+    // const csp = buildCSP({
+    //   [$default]: [$self, $vscode],
+    //   [$script]: [$self, $vscode, $unsafeEval], // HACK: Needed for WebAssembly in Web Extension. Needless to say, it makes the whole CSP useless...
+    //   [$style]: [$self, $vscode, $inlineStyle],
+    //   [$img]: [$self, $vscode, $data],
+    //   [$font]: [$self, $vscode],
+    //   [$child]: [$blob],
+    // });
 
-    const csp = {
-      [$default]: [$self, $vscode],
-      [$script]: [$self, $vscode, $unsafeEval], // HACK: Needed for WebAssembly in Web Extension. Needless to say, it makes the whole CSP useless...
-      [$style]: [$self, $vscode, $inlineStyle],
-      [$img]: [$self, $vscode, $data],
-      [$font]: [$self, $vscode],
-      [$child]: [$blob],
-    };
-
-    const prepHtml = html
-      .replaceAll('%PUBLIC_URL%', PUBLIC_URL)
-      .replaceAll('%REACT_APP_CSP%', buildCSP(csp))
+    return html
+      .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
+        return `${attr}="${assetAsWebviewUri(url)}"`;
+      })
       .replace('<!--HEAD-->', `
-        <link rel="stylesheet" href="${webview.asWebviewUri(vsc.Uri.joinPath(publicUri, 'bundle.css'))}"/>
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}"/>
+        <link ref="preload" as="script" id="assets/index.js" href="${assetAsWebviewUri("assets/index.js")}"/>
+        <link ref="preload" as="style" id="assets/index.css" href="${assetAsWebviewUri("assets/index.css")}"/>
+        <link ref="preload" as="fetch" id="assets/worker.js" href="${assetAsWebviewUri("assets/worker.js")}"/>
+        <link ref="preload" as="fetch" id="assets/sqlite3.wasm" type="application/wasm" href="${assetAsWebviewUri("assets/sqlite3.wasm")}"/>
+        <link ref="preload" as="fetch" id="assets/sqlite3-opfs-async-proxy.js" href="${assetAsWebviewUri("assets/sqlite3-opfs-async-proxy.js")}"/>
+        <link ref="preload" as="fetch" id="Northwind_small.sqlite" href="${assetAsWebviewUri("Northwind_small.sqlite")}"/>
       `)
-      .replace('<!--BODY-->', `
-        <script src="${webview.asWebviewUri(vsc.Uri.joinPath(publicUri, 'bundle.js'))}"></script>
-      `)
-    return prepHtml;
+      .replace('<!--BODY-->', ``)
   }
 
   private _requestId = 1;
@@ -412,10 +417,10 @@ const registerOptions = {
 export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {
   static viewType = 'sqlite-viewer.view';
 
-  public static register(context: vsc.ExtensionContext): vsc.Disposable {
+  public static register(context: vsc.ExtensionContext, credentials: Credentials): vsc.Disposable {
     return vsc.window.registerCustomEditorProvider(
       SQLiteEditorDefaultProvider.viewType,
-      new SQLiteEditorDefaultProvider(context),
+      new SQLiteEditorDefaultProvider(context, credentials),
       registerOptions);
   }
 }
@@ -423,10 +428,10 @@ export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {
 export class SQLiteEditorOptionProvider extends SQLiteEditorProvider {
   static viewType = 'sqlite-viewer.option';
 
-  public static register(context: vsc.ExtensionContext): vsc.Disposable {
+  public static register(context: vsc.ExtensionContext, credentials: Credentials): vsc.Disposable {
     return vsc.window.registerCustomEditorProvider(
       SQLiteEditorOptionProvider.viewType,
-      new SQLiteEditorOptionProvider(context),
+      new SQLiteEditorOptionProvider(context, credentials),
       registerOptions);
   }
 }

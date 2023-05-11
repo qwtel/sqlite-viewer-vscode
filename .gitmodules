@@ -1,3 +1,6 @@
 [submodule "sqlite-viewer-app"]
 	path = sqlite-viewer-app
 	url = git@github.com:qwtel/sqlite-viewer-app.git
+[submodule "mySolidTest"]
+	path = mySolidTest
+	url = git@github.com:qwtel/sqlite-viewer-app.git
