@@ -10,7 +10,7 @@ const extensionId = 'qwtel.sqlite-viewer'
  * The GitHub Authentication Provider accepts the scopes described here:
  * https://developer.github.com/apps/building-oauth-apps/understanding-scopes-for-oauth-apps/
  */
-const SCOPES = ['user:email'];
+const SCOPES = ['user:email', 'read:org'];
 
 const JWT_PUBLIC_KEY = `
 -----BEGIN PUBLIC KEY-----
@@ -62,8 +62,8 @@ export class Credentials {
 					if (previousToken && await checkExpiration(previousToken)) {
 						return previousToken;
 					} else {
-						const response = await fetch(new URL(`/sponsors/${account.id}`, BASE_URL), {
-							headers: [['Authentication', `Bearer ${accessToken}`]],
+						const response = await fetch(new URL('/sponsors/check', BASE_URL), {
+							headers: [['Authorization', `Bearer ${accessToken}`]],
 							signal: timeout(5000).signal,
 						});
 						if (response.ok) {
