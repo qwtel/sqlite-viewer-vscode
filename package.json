@@ -92,16 +92,16 @@
     "postpack": "sed -i '' s/\\?ref=vscode//g *.md"
   },
   "devDependencies": {
-    "@types/node": "^17.0.21",
+    "@types/node": "^20.2.3",
     "@types/vscode": "^1.78.0",
-    "esbuild": "^0.17.18",
+    "esbuild": "^0.17.19",
     "esbuild-plugin-alias": "^0.2.1",
-    "ovsx": "^0.8.0",
-    "typescript": "^4.6.2",
-    "vsce": "^2.7.0"
+    "ovsx": "^0.8.1",
+    "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@vscode/codicons": "^0.0.29",
+    "@vscode/codicons": "^0.0.33",
+    "@vscode/vsce": "^2.19.0",
     "jose": "^4.14.4",
     "node-fetch": "^3.3.1"
   }
