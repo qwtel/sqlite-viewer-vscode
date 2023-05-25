@@ -86,10 +86,10 @@
     "compile": "npm run compile:ext & npm run compile:app & wait",
     "pack": "vsce package --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
     "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
-    "publish-pre": "vsce publish  --pre-release --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
-    "publish-codium": "ovsx publish",
+    "pre-publish": "vsce publish --pre-release --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/preview/",
     "prepack": "sed -i '' s~https://sqliteviewer\\.app~https://sqliteviewer.app?ref=vscode~g *.md",
-    "postpack": "sed -i '' s/\\?ref=vscode//g *.md"
+    "postpack": "sed -i '' s/\\?ref=vscode//g *.md",
+    "codium:publish": "ovsx publish"
   },
   "devDependencies": {
     "@types/node": "^20.2.3",
