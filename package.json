@@ -23,7 +23,7 @@
     "onCustomEditor:sqlite-viewer.option"
   ],
   "main": "./out/extension.js",
-  "browser": "./out/extension.js",
+  "browser": "./out/extension-browser.js",
   "extensionKind": [
     "ui"
   ],
@@ -81,7 +81,9 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile:ext": "esbuild ./src/extension.ts --bundle --minify --outfile=out/extension.js --external:vscode --platform=node --format=cjs",
+    "compile:ext": "npm run compile:ext:node & npm run compile:ext:browser & wait",
+    "compile:ext:node": "esbuild ./src/extension.ts --minify --bundle --outfile=out/extension.js --external:vscode --platform=node --format=cjs",
+    "compile:ext:browser": "esbuild ./src/extension.ts --minify --bundle --outfile=out/extension-browser.js --external:vscode --platform=browser --external:node-fetch --format=cjs",
     "compile:app": "cd ./mySolidTest && npm run build-vscode",
     "compile": "npm run compile:ext & npm run compile:app & wait",
     "pack": "vsce package --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
