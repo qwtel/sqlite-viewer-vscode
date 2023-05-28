@@ -339,28 +339,27 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
       vsc.Uri.joinPath(buildUri, 'index.html')
     ));
 
-    const csp = buildCSP({
-      [$default]: [$self, $vscode],
-      [$script]: [$self, $vscode, $unsafeEval], // HACK: Needed for WebAssembly in Web Extension. Needless to say, it makes the whole CSP useless...
-      [$style]: [$self, $vscode, $inlineStyle],
-      [$img]: [$self, $vscode, $data],
-      [$font]: [$self, $vscode],
-      [$child]: [$blob],
-    });
+    // const csp = buildCSP({
+    //   [$default]: [$self, $vscode],
+    //   [$script]: [$self, $vscode, $unsafeEval], // HACK: Needed for WebAssembly in Web Extension. Needless to say, it makes the whole CSP useless...
+    //   [$style]: [$self, $vscode, $inlineStyle],
+    //   [$img]: [$self, $vscode, $data],
+    //   [$font]: [$self, $vscode],
+    //   [$child]: [$blob],
+    // });
 
     return html
       .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
         return `${attr}="${assetAsWebviewUri(url)}"`;
       })
       .replace('<!--HEAD-->', `
-        <meta http-equiv="Content-Security-Policy" content="${csp}">
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}"/>
-        <link ref="preload" as="script" id="assets/index.js" href="${assetAsWebviewUri("assets/index.js")}"/>
-        <link ref="preload" as="style" id="assets/index.css" href="${assetAsWebviewUri("assets/index.css")}"/>
-        <link ref="preload" as="fetch" id="assets/worker.js" href="${assetAsWebviewUri("assets/worker.js")}"/>
-        <link ref="preload" as="fetch" id="assets/sqlite3.wasm" type="application/wasm" href="${assetAsWebviewUri("assets/sqlite3.wasm")}"/>
-        <link ref="preload" as="fetch" id="assets/sqlite3-opfs-async-proxy.js" href="${assetAsWebviewUri("assets/sqlite3-opfs-async-proxy.js")}"/>
-        <link ref="preload" as="fetch" id="Northwind_small.sqlite" href="${assetAsWebviewUri("Northwind_small.sqlite")}"/>
+        <link rel="preload" as="script" id="assets/index.js" href="${assetAsWebviewUri("assets/index.js")}"/>
+        <link rel="preload" as="style" id="assets/index.css" href="${assetAsWebviewUri("assets/index.css")}"/>
+        <link rel="preload" as="fetch" id="assets/worker.js" href="${assetAsWebviewUri("assets/worker.js")}"/>
+        <link rel="preload" as="fetch" id="assets/sqlite3.wasm" type="application/wasm" href="${assetAsWebviewUri("assets/sqlite3.wasm")}"/>
+        <link rel="preload" as="fetch" id="assets/sqlite3-opfs-async-proxy.js" href="${assetAsWebviewUri("assets/sqlite3-opfs-async-proxy.js")}"/>
+        <link rel="preload" as="fetch" id="Northwind_small.sqlite" href="${assetAsWebviewUri("Northwind_small.sqlite")}"/>
       `)
       .replace('<!--BODY-->', ``)
   }
