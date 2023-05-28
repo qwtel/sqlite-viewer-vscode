@@ -339,21 +339,21 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
       vsc.Uri.joinPath(buildUri, 'index.html')
     ));
 
-    // TBD
-    // const csp = buildCSP({
-    //   [$default]: [$self, $vscode],
-    //   [$script]: [$self, $vscode, $unsafeEval], // HACK: Needed for WebAssembly in Web Extension. Needless to say, it makes the whole CSP useless...
-    //   [$style]: [$self, $vscode, $inlineStyle],
-    //   [$img]: [$self, $vscode, $data],
-    //   [$font]: [$self, $vscode],
-    //   [$child]: [$blob],
-    // });
+    const csp = buildCSP({
+      [$default]: [$self, $vscode],
+      [$script]: [$self, $vscode, $unsafeEval], // HACK: Needed for WebAssembly in Web Extension. Needless to say, it makes the whole CSP useless...
+      [$style]: [$self, $vscode, $inlineStyle],
+      [$img]: [$self, $vscode, $data],
+      [$font]: [$self, $vscode],
+      [$child]: [$blob],
+    });
 
     return html
       .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
         return `${attr}="${assetAsWebviewUri(url)}"`;
       })
       .replace('<!--HEAD-->', `
+        <meta http-equiv="Content-Security-Policy" content="${csp}">
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}"/>
         <link ref="preload" as="script" id="assets/index.js" href="${assetAsWebviewUri("assets/index.js")}"/>
         <link ref="preload" as="style" id="assets/index.css" href="${assetAsWebviewUri("assets/index.css")}"/>

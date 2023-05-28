@@ -67,6 +67,7 @@ export class Credentials {
 						const response = await fetch(new URL('/sponsors/check', BASE_URL), {
 							headers: [['Authorization', `Bearer ${accessToken}`]],
 							signal: timeout(5000).signal,
+							mode: 'cors',
 						});
 						if (response.ok) {
 							const { token } = await response.json() as { token: string };
