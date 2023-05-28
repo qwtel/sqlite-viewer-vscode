@@ -42,7 +42,7 @@ async function showWhatsNew(context: vsc.ExtensionContext) {
   ) {
     let actions;
     const result = await vsc.window.showInformationMessage(
-      `SQLite Viewer 2 is under active development and looking for 🎀 Sponsors!`,
+      `SQLite Viewer is under active development and looking for 💗 Sponsors!`,
       ...actions = [{ title: 'GitHub Sponsors ↗'}]
     );
 
