@@ -348,20 +348,19 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
     //   [$child]: [$blob],
     // });
 
-    return html
+    const preparedHtml = html
       .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
         return `${attr}="${assetAsWebviewUri(url)}"`;
       })
       .replace('<!--HEAD-->', `
-        <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}"/>
-        <link rel="preload" as="script" id="assets/index.js" href="${assetAsWebviewUri("assets/index.js")}"/>
-        <link rel="preload" as="style" id="assets/index.css" href="${assetAsWebviewUri("assets/index.css")}"/>
-        <link rel="preload" as="fetch" id="assets/worker.js" href="${assetAsWebviewUri("assets/worker.js")}"/>
-        <link rel="preload" as="fetch" id="assets/sqlite3.wasm" type="application/wasm" href="${assetAsWebviewUri("assets/sqlite3.wasm")}"/>
-        <link rel="preload" as="fetch" id="assets/sqlite3-opfs-async-proxy.js" href="${assetAsWebviewUri("assets/sqlite3-opfs-async-proxy.js")}"/>
-        <link rel="preload" as="fetch" id="Northwind_small.sqlite" href="${assetAsWebviewUri("Northwind_small.sqlite")}"/>
+        <link rel="stylesheet" crossorigin href="${webview.asWebviewUri(codiconsUri)}"/>
+        <link rel="preload" crossorigin as="fetch" id="assets/worker.js" href="${assetAsWebviewUri("assets/worker.js")}"/>
+        <link rel="preload" crossorigin as="fetch" id="assets/sqlite3.wasm" type="application/wasm" href="${assetAsWebviewUri("assets/sqlite3.wasm")}"/>
+        <link rel="preload" crossorigin as="fetch" id="assets/sqlite3-opfs-async-proxy.js" href="${assetAsWebviewUri("assets/sqlite3-opfs-async-proxy.js")}"/>
       `)
       .replace('<!--BODY-->', ``)
+
+      return preparedHtml;
   }
 
   private _requestId = 1;
