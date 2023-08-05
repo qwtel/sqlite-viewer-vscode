@@ -76,9 +76,6 @@
       }
     }
   },
-  "sponsor": {
-    "url": "https://github.com/sponsors/qwtel"
-  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile:ext": "npm run compile:ext:node & npm run compile:ext:browser & wait",
