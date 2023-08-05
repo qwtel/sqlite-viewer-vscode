@@ -76,9 +76,6 @@
       }
     }
   },
-  "sponsor": {
-    "url": "https://github.com/sponsors/qwtel"
-  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile:ext": "esbuild ./src/extension.ts --bundle --minify --outfile=out/extension.js --external:vscode --format=cjs",
