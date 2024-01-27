@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import acquireFetch from './acquireFetch';
-import * as jose from 'jose';
+// import * as jose from 'jose';
 
 const GITHUB_AUTH_PROVIDER_ID = 'github';
 
@@ -22,12 +22,13 @@ hixfUOoecMEXQ2c2wy95T/JgmiRh9MxPTdRwoSO1Ub1nVFII2s1d8E2RCw==
 `.trim();
 const alg = 'ES256'
 async function checkExpiration(token: string) {
-	const { payload } = await jose.jwtVerify(token, await jose.importSPKI(JWT_PUBLIC_KEY, alg))
-	const exp = payload.exp!;
-	const currentTime = Date.now() / 1000; // Convert to seconds
-	const diffSeconds = exp - currentTime;
-	const diffDays = diffSeconds / (24 * 60 * 60);
-	return diffDays > 29;
+	// const { payload } = await jose.jwtVerify(token, await jose.importSPKI(JWT_PUBLIC_KEY, alg))
+	// const exp = payload.exp!;
+	// const currentTime = Date.now() / 1000; // Convert to seconds
+	// const diffSeconds = exp - currentTime;
+	// const diffDays = diffSeconds / (24 * 60 * 60);
+	// return diffDays > 29;
+	return true;
 }
 
 const BASE_URL = 'https://alpha.sqliteviewer.app';

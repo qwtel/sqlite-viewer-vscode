@@ -210,7 +210,7 @@ const buildCSP = (cspObj: Record<string, string[]>) =>
 class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   private readonly webviews = new WebviewCollection();
 
-  constructor(private readonly _context: vsc.ExtensionContext, private readonly credentials: Credentials) {}
+  constructor(private readonly _context: vsc.ExtensionContext, private readonly credentials?: Credentials) {}
 
   //#region CustomEditorProvider
 
@@ -282,7 +282,7 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
     // Wait for the webview to be properly ready before we init
     webviewPanel.webview.onDidReceiveMessage(async e => {
       if (e.type === 'ready' && this.webviews.has(document.uri)) {
-        this.credentials.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
+        this.credentials?.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
 
         if (document.uri.scheme === 'untitled') {
           this.postMessage(webviewPanel, 'init', {
@@ -415,7 +415,7 @@ const registerOptions = {
 export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {
   static viewType = 'sqlite-viewer.view';
 
-  public static register(context: vsc.ExtensionContext, credentials: Credentials): vsc.Disposable {
+  public static register(context: vsc.ExtensionContext, credentials?: Credentials): vsc.Disposable {
     return vsc.window.registerCustomEditorProvider(
       SQLiteEditorDefaultProvider.viewType,
       new SQLiteEditorDefaultProvider(context, credentials),
@@ -426,7 +426,7 @@ export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {
 export class SQLiteEditorOptionProvider extends SQLiteEditorProvider {
   static viewType = 'sqlite-viewer.option';
 
-  public static register(context: vsc.ExtensionContext, credentials: Credentials): vsc.Disposable {
+  public static register(context: vsc.ExtensionContext, credentials?: Credentials): vsc.Disposable {
     return vsc.window.registerCustomEditorProvider(
       SQLiteEditorOptionProvider.viewType,
       new SQLiteEditorOptionProvider(context, credentials),
