@@ -94,9 +94,9 @@
     "codium:publish": "ovsx publish"
   },
   "devDependencies": {
-    "@types/node": "^20.11.7",
+    "@types/node": "^20.11.9",
     "@types/vscode": "^1.85.0",
-    "esbuild": "^0.19.12",
+    "esbuild": "^0.20.0",
     "esbuild-plugin-alias": "^0.2.1",
     "ovsx": "^0.8.3",
     "typescript": "^5.3.3"
