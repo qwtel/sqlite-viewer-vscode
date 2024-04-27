@@ -4,8 +4,8 @@
 src/**/*
 tsconfig.json
 mySolidTest/**/*
-!mySolidTest/build-vscode/assets
-!mySolidTest/build-vscode/index.html
+!mySolidTest/vscode/build/assets
+!mySolidTest/vscode/build/index.html
 sqlite-viewer-app/**/*
 sqlite-viewer-*
 exampleFiles/*

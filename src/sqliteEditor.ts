@@ -192,27 +192,25 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   }
 }
 
-const $default = 'default-src';
-const $script = 'script-src';
-const $style = 'style-src';
-const $img = 'img-src';
-const $font = 'font-src';
-const $child = 'child-src';
-const $self = "'self'";
-const $vscode = 'vscode-resource: qwtel.vscode-unpkg.net'; // FIXME: find way to avoid hard-coding web extension domain
-const $data = 'data:'
-const $blob = 'blob:'
-const $inlineStyle = "'unsafe-inline'";
-const $unsafeEval = "'unsafe-eval'";
-const buildCSP = (cspObj: Record<string, string[]>) =>
-  Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
+// const $default = 'default-src';
+// const $script = 'script-src';
+// const $style = 'style-src';
+// const $img = 'img-src';
+// const $font = 'font-src';
+// const $child = 'child-src';
+// const $self = "'self'";
+// const $vscode = 'vscode-resource: qwtel.vscode-unpkg.net'; // FIXME: find way to avoid hard-coding web extension domain
+// const $data = 'data:'
+// const $blob = 'blob:'
+// const $inlineStyle = "'unsafe-inline'";
+// const $unsafeEval = "'unsafe-eval'";
+// const buildCSP = (cspObj: Record<string, string[]>) =>
+//   Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
 
 class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   private readonly webviews = new WebviewCollection();
 
   constructor(private readonly _context: vsc.ExtensionContext, private readonly credentials?: Credentials) {}
-
-  //#region CustomEditorProvider
 
   async openCustomDocument(
     uri: vsc.Uri,
@@ -327,10 +325,8 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
     return document.backup(context.destination, cancellation);
   }
 
-  //#endregion
-
   private async getHtmlForWebview(webview: vsc.Webview): Promise<string> {
-    const buildUri = vsc.Uri.joinPath(this._context.extensionUri, 'mySolidTest', 'build-vscode');
+    const buildUri = vsc.Uri.joinPath(this._context.extensionUri, 'mySolidTest', 'vscode', 'build');
     const codiconsUri = vsc.Uri.joinPath(this._context.extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css');
 
     const assetAsWebviewUri = (x: string) => webview.asWebviewUri(vsc.Uri.joinPath(buildUri, x));
