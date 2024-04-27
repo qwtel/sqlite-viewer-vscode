@@ -3,9 +3,9 @@
 .gitmodules  
 src/**/*
 tsconfig.json
-mySolidTest/**/*
-!mySolidTest/vscode/build/assets
-!mySolidTest/vscode/build/index.html
+sqlite-viewer-core/**/*
+!sqlite-viewer-core/vscode/build/assets
+!sqlite-viewer-core/vscode/build/index.html
 sqlite-viewer-app/**/*
 sqlite-viewer-*
 exampleFiles/*
