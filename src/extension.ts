@@ -35,28 +35,28 @@ async function showWhatsNew(context: vsc.ExtensionContext) {
   // store latest version
   context.globalState.update(extensionId, currentVersion);
 
-  // if (
-  //   previousVersion === undefined || 
-  //   previousVersion !== currentVersion || 
-  //   context.extensionMode === vsc.ExtensionMode.Development
-  // ) {
-  //   let actions;
-  //   const result = await vsc.window.showInformationMessage(
-  //     `Added max file size settings. This prevents SQLite Viewer from crashing when opening large files. Defaults to 200 MB`,
-  //     ...actions = [{ title: 'Try SQLite Viewer Web ↗'}]
-  //   );
+  if (
+    previousVersion === undefined || 
+    previousVersion !== currentVersion || 
+    context.extensionMode === vsc.ExtensionMode.Development
+  ) {
+    let actions;
+    const result = await vsc.window.showInformationMessage(
+      `SQLite Viewer updated to new major version! Check the Changelog to see what's new!`,
+      ...actions = [{ title: 'Open Changelog ↗'}]
+    );
 
-  //   if (result !== null) {
-  //     if (result === actions[0]) {
-  //       await vsc.env.openExternal(
-  //         vsc.Uri.parse('https://sqliteviewer.app?ref=vscode')
-  //       );
-  //     } 
-  //     // else if (result === actions[1]) {
-  //     //   await vsc.env.openExternal(
-  //     //     vsc.Uri.parse('https://github.com/qwtel/sqlite-viewer-vscode/issues')
-  //     //   );
-  //     // }
-  //   }
-  // }
+    if (result !== null) {
+      if (result === actions[0]) {
+        await vsc.env.openExternal(
+          vsc.Uri.parse('https://marketplace.visualstudio.com/items/qwtel.sqlite-viewer/changelog')
+        );
+      } 
+      // else if (result === actions[1]) {
+      //   await vsc.env.openExternal(
+      //     vsc.Uri.parse('https://github.com/qwtel/sqlite-viewer-vscode/issues')
+      //   );
+      // }
+    }
+  }
 }

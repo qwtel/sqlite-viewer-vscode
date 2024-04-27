@@ -49,6 +49,12 @@
           },
           {
             "filenamePattern": "*.sqlite3"
+          },
+          {
+            "filenamePattern": "*.db"
+          },
+          {
+            "filenamePattern": "*.db3"
           }
         ]
       },

@@ -20,7 +20,7 @@ A quick and easy SQLite viewer for VSCode, inspired by DB Browser for SQLite and
 
 <br/>
 
-## [🆕 Try Out the Standalone Web App][ref]
+## [Try Out the Standalone Web App][ref]
 
 You can now use this extension as a standalone web app at [sqliteviewer.app][ref].
 
