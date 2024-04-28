@@ -35,7 +35,10 @@
           ".sqlite",
           ".sqlite3",
           ".db",
-          ".db3"
+          ".db3",
+          ".sdb",
+          ".s3db",
+          ".gpkg"
         ]
       }
     ],
@@ -55,6 +58,12 @@
           },
           {
             "filenamePattern": "*.db3"
+          },
+          {
+            "filenamePattern": "*.sdb"
+          },
+          {
+            "filenamePattern": "*.s3db"
           }
         ]
       },
