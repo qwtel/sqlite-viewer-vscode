@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## 0.5.0
-SQLite Viewer 0.5 is a near-complete rewrite of this extension for better performance and extensibility.
+SQLite Viewer 0.5 is a complete rewrite of this extension with a focus on improved performance.
 
 It also implements SQLite Viewer's **most requested feature**: Default file association for `.db` files! 
 
