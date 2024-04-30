@@ -3,7 +3,7 @@
   "name": "sqlite-viewer",
   "displayName": "SQLite Viewer",
   "description": "SQLite Viewer for VSCode",
-  "version": "0.3.13",
+  "version": "0.4.0",
   "publisher": "qwtel",
   "private": true,
   "license": "LICENSE.md",
@@ -13,7 +13,7 @@
     "url": "https://github.com/qwtel/sqlite-viewer-vscode"
   },
   "engines": {
-    "vscode": "^1.63.0"
+    "vscode": "^1.85.0"
   },
   "categories": [
     "Other"
@@ -23,7 +23,7 @@
     "onCustomEditor:sqlite-viewer.option"
   ],
   "main": "./out/extension.js",
-  "browser": "./out/extension.js",
+  "browser": "./out/extension-browser.js",
   "extensionKind": [
     "ui"
   ],
@@ -35,7 +35,10 @@
           ".sqlite",
           ".sqlite3",
           ".db",
-          ".db3"
+          ".db3",
+          ".sdb",
+          ".s3db",
+          ".gpkg"
         ]
       }
     ],
@@ -49,6 +52,18 @@
           },
           {
             "filenamePattern": "*.sqlite3"
+          },
+          {
+            "filenamePattern": "*.db"
+          },
+          {
+            "filenamePattern": "*.db3"
+          },
+          {
+            "filenamePattern": "*.sdb"
+          },
+          {
+            "filenamePattern": "*.s3db"
           }
         ]
       },
@@ -78,28 +93,29 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile:ext": "esbuild ./src/extension.ts --bundle --minify --outfile=out/extension.js --external:vscode --format=cjs",
-    "compile:view": "./scripts/compile-view.js",
-    "compile:worker": "./scripts/compile-worker.js",
-    "compile": "npm run compile:ext & npm run compile:view & npm run compile:worker & wait",
+    "compile:ext": "npm run compile:ext:node & npm run compile:ext:browser & wait",
+    "compile:ext:node": "esbuild ./src/extension.ts --minify --bundle --outfile=out/extension.js --external:vscode --platform=node --format=cjs",
+    "compile:ext:browser": "esbuild ./src/extension.ts --minify --bundle --outfile=out/extension-browser.js --external:vscode --platform=browser --external:node-fetch --format=cjs",
+    "compile:app": "cd ./sqlite-viewer-core && npm run build-vscode",
+    "compile": "npm run compile:ext & npm run compile:app & wait",
     "pack": "vsce package --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
     "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
-    "publish-pre": "vsce publish  --pre-release --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
-    "publish-codium": "ovsx publish",
+    "pre-publish": "vsce publish --pre-release --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/preview/",
     "prepack": "sed -i '' s~https://sqliteviewer\\.app~https://sqliteviewer.app?ref=vscode~g *.md",
-    "postpack": "sed -i '' s/\\?ref=vscode//g *.md"
+    "postpack": "sed -i '' s/\\?ref=vscode//g *.md",
+    "codium:publish": "ovsx publish"
   },
   "devDependencies": {
-    "@types/node": "^17.0.21",
-    "@types/vscode": "^1.63.0",
-    "esbuild": "^0.14.27",
-    "esbuild-css-modules-plugin": "^2.2.4",
+    "@types/node": "^20.11.9",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.20.0",
     "esbuild-plugin-alias": "^0.2.1",
-    "ovsx": "^0.8.0",
-    "typescript": "^4.6.2",
-    "vsce": "^2.7.0"
+    "ovsx": "^0.8.3",
+    "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@vscode/codicons": "^0.0.29"
+    "node-fetch": "^3.3.2",
+    "@vscode/codicons": "^0.0.35",
+    "@vscode/vsce": "^2.23.0"
   }
 }

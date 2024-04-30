@@ -1,3 +1,3 @@
-[submodule "sqlite-viewer-app"]
-	path = sqlite-viewer-app
+[submodule "sqlite-viewer-core"]
+	path = sqlite-viewer-core
 	url = git@github.com:qwtel/sqlite-viewer-app.git

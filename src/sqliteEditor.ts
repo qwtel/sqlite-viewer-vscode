@@ -1,6 +1,7 @@
 import * as vsc from 'vscode';
 import { Disposable, disposeAll } from './dispose';
 import { WebviewCollection } from './util';
+// import type { Credentials } from './credentials';
 
 interface SQLiteEdit {
   readonly data: Uint8Array;
@@ -191,27 +192,25 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   }
 }
 
-const $default = 'default-src';
-const $script = 'script-src';
-const $style = 'style-src';
-const $img = 'img-src';
-const $font = 'font-src';
-const $child = 'child-src';
-const $self = "'self'";
-const $vscode = 'vscode-resource: qwtel.vscode-unpkg.net'; // FIXME: find way to avoid hard-coding web extension domain
-const $data = 'data:'
-const $blob = 'blob:'
-const $inlineStyle = "'unsafe-inline'";
-const $unsafeEval = "'unsafe-eval'";
-const buildCSP = (cspObj: Record<string, string[]>) =>
-  Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
+// const $default = 'default-src';
+// const $script = 'script-src';
+// const $style = 'style-src';
+// const $img = 'img-src';
+// const $font = 'font-src';
+// const $child = 'child-src';
+// const $self = "'self'";
+// const $vscode = 'vscode-resource: qwtel.vscode-unpkg.net'; // FIXME: find way to avoid hard-coding web extension domain
+// const $data = 'data:'
+// const $blob = 'blob:'
+// const $inlineStyle = "'unsafe-inline'";
+// const $unsafeEval = "'unsafe-eval'";
+// const buildCSP = (cspObj: Record<string, string[]>) =>
+//   Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
 
 class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   private readonly webviews = new WebviewCollection();
 
   constructor(private readonly _context: vsc.ExtensionContext) {}
-
-  //#region CustomEditorProvider
 
   async openCustomDocument(
     uri: vsc.Uri,
@@ -279,8 +278,10 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
     webviewPanel.webview.onDidReceiveMessage(e => this.onMessage(document, e));
 
     // Wait for the webview to be properly ready before we init
-    webviewPanel.webview.onDidReceiveMessage(e => {
+    webviewPanel.webview.onDidReceiveMessage(async e => {
       if (e.type === 'ready' && this.webviews.has(document.uri)) {
+        // this.credentials?.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
+
         if (document.uri.scheme === 'untitled') {
           this.postMessage(webviewPanel, 'init', {
             filename: 'untitled',
@@ -324,40 +325,38 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
     return document.backup(context.destination, cancellation);
   }
 
-  //#endregion
-
   private async getHtmlForWebview(webview: vsc.Webview): Promise<string> {
-    const publicUri = vsc.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public');
+    const buildUri = vsc.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build');
     const codiconsUri = vsc.Uri.joinPath(this._context.extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css');
 
+    const assetAsWebviewUri = (x: string) => webview.asWebviewUri(vsc.Uri.joinPath(buildUri, x));
+
     const html = new TextDecoder().decode(await vsc.workspace.fs.readFile(
-      vsc.Uri.joinPath(publicUri, 'vscode.html')
+      vsc.Uri.joinPath(buildUri, 'index.html')
     ));
 
-    const PUBLIC_URL = webview.asWebviewUri(
-      vsc.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-app', 'public')
-    ).toString();
+    // const csp = buildCSP({
+    //   [$default]: [$self, $vscode],
+    //   [$script]: [$self, $vscode, $unsafeEval], // HACK: Needed for WebAssembly in Web Extension. Needless to say, it makes the whole CSP useless...
+    //   [$style]: [$self, $vscode, $inlineStyle],
+    //   [$img]: [$self, $vscode, $data],
+    //   [$font]: [$self, $vscode],
+    //   [$child]: [$blob],
+    // });
 
-    const csp = {
-      [$default]: [$self, $vscode],
-      [$script]: [$self, $vscode, $unsafeEval], // HACK: Needed for WebAssembly in Web Extension. Needless to say, it makes the whole CSP useless...
-      [$style]: [$self, $vscode, $inlineStyle],
-      [$img]: [$self, $vscode, $data],
-      [$font]: [$self, $vscode],
-      [$child]: [$blob],
-    };
-
-    const prepHtml = html
-      .replaceAll('%PUBLIC_URL%', PUBLIC_URL)
-      .replaceAll('%REACT_APP_CSP%', buildCSP(csp))
+    const preparedHtml = html
+      .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
+        return `${attr}="${assetAsWebviewUri(url)}"`;
+      })
       .replace('<!--HEAD-->', `
-        <link rel="stylesheet" href="${webview.asWebviewUri(vsc.Uri.joinPath(publicUri, 'bundle.css'))}"/>
-        <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}"/>
+        <link rel="stylesheet" crossorigin href="${webview.asWebviewUri(codiconsUri)}"/>
+        <link rel="preload" crossorigin as="fetch" id="assets/worker.js" href="${assetAsWebviewUri("assets/worker.js")}"/>
+        <link rel="preload" crossorigin as="fetch" id="assets/sqlite3.wasm" type="application/wasm" href="${assetAsWebviewUri("assets/sqlite3.wasm")}"/>
+        <link rel="preload" crossorigin as="fetch" id="assets/sqlite3-opfs-async-proxy.js" href="${assetAsWebviewUri("assets/sqlite3-opfs-async-proxy.js")}"/>
       `)
-      .replace('<!--BODY-->', `
-        <script src="${webview.asWebviewUri(vsc.Uri.joinPath(publicUri, 'bundle.js'))}"></script>
-      `)
-    return prepHtml;
+      .replace('<!--BODY-->', ``)
+
+      return preparedHtml;
   }
 
   private _requestId = 1;

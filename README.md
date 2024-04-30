@@ -7,8 +7,8 @@ A quick and easy SQLite viewer for VSCode, inspired by DB Browser for SQLite and
 <br/>
 
 ## Features
-- Platform-independent, no native dependencies — now working on VSCode for Web
-- File extension association: Just click on a `.sqlite` file and the custom viewer opens
+- Platform-independent, no native dependencies — it even works in VSCode for Web
+- File extension association: Just click on a `.sqlite` or `.db` file and the custom viewer opens
 - Fast UI with virtualized scrolling, sorting, filtering, etc.
 - Seamlessly integrates with VSCode and matches your color theme
 
@@ -20,7 +20,7 @@ A quick and easy SQLite viewer for VSCode, inspired by DB Browser for SQLite and
 
 <br/>
 
-## [🆕 Try Out the Standalone Web App][ref]
+## [Try Out the Standalone Web App][ref]
 
 You can now use this extension as a standalone web app at [sqliteviewer.app][ref].
 

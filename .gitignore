@@ -2,3 +2,4 @@
 /out
 /exampleFiles
 *.vsix
+_sqlite-viewer-app
