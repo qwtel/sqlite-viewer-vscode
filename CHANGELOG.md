@@ -26,6 +26,9 @@ Performance
 Style
 - Many aspects of the extension's UI should match VSCode's style closer
 
+## v0.4.1
+Added minimal application reporting.
+
 ## v0.3.0 – v3.0.24
 Minor bug fixes and previews 
 

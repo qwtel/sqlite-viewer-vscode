@@ -1,12 +1,18 @@
 import * as vsc from 'vscode';
 import { SQLiteEditorDefaultProvider, SQLiteEditorOptionProvider  } from './sqliteEditor';
+import TelemetryReporter from '@vscode/extension-telemetry';
 // import { Credentials } from './credentials';
 
+const key = "36072a93-f98f-4c93-88c3-8870add45a57";
+
 export async function activate(context: vsc.ExtensionContext) {
-  showWhatsNew(context);
+  const reporter = new TelemetryReporter(key);
   // const credentials = new Credentials(context);
-  context.subscriptions.push(SQLiteEditorDefaultProvider.register(context /* , credentials */));
-  context.subscriptions.push(SQLiteEditorOptionProvider.register(context /* , credentials */));
+  context.subscriptions.push(SQLiteEditorDefaultProvider.register(context, reporter /* , credentials */));
+  context.subscriptions.push(SQLiteEditorOptionProvider.register(context, reporter /* , credentials */));
+  context.subscriptions.push(reporter);
+
+  showWhatsNew(context, reporter);
 }
 
 const extensionId = 'qwtel.sqlite-viewer'
@@ -28,7 +34,7 @@ const extensionId = 'qwtel.sqlite-viewer'
 //   }
 // }
 
-async function showWhatsNew(context: vsc.ExtensionContext) {
+async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
   const previousVersion = context.globalState.get<string>(extensionId);
   const currentVersion = vsc.extensions.getExtension(extensionId)!.packageJSON.version;
 
@@ -40,9 +46,11 @@ async function showWhatsNew(context: vsc.ExtensionContext) {
     previousVersion !== currentVersion || 
     context.extensionMode === vsc.ExtensionMode.Development
   ) {
+    reporter.sendTelemetryEvent("install");
+
     let actions;
     const result = await vsc.window.showInformationMessage(
-      `SQLite Viewer updated to new major version! Check the Changelog to see what's new!`,
+      `SQLite Viewer updated to new major version! Check out the Changelog to see what's new!`,
       ...actions = [{ title: 'Open Changelog ↗'}]
     );
 
@@ -51,7 +59,7 @@ async function showWhatsNew(context: vsc.ExtensionContext) {
         await vsc.env.openExternal(
           vsc.Uri.parse('https://marketplace.visualstudio.com/items/qwtel.sqlite-viewer/changelog')
         );
-      } 
+      }
       // else if (result === actions[1]) {
       //   await vsc.env.openExternal(
       //     vsc.Uri.parse('https://github.com/qwtel/sqlite-viewer-vscode/issues')

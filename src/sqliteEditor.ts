@@ -1,4 +1,5 @@
 import * as vsc from 'vscode';
+import type TelemetryReporter from '@vscode/extension-telemetry';
 import { Disposable, disposeAll } from './dispose';
 import { WebviewCollection } from './util';
 // import type { Credentials } from './credentials';
@@ -210,7 +211,10 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   private readonly webviews = new WebviewCollection();
 
-  constructor(private readonly _context: vsc.ExtensionContext) {}
+  constructor(
+    private readonly _context: vsc.ExtensionContext, 
+    private readonly reporter: TelemetryReporter,
+  ) {}
 
   async openCustomDocument(
     uri: vsc.Uri,
@@ -304,6 +308,8 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
         }
       }
     });
+
+    this.reporter.sendTelemetryEvent("open");
   }
 
   private readonly _onDidChangeCustomDocument = new vsc.EventEmitter<vsc.CustomDocumentEditEvent<SQLiteDocument>>();
@@ -370,7 +376,7 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   }
 
   private postMessage(panel: vsc.WebviewPanel, type: string, body: any, transfer?: any[]): void {
-    // @ts-ignore
+    // @ts-expect-error: types missing "transferable"
     panel.webview.postMessage({ type, body }, transfer);
   }
 
@@ -411,10 +417,10 @@ const registerOptions = {
 export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {
   static viewType = 'sqlite-viewer.view';
 
-  public static register(context: vsc.ExtensionContext): vsc.Disposable {
+  public static register(context: vsc.ExtensionContext, reporter: TelemetryReporter): vsc.Disposable {
     return vsc.window.registerCustomEditorProvider(
       SQLiteEditorDefaultProvider.viewType,
-      new SQLiteEditorDefaultProvider(context),
+      new SQLiteEditorDefaultProvider(context, reporter),
       registerOptions);
   }
 }
@@ -422,10 +428,10 @@ export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {
 export class SQLiteEditorOptionProvider extends SQLiteEditorProvider {
   static viewType = 'sqlite-viewer.option';
 
-  public static register(context: vsc.ExtensionContext): vsc.Disposable {
+  public static register(context: vsc.ExtensionContext, reporter: TelemetryReporter): vsc.Disposable {
     return vsc.window.registerCustomEditorProvider(
       SQLiteEditorOptionProvider.viewType,
-      new SQLiteEditorOptionProvider(context),
+      new SQLiteEditorOptionProvider(context, reporter),
       registerOptions);
   }
 }
