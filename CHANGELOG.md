@@ -1,11 +1,11 @@
 # CHANGELOG
 
-## 0.5.0
-SQLite Viewer 0.5 is a complete rewrite of this extension with a focus on improved performance.
+## v0.4.0
+SQLite Viewer 0.4 is a complete rewrite of this extension with a focus on improved performance.
 
 It also implements SQLite Viewer's **most requested feature**: Default file association for `.db` files! 
 
-Additionally, version 0.5 ships many quality of life improvements:
+Additionally, version 0.4 ships many quality of life improvements:
 
 - Double clicking a cell will now open the modal and pre-select the text content
 - The extension will now attempt to auto-size text columns based on visible content on first open
@@ -26,6 +26,8 @@ Performance
 Style
 - Many aspects of the extension's UI should match VSCode's style closer
 
+## v0.3.0 – v3.0.24
+Minor bug fixes and previews 
 
 ## v0.2.4
 - Added max file size setting
