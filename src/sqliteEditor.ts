@@ -284,6 +284,7 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
     // Wait for the webview to be properly ready before we init
     webviewPanel.webview.onDidReceiveMessage(async e => {
       if (e.type === 'ready' && this.webviews.has(document.uri)) {
+        this.reporter.sendTelemetryEvent("open");
         // this.credentials?.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
 
         if (document.uri.scheme === 'untitled') {
@@ -308,8 +309,6 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
         }
       }
     });
-
-    this.reporter.sendTelemetryEvent("open");
   }
 
   private readonly _onDidChangeCustomDocument = new vsc.EventEmitter<vsc.CustomDocumentEditEvent<SQLiteDocument>>();

@@ -19,15 +19,24 @@ Additionally, version 0.4 ships many quality of life improvements:
 - Downloading a blob will now automatically add an appropriate file extension if it can be inferred
 - Column sizes and pinned now persist when switching to another table (but not after closing the tab/file) 
 
-Performance
+### Performance
 - Faster virtualized scrolling
 - Faster columns resizing
 
-Style
+### Style
 - Many aspects of the extension's UI should match VSCode's style closer
 
+## v0.4.2
+### Fixes
+- Fixed column widths resetting when refreshing a file
+- Fixed column order resetting when refreshing a file
+- Fixed an issue causing the grid to collapse when refreshing a file
+- Fixed sidebar column order not updating when pinning a column
+### Style
+- Increased default column width by 20%
+
 ## v0.4.1
-Added minimal application reporting.
+Added minimal application reporting
 
 ## v0.3.0 – v3.0.24
 Minor bug fixes and previews 
