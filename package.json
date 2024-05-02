@@ -118,6 +118,7 @@
     "@vscode/codicons": "^0.0.35",
     "@vscode/extension-telemetry": "^0.9.6",
     "@vscode/vsce": "^2.26.0",
+    "@worker-tools/typed-event-target": "^1.0.0",
     "node-fetch": "^3.3.2"
   }
 }

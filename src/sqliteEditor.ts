@@ -1,7 +1,10 @@
 import * as vsc from 'vscode';
 import type TelemetryReporter from '@vscode/extension-telemetry';
+import type { TypedEventListenerOrEventListenerObject } from "@worker-tools/typed-event-target";
 import { Disposable, disposeAll } from './dispose';
 import { WebviewCollection } from './util';
+import * as Comlink from "../sqlite-viewer-core/src/vendor/comlink/src/comlink";
+import "../sqlite-viewer-core/src/comlink";
 // import type { Credentials } from './credentials';
 
 interface SQLiteEdit {
@@ -208,8 +211,39 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 // const buildCSP = (cspObj: Record<string, string[]>) =>
 //   Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
 
+class WebviewEndpoint {
+  constructor(private readonly webview: vsc.Webview) {}
+  private disposables = new Map<TypedEventListenerOrEventListenerObject<MessageEvent>|null, vsc.Disposable>
+  postMessage(message: any, transfer: Transferable[]) {
+    // @ts-expect-error: transferables type missing
+    this.webview.postMessage(message, transfer);
+  }
+  addEventListener(_event: "message", handler: TypedEventListenerOrEventListenerObject<MessageEvent>|null) {
+    if (typeof handler === "function") {
+      this.disposables.set(handler, this.webview.onDidReceiveMessage(data => {
+        handler(new MessageEvent("message", { data }));
+      }))
+    } else if (handler) {
+      this.disposables.set(handler, this.webview.onDidReceiveMessage(data => {
+        handler.handleEvent(new MessageEvent("message", { data }));
+      }));
+    }
+  }
+  removeEventListener(_event: "message", handler: TypedEventListenerOrEventListenerObject<MessageEvent>|null) {
+    this.disposables.get(handler)?.dispose();
+    this.disposables.delete(handler);
+  }
+}
+
+type WebviewFns = {
+  setToken: () => void,
+  getFileData: () => Uint8Array,
+  forceUpdate: (data: Pick<Uint8Array, "buffer"|"byteOffset"|"byteLength">, filename: string, editable: boolean) => void,
+};
+
 class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   private readonly webviews = new WebviewCollection();
+  private readonly webviewRemotes = new WeakMap<vsc.WebviewPanel, Comlink.Remote<WebviewFns>>
 
   constructor(
     private readonly _context: vsc.ExtensionContext, 
@@ -229,8 +263,8 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
           throw new Error('Could not find webview to save for');
         }
         const panel = webviewsForDocument[0];
-        const response = await this.postMessageWithResponse<number[]>(panel, 'getFileData', {});
-        return new Uint8Array(response);
+        const remote = this.webviewRemotes.get(panel)!
+        return await remote.getFileData() ?? new Uint8Array(0);
       }
     });
 
@@ -244,19 +278,17 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
       });
     }));
 
-    listeners.push(document.onDidChangeContent(e => {
+    listeners.push(document.onDidChangeContent(async e => {
       // Update all webviews when the document changes
       // NOTE: per configuration there can only be one webview per uri, so transferring the buffer is ok
-      for (const webviewPanel of this.webviews.get(document.uri)) {
+      for (const panel of this.webviews.get(document.uri)) {
+        if (!document.documentData) continue;
         const { filename } = document.uriParts;
-        const { buffer, byteOffset, byteLength } = document.documentData || {}
+        const { buffer, byteOffset, byteLength } = document.documentData;
         const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
 
-        this.postMessage(webviewPanel, 'update', {
-          filename,
-          value,
-          editable: false,
-        }, [buffer]);
+        const remote = this.webviewRemotes.get(panel)!
+        await remote.forceUpdate(Comlink.transfer(value, [buffer]), filename, false);
       }
     }));
 
@@ -273,42 +305,66 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
     // Add the webview to our internal set of active webviews
     this.webviews.add(document.uri, webviewPanel);
 
+    const webviewEndpoint = new WebviewEndpoint(webviewPanel.webview);
+    this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
+
+    Comlink.expose({
+      ready: () => {
+        if (this.webviews.has(document.uri)) {
+          this.reporter.sendTelemetryEvent("open");
+          // this.credentials?.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
+
+          if (document.uri.scheme === 'untitled') {
+            return {
+              filename: 'untitled',
+              untitled: true,
+              editable: false,
+            };
+          } else if (document.documentData) {
+            const editable = false;
+            // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
+
+            const { buffer, byteOffset, byteLength } = document.documentData
+            const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
+
+            const { filename } = document.uriParts;
+            return Comlink.record({
+              filename,
+              value: Comlink.transfer(value, [buffer]),
+              editable,
+            });
+          }
+        }
+      },
+      refreshFile: async () => {
+        if (document.uri.scheme !== 'untitled') {
+          await document.refresh()
+          const { filename } = document.uriParts;
+          const { buffer, byteOffset, byteLength } = document.documentData || {}
+          const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
+  
+          return Comlink.record({
+            filename,
+            value: Comlink.transfer(value, [buffer!]),
+            editable: false,
+          });
+        }
+      },
+      downloadBlob: async (data: Uint8Array, download: string, metaKey: boolean) => {
+        const { dirname } = document.uriParts;
+        const dlUri = vsc.Uri.parse(`${dirname}/${download}`);
+
+        await vsc.workspace.fs.writeFile(dlUri, data);
+        if (!metaKey) await vsc.commands.executeCommand('vscode.open', dlUri);
+        return;
+      },
+    }, webviewEndpoint);
+
     // Setup initial content for the webview
     webviewPanel.webview.options = {
       enableScripts: true,
     };
     webviewPanel.webview.html = await this.getHtmlForWebview(webviewPanel.webview);
-
-    webviewPanel.webview.onDidReceiveMessage(e => this.onMessage(document, e));
-
-    // Wait for the webview to be properly ready before we init
-    webviewPanel.webview.onDidReceiveMessage(async e => {
-      if (e.type === 'ready' && this.webviews.has(document.uri)) {
-        this.reporter.sendTelemetryEvent("open");
-        // this.credentials?.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
-
-        if (document.uri.scheme === 'untitled') {
-          this.postMessage(webviewPanel, 'init', {
-            filename: 'untitled',
-            untitled: true,
-            editable: false,
-          });
-        } else {
-          const editable = false;
-          // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
-
-          const { buffer, byteOffset, byteLength } = document.documentData || {}
-          const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
-
-          const { filename } = document.uriParts;
-          this.postMessage(webviewPanel, 'init', {
-            filename,
-            value,
-            editable,
-          }, [buffer]);
-        }
-      }
-    });
   }
 
   private readonly _onDidChangeCustomDocument = new vsc.EventEmitter<vsc.CustomDocumentEditEvent<SQLiteDocument>>();
@@ -362,46 +418,6 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
       .replace('<!--BODY-->', ``)
 
       return preparedHtml;
-  }
-
-  private _requestId = 1;
-  private readonly _callbacks = new Map<number, (response: any) => void>();
-
-  private postMessageWithResponse<R = unknown>(panel: vsc.WebviewPanel, type: string, body: any): Promise<R> {
-    const requestId = this._requestId++;
-    const p = new Promise<R>(resolve => this._callbacks.set(requestId, resolve));
-    panel.webview.postMessage({ type, requestId, body });
-    return p;
-  }
-
-  private postMessage(panel: vsc.WebviewPanel, type: string, body: any, transfer?: any[]): void {
-    // @ts-expect-error: types missing "transferable"
-    panel.webview.postMessage({ type, body }, transfer);
-  }
-
-  private async onMessage(document: SQLiteDocument, message: any) {
-    switch (message.type) {
-      case 'refresh':
-        if (document.uri.scheme !== 'untitled') {
-          document.refresh()
-        }
-        return;
-      case 'blob':
-        const { data, download, metaKey } = message;
-
-        const { dirname } = document.uriParts;
-        const dlUri = vsc.Uri.parse(`${dirname}/${download}`);
-
-        await vsc.workspace.fs.writeFile(dlUri, data);
-        if (!metaKey) await vsc.commands.executeCommand('vscode.open', dlUri);
-        return;
-
-      case 'response': {
-        const callback = this._callbacks.get(message.requestId);
-        callback?.(message.body);
-        return;
-      }
-    }
   }
 }
 
