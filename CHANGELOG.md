@@ -26,6 +26,12 @@ Additionally, version 0.4 ships many quality of life improvements:
 ### Style
 - Many aspects of the extension's UI should match VSCode's style closer
 
+## v0.4.3
+### Fixes
+- Added back search functionality for tables
+- Fixed ROWID column sizing
+- Fixed a browser history issue when using the extension on the web
+
 ## v0.4.2
 ### Fixes
 - Fixed column widths resetting when refreshing a file
