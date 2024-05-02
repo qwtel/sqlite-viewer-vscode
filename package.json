@@ -98,6 +98,7 @@
     "compile:ext:browser": "esbuild ./src/extension.ts --minify --bundle --outfile=out/extension-browser.js --external:vscode --platform=browser --external:node-fetch --format=cjs",
     "compile:app": "cd ./sqlite-viewer-core && npm run build-vscode",
     "compile": "npm run compile:ext & npm run compile:app & wait",
+    "dev-compile": "DEV=1 npm run compile",
     "pack": "vsce package --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
     "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
     "pre-publish": "vsce publish --pre-release --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/preview/",
