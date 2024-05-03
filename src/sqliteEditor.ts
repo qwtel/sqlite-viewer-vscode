@@ -299,7 +299,7 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
     _token: vsc.CancellationToken
   ): Promise<SQLiteDocument> {
 
-    const document: SQLiteDocument = await SQLiteDocument.create(uri, openContext.backupId, {
+    const document = await SQLiteDocument.create(uri, openContext.backupId, {
       getFileData: async () => {
         const webviewsForDocument = [...this.webviews.get(document.uri)];
         if (!webviewsForDocument.length) {

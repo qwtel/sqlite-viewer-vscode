@@ -1,30 +1,9 @@
 # CHANGELOG
 
-## v0.4
-SQLite Viewer 0.4 is a complete rewrite of this extension with a focus on improved performance.
-
-It also implements SQLite Viewer's **most requested feature**: Default file association for `.db` files! 
-
-Additionally, version 0.4 ships many quality of life improvements:
-
-- Double clicking a cell will now open the modal and pre-select the text content
-- The extension will now attempt to auto-size text columns based on visible content on first open
-- Blob columns containing known image formats are previewed inline
-- Blob columns up to 256 bytes (that aren't images) are rendered in hex format instead of as a download button
-- Pinning a row will no longer remove it from the main view
-- Columns can now be hidden in the sidebar
-- The `ROWID` column can now be displayed (enable in sidebar)
-- It is now possible to select and rearrange multiple columns at the same time in the sidebar
-- The modal/dialog view can now be resized
-- Downloading a blob will now automatically add an appropriate file extension if it can be inferred
-- Column sizes and pinned now persist when switching to another table (but not after closing the tab/file) 
-
-### Performance
-- Faster virtualized scrolling
-- Faster columns resizing
-
-### Style
-- Many aspects of the extension's UI should match VSCode's style closer
+## v0.4.6
+- Added button to filter columns by exact search term
+- Removed "Not Allowed" cursor from readonly fields in detail view
+- Reduced the amount of copying when opening a file
 
 ## v0.4.5
 Fixed an issue that caused a blank window when opening an external link
@@ -64,6 +43,31 @@ Improved JSON column support
 ## v0.4.1
 Added essential application reporting
 
+## v0.4.0
+SQLite Viewer 0.4 is a complete rewrite of this extension with a focus on improved performance.
+
+It also implements SQLite Viewer's **most requested feature**: Default file association for `.db` files! 
+
+Additionally, version 0.4 ships many quality of life improvements:
+
+- Double clicking a cell will now open the modal and pre-select the text content
+- The extension will now attempt to auto-size text columns based on visible content on first open
+- Blob columns containing known image formats are previewed inline
+- Blob columns up to 256 bytes (that aren't images) are rendered in hex format instead of as a download button
+- Pinning a row will no longer remove it from the main view
+- Columns can now be hidden in the sidebar
+- The `ROWID` column can now be displayed (enable in sidebar)
+- It is now possible to select and rearrange multiple columns at the same time in the sidebar
+- The modal/dialog view can now be resized
+- Downloading a blob will now automatically add an appropriate file extension if it can be inferred
+- Column sizes and pinned now persist when switching to another table (but not after closing the tab/file) 
+
+### Performance
+- Faster virtualized scrolling
+- Faster columns resizing
+
+### Style
+- Many aspects of the extension's UI should match VSCode's style closer
 
 ## v0.3.0 – v3.0.24
 Minor bug fixes and previews 
