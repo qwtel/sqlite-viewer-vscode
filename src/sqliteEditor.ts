@@ -1,10 +1,11 @@
-import * as vsc from 'vscode';
 import type TelemetryReporter from '@vscode/extension-telemetry';
 import type { TypedEventListenerOrEventListenerObject } from "@worker-tools/typed-event-target";
+import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
+
+import * as vsc from 'vscode';
 import { Disposable, disposeAll } from './dispose';
 import { WebviewCollection } from './util';
-import * as Comlink from "../sqlite-viewer-core/src/vendor/comlink/src/comlink";
-import "../sqlite-viewer-core/src/comlink";
+import * as Comlink from "../sqlite-viewer-core/src/comlink";
 // import type { Credentials } from './credentials';
 
 interface SQLiteEdit {
@@ -211,7 +212,7 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 // const buildCSP = (cspObj: Record<string, string[]>) =>
 //   Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
 
-class WebviewEndpoint {
+class WebviewEndpointAdapter {
   constructor(private readonly webview: vsc.Webview) {}
   private disposables = new Map<TypedEventListenerOrEventListenerObject<MessageEvent>|null, vsc.Disposable>
   postMessage(message: any, transfer: Transferable[]) {
@@ -235,21 +236,86 @@ class WebviewEndpoint {
   }
 }
 
-type WebviewFns = {
-  setToken: () => void,
-  getFileData: () => Uint8Array,
-  forceUpdate: (data: Pick<Uint8Array, "buffer"|"byteOffset"|"byteLength">, filename: string, editable: boolean) => void,
-};
+/**
+ * Functions exposed by the vscode host, to be called from within the webview via Comlink
+ * TODO: better name?
+ */
+export class VscodeFns {
+  constructor(
+    readonly parent: SQLiteEditorProvider, 
+    readonly document: SQLiteDocument
+  ) {}
+
+  ready() {
+    const { document } = this;
+    if (this.parent.webviews.has(document.uri)) {
+      this.parent.reporter.sendTelemetryEvent("open");
+      // this.credentials?.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
+
+      if (document.uri.scheme === 'untitled') {
+        return {
+          filename: 'untitled',
+          untitled: true,
+          editable: false,
+        };
+      } else if (document.documentData) {
+        const editable = false;
+        // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
+
+        const { filename } = document.uriParts;
+        const { buffer, byteOffset, byteLength } = document.documentData
+        const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
+
+        return Comlink.record({
+          filename,
+          value: Comlink.transfer(value, [buffer]),
+          editable,
+        });
+      }
+      // HACK: There could be other reasons why the data is empty
+      throw Error(TooLargeErrorMsg);
+    }
+  }
+
+  async refreshFile() {
+    const { document } = this;
+    if (document.uri.scheme !== 'untitled') {
+      await document.refresh()
+      const { filename } = document.uriParts;
+      if (document.documentData) {
+        const { buffer, byteOffset, byteLength } = document.documentData;
+        const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
+        return Comlink.record({
+          filename,
+          value: Comlink.transfer(value, [buffer]),
+          editable: false,
+        });
+      }
+      // HACK: There could be other reasons why the data is empty
+      throw Error(TooLargeErrorMsg);
+    }
+  }
+
+  async downloadBlob(data: Uint8Array, download: string, metaKey: boolean) {
+    const { document } = this;
+    const { dirname } = document.uriParts;
+    const dlUri = vsc.Uri.parse(`${dirname}/${download}`);
+
+    await vsc.workspace.fs.writeFile(dlUri, data);
+    if (!metaKey) await vsc.commands.executeCommand('vscode.open', dlUri);
+    return;
+  }
+}
 
 const TooLargeErrorMsg = "File too large. You can increase this limit in the settings under 'Sqlite Viewer: Max File Size'."
 
 class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
-  private readonly webviews = new WebviewCollection();
-  private readonly webviewRemotes = new WeakMap<vsc.WebviewPanel, Comlink.Remote<WebviewFns>>
+  readonly webviews = new WebviewCollection();
+  readonly webviewRemotes = new WeakMap<vsc.WebviewPanel, Comlink.Remote<WebviewFns>>
 
   constructor(
-    private readonly _context: vsc.ExtensionContext, 
-    private readonly reporter: TelemetryReporter,
+    readonly _context: vsc.ExtensionContext, 
+    readonly reporter: TelemetryReporter,
   ) {}
 
   async openCustomDocument(
@@ -288,9 +354,8 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
         const { filename } = document.uriParts;
         const { buffer, byteOffset, byteLength } = document.documentData;
         const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
-
-        const remote = this.webviewRemotes.get(panel)!
-        await remote.forceUpdate(Comlink.transfer(value, [buffer]), filename, false);
+        const remote = this.webviewRemotes.get(panel);
+        await remote?.forceUpdate(Comlink.record({ filename, value: Comlink.transfer(value, [buffer]) }));
       }
     }));
 
@@ -307,66 +372,10 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
     // Add the webview to our internal set of active webviews
     this.webviews.add(document.uri, webviewPanel);
 
-    const webviewEndpoint = new WebviewEndpoint(webviewPanel.webview);
+    const webviewEndpoint = new WebviewEndpointAdapter(webviewPanel.webview);
     this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
 
-    Comlink.expose({
-      ready: () => {
-        if (this.webviews.has(document.uri)) {
-          this.reporter.sendTelemetryEvent("open");
-          // this.credentials?.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
-
-          if (document.uri.scheme === 'untitled') {
-            return {
-              filename: 'untitled',
-              untitled: true,
-              editable: false,
-            };
-          } else if (document.documentData) {
-            const editable = false;
-            // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
-
-            const { buffer, byteOffset, byteLength } = document.documentData
-            const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
-
-            const { filename } = document.uriParts;
-            return Comlink.record({
-              filename,
-              value: Comlink.transfer(value, [buffer]),
-              editable,
-            });
-          }
-          // HACK: There could be other reasons why the data is empty
-          throw Error(TooLargeErrorMsg);
-        }
-      },
-      refreshFile: async () => {
-        if (document.uri.scheme !== 'untitled') {
-          await document.refresh()
-          const { filename } = document.uriParts;
-          if (document.documentData) {
-            const { buffer, byteOffset, byteLength } = document.documentData;
-            const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
-    
-            return Comlink.record({
-              filename,
-              value: Comlink.transfer(value, [buffer]),
-              editable: false,
-            });
-          }
-          // HACK: There could be other reasons why the data is empty
-          throw Error(TooLargeErrorMsg);
-        }
-      },
-      downloadBlob: async (data: Uint8Array, download: string, metaKey: boolean) => {
-        const { dirname } = document.uriParts;
-        const dlUri = vsc.Uri.parse(`${dirname}/${download}`);
-
-        await vsc.workspace.fs.writeFile(dlUri, data);
-        if (!metaKey) await vsc.commands.executeCommand('vscode.open', dlUri);
-        return;
-      },
-    }, webviewEndpoint);
+    Comlink.expose(new VscodeFns(this, document), webviewEndpoint);
 
     // Setup initial content for the webview
     webviewPanel.webview.options = {
