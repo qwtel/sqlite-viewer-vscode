@@ -26,6 +26,9 @@ Additionally, version 0.4 ships many quality of life improvements:
 ### Style
 - Many aspects of the extension's UI should match VSCode's style closer
 
+## v0.4.5
+Fixed an issue that caused a blank window when opening an external link
+
 ## v0.4.4
 ### Features
 Improved JSON column support
