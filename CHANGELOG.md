@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v0.4.0
+## v0.4
 SQLite Viewer 0.4 is a complete rewrite of this extension with a focus on improved performance.
 
 It also implements SQLite Viewer's **most requested feature**: Default file association for `.db` files! 
@@ -26,6 +26,26 @@ Additionally, version 0.4 ships many quality of life improvements:
 ### Style
 - Many aspects of the extension's UI should match VSCode's style closer
 
+## v0.4.5
+Fixed an issue that caused a blank window when opening an external link
+
+## v0.4.4
+### Features
+Improved JSON column support
+- JSON columns are now shown as textarea instead of a one-line input in detail view
+- JSON textarea defaults to 6 rows instead of 2 in detail view
+- JSON values are now rendered in monospace font
+- JSON values are now pretty printed in detail view
+
+### Fixes
+- Unknown column types now default to textarea instead of one-line input
+
+### Style
+- Better differentiation between empty strings and NULL by showing them as `""` instead of `NULL`
+
+### Known Issues
+- Visible cells are not updating to new values after refreshing a file
+
 ## v0.4.3
 ### Fixes
 - Added back search functionality for tables
@@ -42,7 +62,8 @@ Additionally, version 0.4 ships many quality of life improvements:
 - Increased default column width by 20%
 
 ## v0.4.1
-Added minimal application reporting
+Added essential application reporting
+
 
 ## v0.3.0 – v3.0.24
 Minor bug fixes and previews 
