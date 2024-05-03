@@ -241,6 +241,8 @@ type WebviewFns = {
   forceUpdate: (data: Pick<Uint8Array, "buffer"|"byteOffset"|"byteLength">, filename: string, editable: boolean) => void,
 };
 
+const TooLargeErrorMsg = "File too large. You can increase this limit in the settings under 'Sqlite Viewer: Max File Size'."
+
 class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   private readonly webviews = new WebviewCollection();
   private readonly webviewRemotes = new WeakMap<vsc.WebviewPanel, Comlink.Remote<WebviewFns>>
@@ -334,20 +336,26 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
               editable,
             });
           }
+          // HACK: There could be other reasons why the data is empty
+          throw Error(TooLargeErrorMsg);
         }
       },
       refreshFile: async () => {
         if (document.uri.scheme !== 'untitled') {
           await document.refresh()
           const { filename } = document.uriParts;
-          const { buffer, byteOffset, byteLength } = document.documentData || {}
-          const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
-  
-          return Comlink.record({
-            filename,
-            value: Comlink.transfer(value, [buffer!]),
-            editable: false,
-          });
+          if (document.documentData) {
+            const { buffer, byteOffset, byteLength } = document.documentData;
+            const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
+    
+            return Comlink.record({
+              filename,
+              value: Comlink.transfer(value, [buffer]),
+              editable: false,
+            });
+          }
+          // HACK: There could be other reasons why the data is empty
+          throw Error(TooLargeErrorMsg);
         }
       },
       downloadBlob: async (data: Uint8Array, download: string, metaKey: boolean) => {
