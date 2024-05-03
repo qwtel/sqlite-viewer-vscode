@@ -1,11 +1,10 @@
 import type TelemetryReporter from '@vscode/extension-telemetry';
-import type { TypedEventListenerOrEventListenerObject } from "@worker-tools/typed-event-target";
 import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
 
 import * as vsc from 'vscode';
-import { Disposable, disposeAll } from './dispose';
-import { WebviewCollection } from './util';
 import * as Comlink from "../sqlite-viewer-core/src/comlink";
+import { Disposable, disposeAll } from './dispose';
+import { WebviewCollection, WebviewEndpointAdapter } from './util';
 // import type { Credentials } from './credentials';
 
 interface SQLiteEdit {
@@ -211,30 +210,6 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 // const $unsafeEval = "'unsafe-eval'";
 // const buildCSP = (cspObj: Record<string, string[]>) =>
 //   Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
-
-class WebviewEndpointAdapter {
-  constructor(private readonly webview: vsc.Webview) {}
-  private disposables = new Map<TypedEventListenerOrEventListenerObject<MessageEvent>|null, vsc.Disposable>
-  postMessage(message: any, transfer: Transferable[]) {
-    // @ts-expect-error: transferables type missing
-    this.webview.postMessage(message, transfer);
-  }
-  addEventListener(_event: "message", handler: TypedEventListenerOrEventListenerObject<MessageEvent>|null) {
-    if (typeof handler === "function") {
-      this.disposables.set(handler, this.webview.onDidReceiveMessage(data => {
-        handler(new MessageEvent("message", { data }));
-      }))
-    } else if (handler) {
-      this.disposables.set(handler, this.webview.onDidReceiveMessage(data => {
-        handler.handleEvent(new MessageEvent("message", { data }));
-      }));
-    }
-  }
-  removeEventListener(_event: "message", handler: TypedEventListenerOrEventListenerObject<MessageEvent>|null) {
-    this.disposables.get(handler)?.dispose();
-    this.disposables.delete(handler);
-  }
-}
 
 /**
  * Functions exposed by the vscode host, to be called from within the webview via Comlink
