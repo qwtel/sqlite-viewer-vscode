@@ -6,7 +6,7 @@
 		"outDir": "out",
 		"sourceMap": true,
 		"strict": true,
-		"rootDir": "src",
+		"rootDir": ".",
 	},
-	"exclude": ["node_modules", ".vscode-test", "sqlite-viewer-app"],
+	"exclude": ["node_modules", ".vscode-test", "_sqlite-viewer-app"],
 }

@@ -18,8 +18,8 @@
     },
     {
       "label": "compile",
-      "type": "npm",
-      "script": "compile",
+      "type": "shell",
+      "command": "bun --bun compile",
       "options": {
         "env": {
           "DEV": "1"
