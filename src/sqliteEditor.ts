@@ -302,12 +302,12 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
     const document = await SQLiteDocument.create(uri, openContext.backupId, {
       getFileData: async () => {
         const webviewsForDocument = [...this.webviews.get(document.uri)];
-        if (!webviewsForDocument.length) {
-          throw new Error('Could not find webview to save for');
-        }
+        if (!webviewsForDocument.length) throw new Error('Could not find webview to save for');
         const panel = webviewsForDocument[0];
         const remote = this.webviewRemotes.get(panel)!
-        return await remote.getFileData() ?? new Uint8Array(0);
+        const data = await remote.getFileData();
+        if (!data) throw new Error("Couldn't get data from webview");
+        return data;
       }
     });
 
