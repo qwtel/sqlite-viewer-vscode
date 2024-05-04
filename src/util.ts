@@ -44,24 +44,26 @@ export class WebviewCollection {
  */
 export class WebviewEndpointAdapter {
   constructor(private readonly webview: vsc.Webview) {}
-  #disposables = new Map<TypedEventListenerOrEventListenerObject<MessageEvent>, vsc.Disposable>
+  private listeners = new WeakMap<TypedEventListenerOrEventListenerObject<MessageEvent>, vsc.Disposable>
   postMessage(message: any, transfer: Transferable[]) {
     // @ts-expect-error: transferables type missing
     this.webview.postMessage(message, transfer);
   }
   addEventListener(_event: "message", handler: TypedEventListenerOrEventListenerObject<MessageEvent>|null) {
-    if (typeof handler === "function") {
-      this.#disposables.set(handler, this.webview.onDidReceiveMessage(data => {
-        handler(new MessageEvent("message", { data })); // FIXME: use faster custom messageevent impl
-      }))
-    } else if (handler) {
-      this.#disposables.set(handler, this.webview.onDidReceiveMessage(data => {
-        handler.handleEvent(new MessageEvent("message", { data }));
+    if (!handler) return;
+    if ("handleEvent" in handler) {
+      this.listeners.set(handler, this.webview.onDidReceiveMessage(data => {
+        handler.handleEvent({ data } as MessageEvent);
       }));
+    } else {
+      this.listeners.set(handler, this.webview.onDidReceiveMessage(data => {
+        handler({ data } as MessageEvent);
+      }))
     }
   }
   removeEventListener(_event: "message", handler: TypedEventListenerOrEventListenerObject<MessageEvent>|null) {
-    handler && this.#disposables.get(handler)?.dispose();
-    handler && this.#disposables.delete(handler);
+    if (!handler) return;
+    this.listeners.get(handler)?.dispose();
+    this.listeners.delete(handler);
   }
 }
