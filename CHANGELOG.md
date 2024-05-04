@@ -27,6 +27,11 @@ Additionally, version 0.4 ships many quality of life improvements:
 - Many aspects of the extension's UI should match VSCode's style closer
 
 
+## v0.4.7
+- Fixed visible cells updating to new values immediately after refreshing a file
+- Fixed an issue that caused the UI to become non-interactive when showing an error message
+
+
 ## v0.4.6
 - Added button to filter columns by exact search term
 - Removed "Not Allowed" cursor from readonly fields in detail view
@@ -51,8 +56,6 @@ Improved JSON column support
 ### Style
 - Better differentiation between empty strings and NULL by showing them as `""` instead of `NULL`
 
-### Known Issues
-- Visible cells are not updating to new values after refreshing a file
 
 
 ## v0.4.3
