@@ -16,3 +16,4 @@ scripts/*
 *.vsix
 *.zip
 _sqlite-viewer-app
+bun.lockb
