@@ -27,6 +27,11 @@ Additionally, version 0.4 ships many quality of life improvements:
 - Many aspects of the extension's UI should match VSCode's style closer
 
 
+## v0.4.8
+- The detail view has a new, cleaner look that closer matches similar components in VSCode
+- Added extension name and version number to the bottom left
+
+
 ## v0.4.7
 - Fixed visible cells updating to new values immediately after refreshing a file
 - Fixed an issue that caused the UI to become non-interactive when showing an error message
