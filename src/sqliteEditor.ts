@@ -330,7 +330,10 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
         const { buffer, byteOffset, byteLength } = document.documentData;
         const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
         const remote = this.webviewRemotes.get(panel);
-        await remote?.forceUpdate(Comlink.record({ filename, value: Comlink.transfer(value, [buffer]) }));
+        await remote?.forceUpdate(Comlink.record({
+          filename, 
+          value: Comlink.transfer(value, [buffer]) 
+        }));
       }
     }));
 
