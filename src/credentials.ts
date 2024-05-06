@@ -1,12 +1,10 @@
 import * as vscode from 'vscode';
-import acquireFetch from './acquireFetch';
+import { fetch } from './webFetch';
 // import * as jose from 'jose';
 
 const GITHUB_AUTH_PROVIDER_ID = 'github';
 
 const extensionId = 'qwtel.sqlite-viewer'
-
-const { fetch } = acquireFetch();
 
 /** 
  * The GitHub Authentication Provider accepts the scopes described here:

@@ -3,9 +3,16 @@ import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
 
 import * as vsc from 'vscode';
 import * as Comlink from "../sqlite-viewer-core/src/comlink";
+import nodeEndpoint from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
 import { Disposable, disposeAll } from './dispose';
 import { WebviewCollection, WebviewEndpointAdapter } from './util';
+import { Worker } from './webWorker';
+import * as path from "path"
+import type { WorkerDB } from '../sqlite-viewer-core/src/worker-db';
 // import type { Credentials } from './credentials';
+
+// console.log("Hello????")
+// console.log(fs.readFileSync(path.resolve(__dirname, "./worker.js")).byteLength)
 
 interface SQLiteEdit {
   readonly data: Uint8Array;
@@ -360,6 +367,20 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
       enableScripts: true,
     };
     webviewPanel.webview.html = await this.getHtmlForWebview(webviewPanel.webview);
+
+    const worker = new Worker(path.resolve(__dirname, "./worker.js"));
+    // @ts-ignore: TODO
+    const WorkerDBRemote = Comlink.wrap<typeof WorkerDB>(nodeEndpoint(worker));
+
+    const m = new MessageChannel()
+
+    // const db = await new WorkerDBRemote("test.db");
+    // console.log(await db.helloWorld(Comlink.transfer(m.port1, [m.port1])));
+    // console.log(this.webviewRemotes.get(webviewPanel)!.sendPort(Comlink.transfer(m.port2, [m.port2])));
+    // Comlink.expose(db, webviewEndpoint); // LOOOOL
+    // const data = new Uint8Array(document.documentData!)
+    // console.log("has data yet?", data?.byteLength)
+    // await db.initBuffer(data)
   }
 
   private readonly _onDidChangeCustomDocument = new vsc.EventEmitter<vsc.CustomDocumentEditEvent<SQLiteDocument>>();
