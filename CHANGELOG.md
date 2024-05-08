@@ -27,6 +27,11 @@ Additionally, version 0.4 ships many quality of life improvements:
 - Many aspects of the extension's UI should match VSCode's style closer
 
 
+## v0.4.10
+- SQLite updated to 3.45.3
+- Fixed an issue that sometimes caused text selection to be slow
+
+
 ## v0.4.9
 Fixed an issue that prevented files from loading correctly when connected to a workspace via SSH
 
