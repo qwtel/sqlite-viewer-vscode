@@ -27,6 +27,11 @@ Additionally, version 0.4 ships many quality of life improvements:
 - Many aspects of the extension's UI should match VSCode's style closer
 
 
+## v0.4.11
+- Fixed foreign key icon not being shown, or being shown on wrong column 
+- Fixed text in foreign key tooltip referencing wrong column names 
+
+
 ## v0.4.10
 - SQLite updated to 3.45.3
 - Fixed an issue that sometimes caused text selection to be slow
