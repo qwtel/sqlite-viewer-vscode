@@ -28,6 +28,7 @@ Additionally, version 0.4 ships many quality of life improvements:
 
 
 ## v0.4.11
+- Tables in sidebar are now sorted alphabetically 
 - Fixed foreign key icon not being shown, or being shown on wrong column 
 - Fixed text in foreign key tooltip referencing wrong column names 
 
