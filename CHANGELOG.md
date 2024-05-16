@@ -27,6 +27,10 @@ Additionally, version 0.4 ships many quality of life improvements:
 - Many aspects of the extension's UI should match VSCode's style closer
 
 
+## v0.4.12
+Fixed an issue that prevented text selection when using the extension on the web in the latest version of Chrome
+
+
 ## v0.4.11
 - Tables in sidebar are now sorted alphabetically 
 - Fixed foreign key icon not being shown, or being shown on wrong column 
