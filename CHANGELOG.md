@@ -1,6 +1,18 @@
 # CHANGELOG
 
+## v0.5 (Prerelease)
+### WAL Mode Support
+This version introduces support for __reading WAL mode databases__. It works across all VSCode file systems including local, remote, and even on web such as on github.dev (for the rare occasion that a `-wal` file is checked into git).
+
+This fixes a common issue where the contents of a `-wal` file that hadn't reached the size limit to be committed to the main file were not showing in the UI.
+
+Note that this features is experimental and might fail if the WAL file is heavily written to. 
+
+Making this work required significant restructuring of the code, please report any issue you might encounter. 
+
+
 ## v0.4
+### Solid Rewrite
 SQLite Viewer 0.4 is a complete rewrite of this extension with a focus on improved performance.
 
 It also implements SQLite Viewer's **most requested feature**: Default file association for `.db` files! 

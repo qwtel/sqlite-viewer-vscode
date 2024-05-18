@@ -41,6 +41,9 @@ This distribution also includes software licensed under the following terms:
 `comlink` : [Apache-2.0]
 > Copyright 2017 Google Inc.
 
+`wa-sqlite`: [MIT]
+> Copyright (c) 2023 Roy T. Hashimoto
+
 SQLite : [Public Domain](https://sqlite.org/copyright.html)
 
 [MIT]: https://mit-license.org

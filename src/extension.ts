@@ -52,7 +52,7 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
     ) {
       let actions;
       const result = await vsc.window.showInformationMessage(
-        `SQLite Viewer updated to new major version! Check out the Changelog to see what's new!`,
+        `SQLite Viewer now supports reading WAL mode databases. Check out the Changelog for details.`,
         ...actions = [{ title: 'Open Changelog ↗'}]
       );
 
