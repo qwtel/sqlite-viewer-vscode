@@ -1,15 +1,17 @@
 # CHANGELOG
 
-## v0.5 (Prerelease)
+## v0.5 (Pre-Release)
 ### WAL Mode Support
-This version introduces support for __reading WAL mode databases__. It works across all VSCode file systems including local, remote, and even on web such as on github.dev (for the rare occasion that a `-wal` file is checked into git).
+This version introduces support for __reading WAL mode databases__. It works across all VSCode file systems including local, remote, and even on web such as on github.dev.
 
 This fixes a common issue where the contents of a `-wal` file that hadn't reached the size limit to be committed to the main file were not showing in the UI.
 
 Note that this features is experimental and might fail if the WAL file is heavily written to. 
 
-Making this work required significant restructuring of the code, please report any issue you might encounter. 
+Making this work required significant restructuring of the code, please report any issue you encounter. 
 
+## v0.5.1 (Pre-Release)
+No publicly visible changes
 
 ## v0.4
 ### Solid Rewrite
