@@ -220,20 +220,25 @@ function getTransferables(document: SQLiteDocument, documentData: Uint8Array) {
   return { filename, value, walValue };
 }
 
-// const $default = 'default-src';
-// const $script = 'script-src';
-// const $style = 'style-src';
-// const $img = 'img-src';
-// const $font = 'font-src';
-// const $child = 'child-src';
-// const $self = "'self'";
-// const $vscode = 'vscode-resource: qwtel.vscode-unpkg.net'; // FIXME: find way to avoid hard-coding web extension domain
-// const $data = 'data:'
-// const $blob = 'blob:'
-// const $inlineStyle = "'unsafe-inline'";
-// const $unsafeEval = "'unsafe-eval'";
-// const buildCSP = (cspObj: Record<string, string[]>) =>
-//   Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
+const csp = {
+  defaultSrc: 'default-src',
+  scriptSrc: 'script-src',
+  styleSrc: 'style-src',
+  imgSrc: 'img-src',
+  fontSrc: 'font-src',
+  childSrc: 'child-src',
+  self: "'self'",
+  data: 'data:',
+  blob: 'blob:',
+  inlineStyle: "'unsafe-inline'",
+  unsafeEval: "'unsafe-eval'",
+  wasmUnsafeEval: "'wasm-unsafe-eval'",
+  build(cspObj: Record<string, string[]>) {
+    return Object.entries(cspObj)
+      .map(([k, vs]) => `${k} ${vs.filter(x => x != null).join(' ')};`)
+      .join(' ');
+  }
+} as const;
 
 /**
  * Functions exposed by the vscode host, to be called from within the webview via Comlink
@@ -370,7 +375,7 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   async resolveCustomEditor(
     document: SQLiteDocument,
     webviewPanel: vsc.WebviewPanel,
-    token: vsc.CancellationToken
+    _token: vsc.CancellationToken
   ): Promise<void> {
     // Add the webview to our internal set of active webviews
     this.webviews.add(document.uri, webviewPanel);
@@ -416,20 +421,22 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
       vsc.Uri.joinPath(buildUri, 'index.html')
     ));
 
-    // const csp = buildCSP({
-    //   [$default]: [$self, $vscode],
-    //   [$script]: [$self, $vscode, $unsafeEval], // HACK: Needed for WebAssembly in Web Extension. Needless to say, it makes the whole CSP useless...
-    //   [$style]: [$self, $vscode, $inlineStyle],
-    //   [$img]: [$self, $vscode, $data],
-    //   [$font]: [$self, $vscode],
-    //   [$child]: [$blob],
-    // });
+    const cspObj = {
+      [csp.defaultSrc]: [webview.cspSource],
+      [csp.scriptSrc]: [webview.cspSource, csp.wasmUnsafeEval], 
+      [csp.styleSrc]: [webview.cspSource, csp.inlineStyle],
+      [csp.imgSrc]: [webview.cspSource, csp.data],
+      [csp.fontSrc]: [webview.cspSource],
+      [csp.childSrc]: [csp.blob],
+    };
+    const cspStr = csp.build(cspObj);;
 
     const preparedHtml = html
       .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
         return `${attr}="${assetAsWebviewUri(url)}"`;
       })
       .replace('<!--HEAD-->', `
+        <meta http-equiv="Content-Security-Policy" content="${cspStr}">
         <link rel="stylesheet" crossorigin href="${webview.asWebviewUri(codiconsUri)}"/>
         <link rel="preload" crossorigin as="fetch" id="assets/worker.js" href="${assetAsWebviewUri("assets/worker.js")}"/>
         <link rel="preload" crossorigin as="fetch" id="assets/sqlite3.wasm" type="application/wasm" href="${assetAsWebviewUri("assets/sqlite3.wasm")}"/>
@@ -446,7 +453,7 @@ const registerOptions = {
     retainContextWhenHidden: true,
   },
   supportsMultipleEditorsPerDocument: false,
-}
+} satisfies Parameters<typeof vsc.window.registerCustomEditorProvider>[2];
 
 export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {
   static viewType = 'sqlite-viewer.view';
