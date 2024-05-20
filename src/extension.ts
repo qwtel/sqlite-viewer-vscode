@@ -59,7 +59,9 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
       if (result !== null) {
         if (result === actions[0]) {
           await vsc.env.openExternal(
-            vsc.Uri.parse('https://marketplace.visualstudio.com/items/qwtel.sqlite-viewer/changelog')
+            vsc.Uri.parse(vsc.env.uriScheme.includes('vscode') 
+              ? 'https://marketplace.visualstudio.com/items/qwtel.sqlite-viewer/changelog'
+              : 'https://open-vsx.org/extension/qwtel/sqlite-viewer/changes')
           );
         }
         // else if (result === actions[1]) {
