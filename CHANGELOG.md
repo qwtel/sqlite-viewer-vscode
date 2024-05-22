@@ -10,10 +10,11 @@ Note that this features is experimental and might fail if the WAL file is heavil
 
 Making this work required significant restructuring of the code, please report any issue you encounter. 
 
+## v0.5.3 (Pre-Release)
+Fixed a Safari related issue
 
 ## v0.5.2 (Pre-Release)
 Added Content-Security-Policy to extension webview
-
 
 ## v0.5.1 (Pre-Release)
 No publicly visible changes
