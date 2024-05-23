@@ -1,6 +1,8 @@
-/node_modules
-/bun.lockb
-/out
-/exampleFiles
+node_modules
+bun.lockb
+out
+exampleFiles
 *.vsix
 _sqlite-viewer-app
+sqlite-viewer-app
+mySolidTest
