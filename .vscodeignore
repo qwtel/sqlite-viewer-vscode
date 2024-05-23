@@ -12,8 +12,10 @@ exampleFiles/*
 documentation/*.gif
 node_modules/**/*
 !node_modules/@vscode/codicons
+bun.lockb
 scripts/*
 *.vsix
 *.zip
 _sqlite-viewer-app
-bun.lockb
+sqlite-viewer-app
+mySolidTest
