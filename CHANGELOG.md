@@ -27,6 +27,12 @@ Additionally, version 0.4 ships many quality of life improvements:
 - Many aspects of the extension's UI should match VSCode's style closer
 
 
+## v0.4.14
+- Generated columns are now shown
+- Fixed showing `ROWID` column for tables that are created without a `ROWID`
+- Fixed an issue that prevented the extension from loading on github.dev in Safari
+
+
 ## v0.4.12 – v0.4.13
 Fixed an issue that prevented text selection when using the extension on the web in the latest version of Chrome
 
