@@ -269,12 +269,12 @@ export class VscodeFns {
         const editable = false;
         // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
         const { filename, value, walValue } = getTransferables(document, document.documentData);
-        return Comlink.record({
+        return Comlink.transfer({
           filename,
-          value: Comlink.transfer(value, [value.buffer]),
+          value,
           walValue,
           editable,
-        });
+        }, [value.buffer]);
       }
 
       // HACK: There could be other reasons why the data is empty
@@ -289,12 +289,12 @@ export class VscodeFns {
 
       if (document.documentData) {
         const { filename, value, walValue } = getTransferables(document, document.documentData);
-        return Comlink.record({
+        return Comlink.transfer({
           filename,
-          value: Comlink.transfer(value, [value.buffer]),
+          value,
           walValue,
           editable: false,
-        });
+        }, [value.buffer]);
       }
 
       // HACK: There could be other reasons why the data is empty
@@ -359,11 +359,11 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
         if (!document.documentData) continue;
         const { filename, value, walValue } = getTransferables(document, document.documentData);
         const remote = this.webviewRemotes.get(panel);
-        await remote?.forceUpdate(Comlink.record({
+        await remote?.forceUpdate(Comlink.transfer({
           filename, 
-          value: Comlink.transfer(value, [value.buffer]) ,
+          value,
           walValue,
-        }));
+        }, [value.buffer]));
       }
     }));
 
