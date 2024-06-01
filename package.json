@@ -84,9 +84,10 @@
         "sqliteViewer.maxFileSize": {
           "type": "number",
           "minimum": 0,
+          "maximum": 4000,
           "exclusiveMinimum": false,
           "default": 200,
-          "description": "The maximum file size the extension will attempt to load in MB. Set to 0 to disable the limit."
+          "description": "The maximum file size in MB the extension will attempt to load. Set to 0 to disable the limit. The internal limit is 4GB, but platform limits may apply earlier.\n\nWarning: Opening large files may cause poor performance, freezes, and system wide memory pressure."
         }
       }
     }

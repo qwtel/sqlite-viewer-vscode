@@ -8,6 +8,9 @@ This fixes a common issue that caused the contents of a `-wal` file not being sh
 
 Making this work required significant restructuring, please report any issues you may encounter. 
 
+## v0.5.6
+Fixed a potential memory issue by limiting usage to configured file size limit
+
 ## v0.5.5
 Bumped WAL Mode support to main channel.
 

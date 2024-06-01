@@ -32,9 +32,7 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       return [new Uint8Array(), null];
     }
 
-    const config = vsc.workspace.getConfiguration('sqliteViewer');
-    const maxFileSizeMB = config.get<number>('maxFileSize') ?? 200;
-    const maxFileSize = maxFileSizeMB * 2 ** 20;
+    const maxFileSize = this.getConfiguredMaxFileSize();
 
     const walUri = uri.with({ path: uri.path + '-wal' })
 
@@ -46,6 +44,13 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       vsc.workspace.fs.readFile(uri),
       vsc.workspace.fs.readFile(walUri).then(x => x, () => null)
     ]);
+  }
+
+  static getConfiguredMaxFileSize() {
+    const config = vsc.workspace.getConfiguration('sqliteViewer');
+    const maxFileSizeMB = config.get<number>('maxFileSize') ?? 200;
+    const maxFileSize = maxFileSizeMB * 2 ** 20;
+    return maxFileSize;
   }
 
   private readonly _uri: vsc.Uri;
@@ -260,20 +265,24 @@ export class VscodeFns {
       // this.credentials?.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
 
       if (document.uri.scheme === 'untitled') {
+        const maxFileSize = SQLiteDocument.getConfiguredMaxFileSize();
         return {
           filename: 'untitled',
           untitled: true,
           editable: false,
+          maxFileSize,
         };
       } else if (document.documentData) {
         const editable = false;
         // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
         const { filename, value, walValue } = getTransferables(document, document.documentData);
+        const maxFileSize = SQLiteDocument.getConfiguredMaxFileSize();
         return Comlink.transfer({
           filename,
           value,
           walValue,
           editable,
+          maxFileSize,
         }, [value.buffer]);
       }
 
@@ -289,11 +298,13 @@ export class VscodeFns {
 
       if (document.documentData) {
         const { filename, value, walValue } = getTransferables(document, document.documentData);
+        const maxFileSize = SQLiteDocument.getConfiguredMaxFileSize();
         return Comlink.transfer({
           filename,
           value,
           walValue,
           editable: false,
+          maxFileSize,
         }, [value.buffer]);
       }
 
