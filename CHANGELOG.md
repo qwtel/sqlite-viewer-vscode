@@ -1,18 +1,24 @@
 # CHANGELOG
 
-## v0.5 (Pre-Release)
+## v0.5
 ### WAL Mode Support
-This version introduces support for __reading WAL mode databases__. It works across all VSCode file systems including local, remote, and even on web such as on github.dev.
+This version introduces support for __reading WAL mode databases__. It works across all VSCode file systems including local, remote, and even on github.dev.
 
-This fixes a common issue where the contents of a `-wal` file that hadn't reached the size limit to be committed to the main file were not showing in the UI.
+This fixes a common issue that caused the contents of a `-wal` file not being shown in the UI when the file hadn't reached the limit for an auto checkpoint.
 
-Note that this features is experimental and might fail if the WAL file is heavily written to. 
+Making this work required significant restructuring, please report any issues you may encounter. 
 
-Making this work required significant restructuring of the code, please report any issue you encounter. 
+## v0.5.5
+Bumped WAL Mode support to main channel.
+
+### Changes
+- Autofocus in detail view should now work when the query takes longer to finish
+- Added better loading indicator to detail view
+- Minor performance improvement for detail view query
 
 ## v0.5.4 (Pre-Release)
 - Generated columns are now shown
-- Fixed showing `ROWID` column for tables that are created without a `ROWID`
+- Fixed showing `ROWID` column for tables that were created without row ids
 
 ## v0.5.3 (Pre-Release)
 Fixed an issue that prevented the extension from loading on github.dev in Safari
