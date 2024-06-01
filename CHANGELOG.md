@@ -4,9 +4,23 @@
 ### WAL Mode Support
 This version introduces support for __reading WAL mode databases__. It works across all VSCode file systems including local, remote, and even on github.dev.
 
-This fixes a common issue that caused the contents of a `-wal` file not being shown in the UI when the file hadn't reached the limit for an auto checkpoint.
+This fixes a common issue that caused the contents of a `-wal` file not being shown in the UI when the the auto checkpoint limit hadn't been reached.
+This led to unsatisfying workarounds such as disabling WAL mode, triggering checkpoints manually or reducing the auto checkpoint limit.
 
-Making this work required significant restructuring, please report any issues you may encounter. 
+While this update removes the need for the above workarounds, it does not change the readonly nature of the extension or remove the need to reload the file for updates to be visible in the UI.
+
+Note that making this work required significant restructuring of the extension, which may cause (unrelated) issues. Please report any you may encounter. 
+
+## v0.5.7
+The extension now adds configuration settings for nesting SQLite-related files:
+
+![File nesting screenshot](documentation/nesting.png)
+
+This has no effect if you aren't using VSCode's File Nesting feature. You may enable it in settings under "Explorer > File Nesting: Enabled".
+
+If you use file nesting, but do not want to nest SQLite files, you can manually delete the patterns from the settings page under "Explorer > File Nesting: Patterns". SQLite Viewer will not attempt to set the patterns again, unless explicitly requested through the command "SQLite Viewer: Add SQLite File Nesting Patterns".
+
+This version also changes the file name of downloaded blobs to be prefixed with `-x-`, e.g. `favicons.sqlite-x-moz_icons-10-data.bin`. This ensures that downloaded blobs will be sorted below `-wal`, `-shm` and `-journal` files, reducing the risk of accidentally interacting with them when range-selecting downloaded files.
 
 ## v0.5.6
 Fixed a potential memory issue by limiting usage to configured file size limit
