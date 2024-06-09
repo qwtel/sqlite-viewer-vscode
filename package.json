@@ -102,7 +102,8 @@
   "scripts": {
     "clean": "rm -rf out && rm -rf sqlite-viewer-core/vscode/build",
     "vscode:prepublish": "npm run clean && npm run compile",
-    "compile:ext": "npm run compile:ext:node & npm run compile:ext:browser & wait",
+    "compile:ext": "npm run compile:ext:cp & npm run compile:ext:node & npm run compile:ext:browser & wait",
+    "compile:ext:cp": "cp -r node_modules/@vscode/codicons node_modules/codicons",
     "compile:ext:_base": "esbuild ./src/extension.ts $([ -z \"${DEV}\" ] && echo --minify || echo --sourcemap) --bundle --external:vscode --format=cjs",
     "compile:ext:node": "npm run compile:ext:_base -- --outfile=out/extension.js --platform=node",
     "compile:ext:browser": "npm run compile:ext:_base -- --outfile=out/extension-browser.js --platform=browser --external:node-fetch",

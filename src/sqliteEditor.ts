@@ -424,7 +424,7 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
 
   private async getHtmlForWebview(webview: vsc.Webview): Promise<string> {
     const buildUri = vsc.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build');
-    const codiconsUri = vsc.Uri.joinPath(this._context.extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css');
+    const codiconsUri = vsc.Uri.joinPath(this._context.extensionUri, 'node_modules', 'codicons', 'dist', 'codicon.css');
 
     const assetAsWebviewUri = (x: string) => webview.asWebviewUri(vsc.Uri.joinPath(buildUri, x));
 

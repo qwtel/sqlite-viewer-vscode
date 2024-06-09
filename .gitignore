@@ -3,6 +3,9 @@ bun.lockb
 out
 exampleFiles
 *.vsix
+*.zip
+sqlite-viewer-*
+!sqlite-viewer-core
 _sqlite-viewer-app
 sqlite-viewer-app
 mySolidTest
