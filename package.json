@@ -13,7 +13,7 @@
     "url": "https://github.com/qwtel/sqlite-viewer-vscode"
   },
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.83.1"
   },
   "categories": [
     "Other"
@@ -119,7 +119,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.9",
-    "@types/vscode": "^1.85.0",
+    "@types/vscode": "^1.83.1",
     "esbuild": "^0.20.2",
     "esbuild-plugin-alias": "^0.2.1",
     "ovsx": "^0.9.1",
