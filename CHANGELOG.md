@@ -22,8 +22,13 @@ If you use file nesting, but do not want to nest SQLite files, you can manually 
 
 This version also changes the file name of downloaded blobs to be prefixed with `-x-`, e.g. `favicons.sqlite-x-moz_icons-10-data.bin`. This ensures that downloaded blobs will be sorted below `-wal`, `-shm` and `-journal` files, reducing the risk of accidentally interacting with them when range-selecting downloaded files.
 
+### Fixes
+- Downgraded minimum vscode version to 1.83.1. This should make the Open VSX version of the extension work with Google IDX
+- Removed special characters from codicons asset path. This should make icons render correctly when using the Open VSX version of the extension in GitPod
+- Fixed an error when setting max file size to 0
+
 ## v0.5.6
-Fixed a potential memory issue by limiting usage to configured file size limit
+Fixed a potential memory issue by limiting memory usage to configured file size limit
 
 ## v0.5.5
 Bumped WAL Mode support to main channel.
@@ -46,6 +51,8 @@ Added Content-Security-Policy to extension webview
 ## v0.5.1 (Pre-Release)
 No publicly visible changes
 
+## v0.5.0 (Pre-Release)
+Initial v0.5 pre-release
 
 ## v0.4
 ### Solid Rewrite
@@ -156,6 +163,8 @@ Improved JSON column support
 ## v0.4.1
 Added essential application reporting
 
+## v0.4.0
+Initial v0.4 release
 
 ## v0.3.0 – v3.0.24
 Minor bug fixes and previews 
