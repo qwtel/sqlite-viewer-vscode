@@ -1,6 +1,7 @@
 import * as vsc from 'vscode';
 import { SQLiteEditorDefaultProvider, SQLiteEditorOptionProvider } from './sqliteEditor';
 import TelemetryReporter from '@vscode/extension-telemetry';
+import { IS_VSCODE } from './util';
 // import { Credentials } from './credentials';
 
 const ExtensionId = 'sqlite-viewer'
@@ -108,7 +109,7 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
       if (result !== null) {
         if (result === actions[0]) {
           await vsc.env.openExternal(
-            vsc.Uri.parse(vsc.env.uriScheme.includes('vscode')
+            vsc.Uri.parse(IS_VSCODE
               ? 'https://marketplace.visualstudio.com/items/qwtel.sqlite-viewer/changelog'
               : 'https://open-vsx.org/extension/qwtel/sqlite-viewer/changes')
           );

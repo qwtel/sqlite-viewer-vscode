@@ -4,7 +4,7 @@ import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
 import * as vsc from 'vscode';
 import * as Comlink from "../sqlite-viewer-core/src/comlink";
 import { Disposable, disposeAll } from './dispose';
-import { WebviewCollection, WebviewEndpointAdapter } from './util';
+import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewEndpointAdapter } from './util';
 // import type { Credentials } from './credentials';
 
 interface SQLiteEdit {
@@ -440,7 +440,11 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
       [csp.fontSrc]: [webview.cspSource],
       [csp.childSrc]: [csp.blob],
     };
-    const cspStr = csp.build(cspObj);;
+
+    // Only set csp for hosts that are known to correctly set `webview.cspSource`
+    const cspStr = IS_VSCODE || IS_VSCODIUM
+      ? csp.build(cspObj)
+      : ''
 
     const preparedHtml = html
       .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
