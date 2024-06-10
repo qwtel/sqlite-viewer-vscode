@@ -5,7 +5,7 @@ import * as vsc from 'vscode';
 import * as Comlink from "../sqlite-viewer-core/src/comlink";
 import nodeEndpoint from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
 import { Disposable, disposeAll } from './dispose';
-import { WebviewCollection, WebviewEndpointAdapter } from './util';
+import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewEndpointAdapter } from './util';
 import { Worker } from './webWorker';
 import * as path from "path"
 import type { WorkerDB } from '../sqlite-viewer-core/src/worker-db';
@@ -34,24 +34,35 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     return new SQLiteDocument(uri, fileData, delegate);
   }
 
-  private static async readFile(uri: vsc.Uri): Promise<Uint8Array|null> {
+  private static async readFile(uri: vsc.Uri): Promise<[data: Uint8Array|null, walData?: Uint8Array|null]> {
     if (uri.scheme === 'untitled') {
-      return new Uint8Array();
+      return [new Uint8Array(), null];
     }
 
-    const config = vsc.workspace.getConfiguration('sqliteViewer');
-    const maxFileSizeMB = config.get<number>('maxFileSize') ?? 200;
-    const maxFileSize = maxFileSizeMB * 2 ** 20;
+    const maxFileSize = this.getConfiguredMaxFileSize();
+
+    const walUri = uri.with({ path: uri.path + '-wal' })
 
     const stat = await vsc.workspace.fs.stat(uri)
     if (maxFileSize !== 0 && stat.size > maxFileSize)
-      return null;
-    return vsc.workspace.fs.readFile(uri);
+      return [null, null];
+
+    return Promise.all([
+      vsc.workspace.fs.readFile(uri),
+      vsc.workspace.fs.readFile(walUri).then(x => x, () => null)
+    ]);
+  }
+
+  static getConfiguredMaxFileSize() {
+    const config = vsc.workspace.getConfiguration('sqliteViewer');
+    const maxFileSizeMB = config.get<number>('maxFileSize') ?? 200;
+    const maxFileSize = maxFileSizeMB * 2 ** 20;
+    return maxFileSize;
   }
 
   private readonly _uri: vsc.Uri;
 
-  private _documentData: Uint8Array|null;
+  private _documentData: [data: Uint8Array|null, walData?: Uint8Array|null];
   private _edits: Array<SQLiteEdit> = [];
   private _savedEdits: Array<SQLiteEdit> = [];
 
@@ -59,8 +70,8 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
   private constructor(
     uri: vsc.Uri,
-    initialContent: Uint8Array|null,
-    delegate: SQLiteDocumentDelegate
+    initialContent: [data: Uint8Array|null, walData?: Uint8Array|null],
+    delegate: SQLiteDocumentDelegate,
   ) {
     super();
     this._uri = uri;
@@ -76,7 +87,8 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     return { dirname, filename, basename, extname };
   }
 
-  public get documentData(): Uint8Array|null { return this._documentData }
+  public get documentData() { return this._documentData[0] }
+  public get walData() { return this._documentData[1] }
 
   private readonly _onDidDispose = this._register(new vsc.EventEmitter<void>());
   /**
@@ -86,6 +98,7 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
   private readonly _onDidChangeDocument = this._register(new vsc.EventEmitter<{
     readonly content?: Uint8Array;
+    readonly walContent?: Uint8Array|null;
     readonly edits: readonly SQLiteEdit[];
   }>());
   /**
@@ -166,8 +179,9 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     const diskContent = await SQLiteDocument.readFile(this.uri);
     this._documentData = diskContent;
     this._edits = this._savedEdits;
-    diskContent && this._onDidChangeDocument.fire({
-      content: diskContent,
+    diskContent[0] && this._onDidChangeDocument.fire({
+      content: diskContent[0],
+      walContent: diskContent[1],
       edits: this._edits,
     });
   }
@@ -176,8 +190,9 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     const diskContent = await SQLiteDocument.readFile(this.uri);
     this._documentData = diskContent;
     this._edits = [];
-    diskContent && this._onDidChangeDocument.fire({
-      content: diskContent,
+    diskContent[0] && this._onDidChangeDocument.fire({
+      content: diskContent[0],
+      walContent: diskContent[1],
       edits: [],
     });
   }
@@ -203,20 +218,39 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   }
 }
 
-// const $default = 'default-src';
-// const $script = 'script-src';
-// const $style = 'style-src';
-// const $img = 'img-src';
-// const $font = 'font-src';
-// const $child = 'child-src';
-// const $self = "'self'";
-// const $vscode = 'vscode-resource: qwtel.vscode-unpkg.net'; // FIXME: find way to avoid hard-coding web extension domain
-// const $data = 'data:'
-// const $blob = 'blob:'
-// const $inlineStyle = "'unsafe-inline'";
-// const $unsafeEval = "'unsafe-eval'";
-// const buildCSP = (cspObj: Record<string, string[]>) =>
-//   Object.entries(cspObj).map(([k, vs]) => `${k} ${vs.join(' ')};`).join(' ');
+function getTransferables(document: SQLiteDocument, documentData: Uint8Array) {
+  const { filename } = document.uriParts;
+  const { buffer, byteOffset, byteLength } = documentData;
+  const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
+
+  let walValue;
+  if (document.walData) {
+    const { buffer, byteOffset, byteLength } = document.walData
+    walValue = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
+  }
+
+  return { filename, value, walValue };
+}
+
+const csp = {
+  defaultSrc: 'default-src',
+  scriptSrc: 'script-src',
+  styleSrc: 'style-src',
+  imgSrc: 'img-src',
+  fontSrc: 'font-src',
+  childSrc: 'child-src',
+  self: "'self'",
+  data: 'data:',
+  blob: 'blob:',
+  inlineStyle: "'unsafe-inline'",
+  unsafeEval: "'unsafe-eval'",
+  wasmUnsafeEval: "'wasm-unsafe-eval'",
+  build(cspObj: Record<string, string[]>) {
+    return Object.entries(cspObj)
+      .map(([k, vs]) => `${k} ${vs.filter(x => x != null).join(' ')};`)
+      .join(' ');
+  }
+} as const;
 
 /**
  * Functions exposed by the vscode host, to be called from within the webview via Comlink
@@ -228,32 +262,37 @@ export class VscodeFns {
     readonly document: SQLiteDocument
   ) {}
 
-  ready() {
+  get webviews() { return this.parent.webviews }
+  get reporter() { return this.parent.reporter }
+
+  getInitialData() {
     const { document } = this;
-    if (this.parent.webviews.has(document.uri)) {
-      this.parent.reporter.sendTelemetryEvent("open");
+    if (this.webviews.has(document.uri)) {
+      this.reporter.sendTelemetryEvent("open");
       // this.credentials?.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
 
       if (document.uri.scheme === 'untitled') {
+        const maxFileSize = SQLiteDocument.getConfiguredMaxFileSize();
         return {
           filename: 'untitled',
           untitled: true,
           editable: false,
+          maxFileSize,
         };
       } else if (document.documentData) {
         const editable = false;
         // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
-
-        const { filename } = document.uriParts;
-        const { buffer, byteOffset, byteLength } = document.documentData
-        const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
-
-        return Comlink.record({
+        const { filename, value, walValue } = getTransferables(document, document.documentData);
+        const maxFileSize = SQLiteDocument.getConfiguredMaxFileSize();
+        return Comlink.transfer({
           filename,
-          value: Comlink.transfer(value, [buffer]),
+          value,
+          walValue,
           editable,
-        });
+          maxFileSize,
+        }, [value.buffer]);
       }
+
       // HACK: There could be other reasons why the data is empty
       throw Error(TooLargeErrorMsg);
     }
@@ -263,16 +302,19 @@ export class VscodeFns {
     const { document } = this;
     if (document.uri.scheme !== 'untitled') {
       await document.refresh()
-      const { filename } = document.uriParts;
+
       if (document.documentData) {
-        const { buffer, byteOffset, byteLength } = document.documentData;
-        const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
-        return Comlink.record({
+        const { filename, value, walValue } = getTransferables(document, document.documentData);
+        const maxFileSize = SQLiteDocument.getConfiguredMaxFileSize();
+        return Comlink.transfer({
           filename,
-          value: Comlink.transfer(value, [buffer]),
+          value,
+          walValue,
           editable: false,
-        });
+          maxFileSize,
+        }, [value.buffer]);
       }
+
       // HACK: There could be other reasons why the data is empty
       throw Error(TooLargeErrorMsg);
     }
@@ -333,14 +375,13 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
       // NOTE: per configuration there can only be one webview per uri, so transferring the buffer is ok
       for (const panel of this.webviews.get(document.uri)) {
         if (!document.documentData) continue;
-        const { filename } = document.uriParts;
-        const { buffer, byteOffset, byteLength } = document.documentData;
-        const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
+        const { filename, value, walValue } = getTransferables(document, document.documentData);
         const remote = this.webviewRemotes.get(panel);
-        await remote?.forceUpdate(Comlink.record({
+        await remote?.forceUpdate(Comlink.transfer({
           filename, 
-          value: Comlink.transfer(value, [buffer]) 
-        }));
+          value,
+          walValue,
+        }, [value.buffer]));
       }
     }));
 
@@ -352,7 +393,7 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   async resolveCustomEditor(
     document: SQLiteDocument,
     webviewPanel: vsc.WebviewPanel,
-    token: vsc.CancellationToken
+    _token: vsc.CancellationToken
   ): Promise<void> {
     // Add the webview to our internal set of active webviews
     this.webviews.add(document.uri, webviewPanel);
@@ -404,7 +445,7 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
 
   private async getHtmlForWebview(webview: vsc.Webview): Promise<string> {
     const buildUri = vsc.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build');
-    const codiconsUri = vsc.Uri.joinPath(this._context.extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css');
+    const codiconsUri = vsc.Uri.joinPath(this._context.extensionUri, 'node_modules', 'codicons', 'dist', 'codicon.css');
 
     const assetAsWebviewUri = (x: string) => webview.asWebviewUri(vsc.Uri.joinPath(buildUri, x));
 
@@ -412,24 +453,29 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
       vsc.Uri.joinPath(buildUri, 'index.html')
     ));
 
-    // const csp = buildCSP({
-    //   [$default]: [$self, $vscode],
-    //   [$script]: [$self, $vscode, $unsafeEval], // HACK: Needed for WebAssembly in Web Extension. Needless to say, it makes the whole CSP useless...
-    //   [$style]: [$self, $vscode, $inlineStyle],
-    //   [$img]: [$self, $vscode, $data],
-    //   [$font]: [$self, $vscode],
-    //   [$child]: [$blob],
-    // });
+    const cspObj = {
+      [csp.defaultSrc]: [webview.cspSource],
+      [csp.scriptSrc]: [webview.cspSource, csp.wasmUnsafeEval], 
+      [csp.styleSrc]: [webview.cspSource, csp.inlineStyle],
+      [csp.imgSrc]: [webview.cspSource, csp.data],
+      [csp.fontSrc]: [webview.cspSource],
+      [csp.childSrc]: [csp.blob],
+    };
+
+    // Only set csp for hosts that are known to correctly set `webview.cspSource`
+    const cspStr = IS_VSCODE || IS_VSCODIUM
+      ? csp.build(cspObj)
+      : ''
 
     const preparedHtml = html
       .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
         return `${attr}="${assetAsWebviewUri(url)}"`;
       })
       .replace('<!--HEAD-->', `
+        <meta http-equiv="Content-Security-Policy" content="${cspStr}">
         <link rel="stylesheet" crossorigin href="${webview.asWebviewUri(codiconsUri)}"/>
         <link rel="preload" crossorigin as="fetch" id="assets/worker.js" href="${assetAsWebviewUri("assets/worker.js")}"/>
         <link rel="preload" crossorigin as="fetch" id="assets/sqlite3.wasm" type="application/wasm" href="${assetAsWebviewUri("assets/sqlite3.wasm")}"/>
-        <link rel="preload" crossorigin as="fetch" id="assets/sqlite3-opfs-async-proxy.js" href="${assetAsWebviewUri("assets/sqlite3-opfs-async-proxy.js")}"/>
       `)
       .replace('<!--BODY-->', ``)
 
@@ -443,7 +489,7 @@ const registerOptions = {
     retainContextWhenHidden: true,
   },
   supportsMultipleEditorsPerDocument: false,
-}
+} satisfies Parameters<typeof vsc.window.registerCustomEditorProvider>[2];
 
 export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {
   static viewType = 'sqlite-viewer.view';

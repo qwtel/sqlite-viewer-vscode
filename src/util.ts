@@ -1,6 +1,15 @@
 import * as vsc from 'vscode';
 import type { TypedEventListenerOrEventListenerObject } from "@worker-tools/typed-event-target";
 
+// A bunch of tests to figure out where we're running. Some more reliable than others.
+export const IS_VSCODE = vsc.env.uriScheme.includes("vscode");
+export const IS_VSCODIUM = vsc.env.uriScheme.includes("vscodium");
+export const IS_GITHUB_DEV = vsc.env.uriScheme.includes("vscode") && vsc.env.appHost === "gihub.dev";
+export const IS_GITPOD_WEB = vsc.env.uriScheme.includes("gitpod-code") || vsc.env.appHost === "Gitpod" || vsc.env.appName === "Gitpod Code";
+export const IS_GOOGLE_IDX = vsc.env.appName.includes("IDX") || (vsc.env.appHost === "web" && vsc.env.remoteName?.startsWith('idx'));
+
+export const IS_DESKTOP = vsc.env.appHost === "desktop";
+
 export function getNonce() {
   let text = '';
   const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

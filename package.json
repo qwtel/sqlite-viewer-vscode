@@ -3,7 +3,7 @@
   "name": "sqlite-viewer",
   "displayName": "SQLite Viewer",
   "description": "SQLite Viewer for VSCode",
-  "version": "0.4.9",
+  "version": "0.5.8-dev.0",
   "publisher": "qwtel",
   "private": true,
   "license": "LICENSE.md",
@@ -13,7 +13,7 @@
     "url": "https://github.com/qwtel/sqlite-viewer-vscode"
   },
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.83.1"
   },
   "categories": [
     "Other"
@@ -84,24 +84,34 @@
         "sqliteViewer.maxFileSize": {
           "type": "number",
           "minimum": 0,
+          "maximum": 4000,
           "exclusiveMinimum": false,
           "default": 200,
-          "description": "The maximum file size the extension will attempt to load in MB. Set to 0 to disable the limit."
+          "markdownDescription": "The maximum file size in MB the extension will attempt to load. Set to 0 to disable the limit. The internal limit is 4GB, but platform limits may apply earlier.\n\n__Warning__: Opening large files may cause poor performance, freezes, and system-wide memory pressure."
         }
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "sqlite-viewer.addFileNestingPatterns",
+        "title": "Add SQLite File Nesting Patterns",
+        "category": "SQLite Viewer"
+      }
+    ]
   },
   "scripts": {
     "clean": "rm -rf out && rm -rf sqlite-viewer-core/vscode/build",
     "vscode:prepublish": "npm run clean && npm run compile",
-    "compile:ext": "npm run compile:ext:node & npm run compile:ext:browser & npm run compile:ext:worker & wait",
+    "compile:ext": "npm run compile:ext:cp & npm run compile:ext:node & npm run compile:ext:browser & npm run compile:ext:worker & wait",
+    "compile:ext:cp": "cp -r node_modules/@vscode/codicons node_modules/codicons",
     "compile:ext:_base": "esbuild ./src/extension.ts $([ -z \"${DEV}\" ] && echo --minify || echo --sourcemap) --bundle --external:vscode --format=cjs",
     "compile:ext:node": "npm run compile:ext:_base -- --outfile=out/extension.js --platform=node --define:process.env.VSCODE_WEB=0",
     "compile:ext:browser": "npm run compile:ext:_base -- --outfile=out/extension-browser.js --platform=browser --define:process.env.VSCODE_WEB=1 --external:node-fetch --external:worker_threads --external:child_process --external:fs --external:path",
     "compile:ext:worker": "esbuild ./src/worker.ts --outfile=out/worker.js --bundle --format=iife --platform=node --define:import.meta.env.NODE_ENV='\"dev\"' --define:import.meta.env.VITE_VSCODE=false --define:import.meta.url='\"file:./sqlite-viewer-core/vscode/build/assets/\"'",
-    "compile:app": "cd ./sqlite-viewer-core && npm run compile-vscode",
+    "compile:app": "cd sqlite-viewer-core && npm run $([ -z \"${DEV}\" ] && echo build-vscode || echo build-vscode-fast)",
     "compile": "npm run compile:ext & npm run compile:app & wait",
     "pack": "vsce package --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
+    "postversion": "cd sqlite-viewer-core && git tag -a \"vscode/v$(jq -r '.version' ../package.json)\" -m ''",
     "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
     "pre-publish": "vsce publish --pre-release --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/preview/",
     "prepack": "sed -i '' s~https://sqliteviewer\\.app~https://sqliteviewer.app?ref=vscode~g *.md",
@@ -109,17 +119,16 @@
     "codium:publish": "ovsx publish"
   },
   "devDependencies": {
-    "@types/node": "^20.11.9",
-    "@types/vscode": "^1.85.0",
-    "esbuild": "^0.20.2",
+    "@types/vscode": "^1.83.1",
+    "esbuild": "^0.21.5",
     "esbuild-plugin-alias": "^0.2.1",
     "ovsx": "^0.9.1",
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@vscode/codicons": "^0.0.35",
+    "@vscode/codicons": "^0.0.36",
     "@vscode/extension-telemetry": "^0.9.6",
-    "@vscode/vsce": "^2.26.0",
+    "@vscode/vsce": "^2.27.0",
     "@worker-tools/typed-event-target": "^1.0.0",
     "node-fetch": "^3.3.2"
   }

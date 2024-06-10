@@ -1,6 +1,65 @@
 # CHANGELOG
 
+## v0.5
+### WAL Mode Support
+This version introduces support for __reading WAL mode databases__. It works across all VSCode file systems including local, remote, and even on github.dev.
+
+This fixes a common issue that caused the contents of a `-wal` file not being shown in the UI when the the auto checkpoint limit hadn't been reached.
+This led to unsatisfying workarounds such as disabling WAL mode, triggering checkpoints manually or reducing the auto checkpoint limit.
+
+While this update removes the need for the above workarounds, it does not change the readonly nature of the extension or remove the need to reload the file for updates to be visible in the UI.
+
+Note that making this work required significant restructuring of the extension, which may cause (unrelated) issues. Please report any you may encounter. 
+
+## v0.5.8
+- Limiting webview Content Security Policy to environments that are known to work (vscode, vscodium, github.dev). 
+  This should (finally) make the Open VSX version of this extension work with GitPod and Google IDX.
+
+## v0.5.7
+The extension now adds configuration settings for nesting SQLite-related files:
+
+![File nesting screenshot](documentation/nesting.png)
+
+This has no effect if you aren't using VSCode's File Nesting feature. You may enable it in settings under "Explorer > File Nesting: Enabled".
+
+If you use file nesting, but do not want to nest SQLite files, you can manually delete the patterns from the settings page under "Explorer > File Nesting: Patterns". SQLite Viewer will not attempt to set the patterns again, unless explicitly requested through the command "SQLite Viewer: Add SQLite File Nesting Patterns".
+
+This version also changes the file name of downloaded blobs to be prefixed with `-x-`, e.g. `favicons.sqlite-x-moz_icons-10-data.bin`. This ensures that downloaded blobs will be sorted below `-wal`, `-shm` and `-journal` files, reducing the risk of accidentally interacting with them when range-selecting downloaded files.
+
+### Fixes
+- Downgraded minimum vscode version to 1.83.1. This should make the Open VSX version of the extension work with Google IDX
+- Removed special characters from codicons asset path. This should make icons render correctly when using the Open VSX version of the extension in GitPod
+- Fixed an error when setting max file size to 0
+
+## v0.5.6
+Fixed a potential memory issue by limiting memory usage to configured file size limit
+
+## v0.5.5
+Bumped WAL Mode support to main channel.
+
+### Changes
+- Autofocus in detail view should now work when the query takes longer to finish
+- Added better loading indicator to detail view
+- Minor performance improvement for detail view query
+
+## v0.5.4 (Pre-Release)
+- Generated columns are now shown
+- Fixed showing `ROWID` column for tables that were created without row ids
+
+## v0.5.3 (Pre-Release)
+Fixed an issue that prevented the extension from loading on github.dev in Safari
+
+## v0.5.2 (Pre-Release)
+Added Content-Security-Policy to extension webview
+
+## v0.5.1 (Pre-Release)
+No publicly visible changes
+
+## v0.5.0 (Pre-Release)
+Initial v0.5 pre-release
+
 ## v0.4
+### Solid Rewrite
 SQLite Viewer 0.4 is a complete rewrite of this extension with a focus on improved performance.
 
 It also implements SQLite Viewer's **most requested feature**: Default file association for `.db` files! 
@@ -25,6 +84,27 @@ Additionally, version 0.4 ships many quality of life improvements:
 
 ### Style
 - Many aspects of the extension's UI should match VSCode's style closer
+
+
+## v0.4.14
+- Generated columns are now shown
+- Fixed showing `ROWID` column for tables that are created without a `ROWID`
+- Fixed an issue that prevented the extension from loading on github.dev in Safari
+
+
+## v0.4.12 – v0.4.13
+Fixed an issue that prevented text selection when using the extension on the web in the latest version of Chrome
+
+
+## v0.4.11
+- Tables in sidebar are now sorted alphabetically 
+- Fixed foreign key icon not being shown, or being shown on wrong column 
+- Fixed text in foreign key tooltip referencing wrong column names 
+
+
+## v0.4.10
+- SQLite updated to 3.45.3
+- Fixed an issue that sometimes caused text selection to be slow
 
 
 ## v0.4.9
@@ -87,6 +167,8 @@ Improved JSON column support
 ## v0.4.1
 Added essential application reporting
 
+## v0.4.0
+Initial v0.4 release
 
 ## v0.3.0 – v3.0.24
 Minor bug fixes and previews 

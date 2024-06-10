@@ -16,7 +16,7 @@ A quick and easy SQLite viewer for VSCode, inspired by DB Browser for SQLite and
 - Cached and Readonly
 - Only works for files that fit in system memory
 - No query runner
-- Requires uncorrupted files, i.e. `-journal` and `-wal` files are ignored
+- Requires uncorrupted files, i.e. `-journal` files are ignored
 
 <br/>
 
