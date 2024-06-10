@@ -118,17 +118,16 @@
     "codium:publish": "ovsx publish"
   },
   "devDependencies": {
-    "@types/node": "^20.11.9",
     "@types/vscode": "^1.83.1",
-    "esbuild": "^0.20.2",
+    "esbuild": "^0.21.5",
     "esbuild-plugin-alias": "^0.2.1",
     "ovsx": "^0.9.1",
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@vscode/codicons": "^0.0.35",
+    "@vscode/codicons": "^0.0.36",
     "@vscode/extension-telemetry": "^0.9.6",
-    "@vscode/vsce": "^2.26.0",
+    "@vscode/vsce": "^2.27.0",
     "@worker-tools/typed-event-target": "^1.0.0",
     "node-fetch": "^3.3.2"
   }
