@@ -410,6 +410,7 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
     webviewPanel.webview.html = await this.getHtmlForWebview(webviewPanel.webview);
 
     const worker = new Worker(path.resolve(__dirname, "./worker.js"));
+
     // @ts-ignore: TODO
     const WorkerDBRemote = Comlink.wrap<typeof WorkerDB>(nodeEndpoint(worker));
 
