@@ -3,7 +3,7 @@
 !sqlite-viewer-core/vscode/build/assets
 !sqlite-viewer-core/vscode/build/index.html
 !documentation/icon.png
-!node_modules/codicons
+!node_modules/codicons/dist
 !CHANGELOG.md
 !LICENSE.md
 !README.md
