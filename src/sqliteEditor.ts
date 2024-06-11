@@ -3,16 +3,13 @@ import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
 
 import * as vsc from 'vscode';
 import * as Comlink from "../sqlite-viewer-core/src/comlink";
-import nodeEndpoint from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
+import nodeEndpoint, { type NodeEndpoint } from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
 import { Disposable, disposeAll } from './dispose';
 import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewEndpointAdapter } from './util';
-import { Worker } from './webWorker';
 import * as path from "path"
-import type { WorkerDB } from '../sqlite-viewer-core/src/worker-db';
+import type { WorkerDB, Options as DbOptions, DbParams } from '../sqlite-viewer-core/src/worker-db';
+import { Worker } from './webWorker';
 // import type { Credentials } from './credentials';
-
-// console.log("Hello????")
-// console.log(fs.readFileSync(path.resolve(__dirname, "./worker.js")).byteLength)
 
 interface SQLiteEdit {
   readonly data: Uint8Array;
@@ -254,21 +251,21 @@ const csp = {
 
 /**
  * Functions exposed by the vscode host, to be called from within the webview via Comlink
- * TODO: better name?
  */
-export class VscodeFns {
+export class VscodeFns implements Comlink.TRemote<WorkerDB> {
   constructor(
     readonly parent: SQLiteEditorProvider, 
-    readonly document: SQLiteDocument
+    readonly document: SQLiteDocument,
+    readonly workerDB: Comlink.Remote<WorkerDB>,
   ) {}
 
-  get webviews() { return this.parent.webviews }
-  get reporter() { return this.parent.reporter }
+  get #webviews() { return this.parent.webviews }
+  get #reporter() { return this.parent.reporter }
 
   getInitialData() {
     const { document } = this;
-    if (this.webviews.has(document.uri)) {
-      this.reporter.sendTelemetryEvent("open");
+    if (this.#webviews.has(document.uri)) {
+      this.#reporter.sendTelemetryEvent("open");
       // this.credentials?.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
 
       if (document.uri.scheme === 'untitled') {
@@ -328,6 +325,44 @@ export class VscodeFns {
     await vsc.workspace.fs.writeFile(dlUri, data);
     if (!metaKey) await vsc.commands.executeCommand('vscode.open', dlUri);
     return;
+  }
+
+  // FIXME: better way to forward these?
+  setSqliteWasmPath(path: string): Promise<void> {
+    return this.workerDB.setSqliteWasmPath(path);
+  }
+  initStream(filename: string, stream: ReadableStream<Uint8Array>, fileSize: number, walData?: Uint8Array|null): Promise<void> {
+    return this.workerDB.initStream(filename, stream, fileSize, walData);
+  }
+  initBuffer(filename: string, data: Uint8Array, walData?: Uint8Array|null, opts?: { maxFileSize?: number }): Promise<void> {
+    return this.workerDB.initBuffer(filename, data, walData, opts);
+  }
+  getTableGroups(filename: string) {
+    return this.workerDB.getTableGroups(filename);
+  }
+  getCount(params: DbParams, opts?: DbOptions, signal?: AbortSignal): Promise<number> {
+    return this.workerDB.getCount(params, opts, signal);
+  }
+  getIdsFromToIndex(params: DbParams, start: number, end: number, opts?: DbOptions, signal?: AbortSignal): Promise<Set<string|number>> {
+    return this.workerDB.getIdsFromToIndex(params, start, end, opts, signal);
+  }
+  getPage(params: DbParams, opts: DbOptions = {}, signal?: AbortSignal) {
+    return this.workerDB.getPage(params, opts, signal);
+  }
+  getByRowId(params: DbParams, rowId: string|number, opts = {}, signal?: AbortSignal) {
+    return this.workerDB.getByRowId(params, rowId, opts, signal);
+  }
+  getByRowIds(params: DbParams, rowIds: Iterable<string|number> = [], opts = {}, signal?: AbortSignal) {
+    return this.workerDB.getByRowIds(params, rowIds, opts, signal);
+  }
+  getBlob(params: DbParams, rowId: string, colName: string, signal?: AbortSignal) {
+    return this.workerDB.getBlob(params, rowId, colName, signal)
+  }
+  exportDb(filename: string): Promise<Uint8Array> {
+    return this.workerDB.exportDb(filename);
+  }
+  close(filename: string): Promise<void> {
+    return this.workerDB.close(filename);
   }
 }
 
@@ -401,28 +436,17 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
     const webviewEndpoint = new WebviewEndpointAdapter(webviewPanel.webview);
     this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
 
-    Comlink.expose(new VscodeFns(this, document), webviewEndpoint);
+    // TODO: create worker here?
+    const worker = new Worker(path.resolve(__dirname, "./worker.js"));
+    const workerDB = Comlink.wrap<WorkerDB>(nodeEndpoint(worker as unknown as NodeEndpoint));
+
+    Comlink.expose(new VscodeFns(this, document, workerDB), webviewEndpoint);
 
     // Setup initial content for the webview
     webviewPanel.webview.options = {
       enableScripts: true,
     };
     webviewPanel.webview.html = await this.getHtmlForWebview(webviewPanel.webview);
-
-    const worker = new Worker(path.resolve(__dirname, "./worker.js"));
-
-    // @ts-ignore: TODO
-    const WorkerDBRemote = Comlink.wrap<typeof WorkerDB>(nodeEndpoint(worker));
-
-    const m = new MessageChannel()
-
-    // const db = await new WorkerDBRemote("test.db");
-    // console.log(await db.helloWorld(Comlink.transfer(m.port1, [m.port1])));
-    // console.log(this.webviewRemotes.get(webviewPanel)!.sendPort(Comlink.transfer(m.port2, [m.port2])));
-    // Comlink.expose(db, webviewEndpoint); // LOOOOL
-    // const data = new Uint8Array(document.documentData!)
-    // console.log("has data yet?", data?.byteLength)
-    // await db.initBuffer(data)
   }
 
   private readonly _onDidChangeCustomDocument = new vsc.EventEmitter<vsc.CustomDocumentEditEvent<SQLiteDocument>>();
@@ -474,9 +498,9 @@ class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
       })
       .replace('<!--HEAD-->', `
         <meta http-equiv="Content-Security-Policy" content="${cspStr}">
-        <link rel="stylesheet" crossorigin href="${webview.asWebviewUri(codiconsUri)}"/>
-        <link rel="preload" crossorigin as="fetch" id="assets/worker.js" href="${assetAsWebviewUri("assets/worker.js")}"/>
-        <link rel="preload" crossorigin as="fetch" id="assets/sqlite3.wasm" type="application/wasm" href="${assetAsWebviewUri("assets/sqlite3.wasm")}"/>
+        <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}" crossorigin/>
+        <link rel="preload" as="fetch" id="assets/worker.js" href="${assetAsWebviewUri("assets/worker.js")}" crossorigin/>
+        <link rel="preload" as="fetch" id="assets/sqlite3.wasm" type="application/wasm" href="${assetAsWebviewUri("assets/sqlite3.wasm")}" crossorigin/>
       `)
       .replace('<!--BODY-->', ``)
 
