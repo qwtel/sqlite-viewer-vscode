@@ -82,6 +82,12 @@ async function addFileNestingPatterns({ force = false } = {}) {
   await config.update('patterns', updatedPatterns, vsc.ConfigurationTarget.Global);
 }
 
+const openChangelog = (frag?: `#${string}`) => vsc.env.openExternal(
+  vsc.Uri.parse(IS_VSCODE
+    ? `https://marketplace.visualstudio.com/items/qwtel.sqlite-viewer/changelog${frag ? `#user-content-${frag.slice(1)}` : ''}`
+    : `https://open-vsx.org/extension/qwtel/sqlite-viewer/changes${frag}`)
+);
+
 async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
   const prevVersion = context.globalState.get<string>(FullExtensionId);
   const currVersion = vsc.extensions.getExtension(FullExtensionId)!.packageJSON.version as string;
@@ -97,8 +103,7 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
     reporter.sendTelemetryEvent("install");
 
     if (
-      isMajorUpdate(currVersion, prevVersion) ||
-      context.extensionMode === vsc.ExtensionMode.Development
+      isMajorUpdate(currVersion, prevVersion)
     ) {
       let actions;
       const result = await vsc.window.showInformationMessage(
@@ -106,19 +111,26 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
         ...actions = [{ title: 'Open Changelog ↗' }]
       );
 
-      if (result !== null) {
-        if (result === actions[0]) {
-          await vsc.env.openExternal(
-            vsc.Uri.parse(IS_VSCODE
-              ? 'https://marketplace.visualstudio.com/items/qwtel.sqlite-viewer/changelog'
-              : 'https://open-vsx.org/extension/qwtel/sqlite-viewer/changes')
-          );
+      switch (result) {
+        case actions[0]: {
+          return await openChangelog('#v0.5');
         }
-        // else if (result === actions[1]) {
-        //   await vsc.env.openExternal(
-        //     vsc.Uri.parse('https://github.com/qwtel/sqlite-viewer-vscode/issues')
-        //   );
-        // }
+      }
+    }
+    else if (
+      prevVersion !== currVersion ||
+      context.extensionMode === vsc.ExtensionMode.Development
+    ) {
+      let actions;
+      const result = await vsc.window.showInformationMessage(
+        `SQLite Viewer now adds configuration settings for nesting SQLite-related files. Check out the Changelog for more:`,
+        ...actions = [{ title: 'Open Changelog ↗' }]
+      );
+
+      switch (result) {
+        case actions[0]: {
+          return await openChangelog('#v0.5.7');
+        }
       }
     }
   }
