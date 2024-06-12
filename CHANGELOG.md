@@ -12,8 +12,10 @@ While this update removes the need for the above workarounds, it does not change
 Note that making this work required significant restructuring of the extension, which may cause (unrelated) issues. Please report any you may encounter. 
 
 ## v0.5.8
-- Limiting webview Content Security Policy to environments that are known to work (vscode, vscodium, github.dev). 
-  This should (finally) make the Open VSX version of this extension work with GitPod and Google IDX.
+- Limiting webview Content Security Policy to environments that are known to work.
+This should (finally) make this extension work with GitPod and Google IDX.
+- Fixed download button height in detail view 
+- Reduced bundle size (< 1MB)
 
 ## v0.5.7
 The extension now adds configuration settings for nesting SQLite-related files:
