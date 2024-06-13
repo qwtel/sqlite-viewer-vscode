@@ -9,5 +9,5 @@
 		"rootDir": ".",
 		"noEmit": true,
 	},
-	"exclude": ["node_modules", ".vscode-test", "_sqlite-viewer-app"],
+	"exclude": [],
 }
