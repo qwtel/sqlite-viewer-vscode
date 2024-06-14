@@ -9,6 +9,7 @@ import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewEndpointAdapter } fro
 import * as path from "path"
 import type { WorkerDB, Options as DbOptions, DbParams } from '../sqlite-viewer-core/src/worker-db';
 import { Worker } from './webWorker';
+import { VscodeFns } from './vscodeFns';
 // import type { Credentials } from './credentials';
 
 interface SQLiteEdit {
@@ -19,7 +20,14 @@ interface SQLiteDocumentDelegate {
   getFileData(): Promise<Uint8Array>;
 }
 
-class SQLiteDocument extends Disposable implements vsc.CustomDocument {
+function getConfiguredMaxFileSize() {
+  const config = vsc.workspace.getConfiguration('sqliteViewer');
+  const maxFileSizeMB = config.get<number>('maxFileSize') ?? 200;
+  const maxFileSize = maxFileSizeMB * 2 ** 20;
+  return maxFileSize;
+}
+
+export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   static async create(
     uri: vsc.Uri,
     backupId: string | undefined,
@@ -36,7 +44,7 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       return [new Uint8Array(), null];
     }
 
-    const maxFileSize = this.getConfiguredMaxFileSize();
+    const maxFileSize = getConfiguredMaxFileSize();
 
     const walUri = uri.with({ path: uri.path + '-wal' })
 
@@ -50,11 +58,8 @@ class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     ]);
   }
 
-  static getConfiguredMaxFileSize() {
-    const config = vsc.workspace.getConfiguration('sqliteViewer');
-    const maxFileSizeMB = config.get<number>('maxFileSize') ?? 200;
-    const maxFileSize = maxFileSizeMB * 2 ** 20;
-    return maxFileSize;
+  getConfiguredMaxFileSize() {
+    return getConfiguredMaxFileSize();
   }
 
   private readonly _uri: vsc.Uri;
@@ -249,126 +254,7 @@ const csp = {
   }
 } as const;
 
-/**
- * Functions exposed by the vscode host, to be called from within the webview via Comlink
- */
-export class VscodeFns implements Comlink.TRemote<WorkerDB> {
-  constructor(
-    readonly parent: SQLiteEditorProvider, 
-    readonly document: SQLiteDocument,
-    readonly workerDB: Comlink.Remote<WorkerDB>,
-  ) {}
-
-  get #webviews() { return this.parent.webviews }
-  get #reporter() { return this.parent.reporter }
-
-  getInitialData() {
-    const { document } = this;
-    if (this.#webviews.has(document.uri)) {
-      this.#reporter.sendTelemetryEvent("open");
-      // this.credentials?.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
-
-      if (document.uri.scheme === 'untitled') {
-        const maxFileSize = SQLiteDocument.getConfiguredMaxFileSize();
-        return {
-          filename: 'untitled',
-          untitled: true,
-          editable: false,
-          maxFileSize,
-        };
-      } else if (document.documentData) {
-        const editable = false;
-        // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
-        const { filename, value, walValue } = getTransferables(document, document.documentData);
-        const maxFileSize = SQLiteDocument.getConfiguredMaxFileSize();
-        return Comlink.transfer({
-          filename,
-          value,
-          walValue,
-          editable,
-          maxFileSize,
-        }, [value.buffer]);
-      }
-
-      // HACK: There could be other reasons why the data is empty
-      throw Error(TooLargeErrorMsg);
-    }
-  }
-
-  async refreshFile() {
-    const { document } = this;
-    if (document.uri.scheme !== 'untitled') {
-      await document.refresh()
-
-      if (document.documentData) {
-        const { filename, value, walValue } = getTransferables(document, document.documentData);
-        const maxFileSize = SQLiteDocument.getConfiguredMaxFileSize();
-        return Comlink.transfer({
-          filename,
-          value,
-          walValue,
-          editable: false,
-          maxFileSize,
-        }, [value.buffer]);
-      }
-
-      // HACK: There could be other reasons why the data is empty
-      throw Error(TooLargeErrorMsg);
-    }
-  }
-
-  async downloadBlob(data: Uint8Array, download: string, metaKey: boolean) {
-    const { document } = this;
-    const { dirname } = document.uriParts;
-    const dlUri = vsc.Uri.parse(`${dirname}/${download}`);
-
-    await vsc.workspace.fs.writeFile(dlUri, data);
-    if (!metaKey) await vsc.commands.executeCommand('vscode.open', dlUri);
-    return;
-  }
-
-  // FIXME: better way to forward these?
-  setSqliteWasmPath(path: string): Promise<void> {
-    return this.workerDB.setSqliteWasmPath(path);
-  }
-  initStream(filename: string, stream: ReadableStream<Uint8Array>, fileSize: number, walData?: Uint8Array|null): Promise<void> {
-    return this.workerDB.initStream(filename, stream, fileSize, walData);
-  }
-  initBuffer(filename: string, data: Uint8Array, walData?: Uint8Array|null, opts?: { maxFileSize?: number }): Promise<void> {
-    return this.workerDB.initBuffer(filename, data, walData, opts);
-  }
-  getTableGroups(filename: string) {
-    return this.workerDB.getTableGroups(filename);
-  }
-  getCount(params: DbParams, opts?: DbOptions, signal?: AbortSignal): Promise<number> {
-    return this.workerDB.getCount(params, opts, signal);
-  }
-  getIdsFromToIndex(params: DbParams, start: number, end: number, opts?: DbOptions, signal?: AbortSignal): Promise<(string|number)[]> {
-    return this.workerDB.getIdsFromToIndex(params, start, end, opts, signal);
-  }
-  getPage(params: DbParams, opts: DbOptions = {}, signal?: AbortSignal) {
-    return this.workerDB.getPage(params, opts, signal);
-  }
-  getByRowId(params: DbParams, rowId: string|number, opts = {}, signal?: AbortSignal) {
-    return this.workerDB.getByRowId(params, rowId, opts, signal);
-  }
-  getByRowIds(params: DbParams, rowIds: Iterable<string|number> = [], opts = {}, signal?: AbortSignal) {
-    return this.workerDB.getByRowIds(params, rowIds, opts, signal);
-  }
-  getBlob(params: DbParams, rowId: string, colName: string, signal?: AbortSignal) {
-    return this.workerDB.getBlob(params, rowId, colName, signal)
-  }
-  exportDb(filename: string): Promise<Uint8Array> {
-    return this.workerDB.exportDb(filename);
-  }
-  close(filename: string): Promise<void> {
-    return this.workerDB.close(filename);
-  }
-}
-
-const TooLargeErrorMsg = "File too large. You can increase this limit in the settings under 'Sqlite Viewer: Max File Size'."
-
-class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
+export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   readonly webviews = new WebviewCollection();
   readonly webviewRemotes = new WeakMap<vsc.WebviewPanel, Comlink.Remote<WebviewFns>>
 
