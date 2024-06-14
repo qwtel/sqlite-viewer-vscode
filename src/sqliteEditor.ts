@@ -25,35 +25,75 @@ function getConfiguredMaxFileSize() {
   return maxFileSize;
 }
 
-export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
-  static async create(
-    uri: vsc.Uri,
-    backupId: string | undefined,
-    delegate: SQLiteDocumentDelegate,
-  ): Promise<SQLiteDocument | PromiseLike<SQLiteDocument>> {
-    // If we have a backup, read that. Otherwise read the resource from the workspace
-    const dataFile = typeof backupId === 'string' ? vsc.Uri.parse(backupId) : uri;
-    const fileData = await SQLiteDocument.readFile(dataFile);
-    return new SQLiteDocument(uri, fileData, delegate);
+async function createWebWorker(
+  context: vsc.ExtensionContext,
+  openContext: vsc.CustomDocumentOpenContext,
+  filename: string,
+  uri: vsc.Uri,
+) {
+  const workerPath = import.meta.env.BROWSER_EXT
+    ? vsc.Uri.joinPath(context.extensionUri, 'out', 'worker-browser.js').toString()
+    : (await import('path')).resolve(__dirname, "./worker.js")
+  const worker = new Worker(workerPath);
+  const workerEndpoint = nodeEndpoint(worker as unknown as NodeEndpoint);
+  const workerDB = Comlink.wrap<WorkerDB>(workerEndpoint);
+
+  // If we have a backup, read that. Otherwise read the resource from the workspace
+  const dataFile = typeof openContext.backupId === 'string' ? vsc.Uri.parse(openContext.backupId) : uri;
+  const [data, walData] = await readFile(dataFile);
+  const importDbPromise = workerDB.importDb(filename, Comlink.transfer({
+    data,
+    walData,
+    maxFileSize: getConfiguredMaxFileSize(),
+    mappings: {
+      'sqlite3.wasm': vsc.Uri.joinPath(context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build', 'assets', 'sqlite3.wasm').toString(),
+    }
+  }, [
+    ...data ? [data.buffer as ArrayBuffer] : [],
+    ...walData ? [walData.buffer as ArrayBuffer] : [],
+  ]));
+  return [worker, workerDB, importDbPromise] as const;
+}
+
+async function readFile(uri: vsc.Uri): Promise<[data: Uint8Array|null, walData?: Uint8Array|null]> {
+  if (uri.scheme === 'untitled') {
+    return [new Uint8Array(), null];
   }
 
-  private static async readFile(uri: vsc.Uri): Promise<[data: Uint8Array|null, walData?: Uint8Array|null]> {
-    if (uri.scheme === 'untitled') {
-      return [new Uint8Array(), null];
-    }
+  const maxFileSize = getConfiguredMaxFileSize();
 
-    const maxFileSize = getConfiguredMaxFileSize();
+  const walUri = uri.with({ path: uri.path + '-wal' })
 
-    const walUri = uri.with({ path: uri.path + '-wal' })
+  const stat = await vsc.workspace.fs.stat(uri)
+  if (maxFileSize !== 0 && stat.size > maxFileSize)
+    return [null, null];
 
-    const stat = await vsc.workspace.fs.stat(uri)
-    if (maxFileSize !== 0 && stat.size > maxFileSize)
-      return [null, null];
+  return Promise.all([
+    vsc.workspace.fs.readFile(uri),
+    vsc.workspace.fs.readFile(walUri).then(x => x, () => null)
+  ]);
+}
 
-    return Promise.all([
-      vsc.workspace.fs.readFile(uri),
-      vsc.workspace.fs.readFile(walUri).then(x => x, () => null)
-    ]);
+const toss = (msg: string): never => { throw Error(msg) };
+
+export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
+  static async create(
+    context: vsc.ExtensionContext,
+    openContext: vsc.CustomDocumentOpenContext,
+    uri: vsc.Uri,
+    delegate: SQLiteDocumentDelegate,
+  ): Promise<SQLiteDocument> {
+    const { filename } = getUriParts(uri);
+
+    const createWorkerLike = false
+      ? toss('unreachable')
+      : createWebWorker;
+
+    const [workerLike, workerDB, importDbPromise] = await createWorkerLike(context, openContext, filename, uri);
+
+    importDbPromise.catch(() => {}) // HACK: prevent unhandled promise rejection
+
+    return new SQLiteDocument(uri, delegate, workerLike, workerDB, importDbPromise);
   }
 
   getConfiguredMaxFileSize() {
@@ -62,7 +102,6 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
   private readonly _uri: vsc.Uri;
 
-  private _documentData: [data: Uint8Array|null, walData?: Uint8Array|null];
   private _edits: Array<SQLiteEdit> = [];
   private _savedEdits: Array<SQLiteEdit> = [];
 
@@ -70,24 +109,20 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
   private constructor(
     uri: vsc.Uri,
-    initialContent: [data: Uint8Array|null, walData?: Uint8Array|null],
     delegate: SQLiteDocumentDelegate,
+    private readonly workerLike: { terminate(): void },
+    public readonly workerDB: Comlink.Remote<WorkerDB>,
+    public readonly importDbPromise: Promise<void>,
   ) {
     super();
     this._uri = uri;
-    this._documentData = initialContent;
     this._delegate = delegate;
   }
 
   public get uri() { return this._uri; }
   public get uriParts() { return getUriParts(this._uri); }
-  public get documentData() { return this._documentData[0] }
-  public get walData() { return this._documentData[1] }
 
   private readonly _onDidDispose = this._register(new vsc.EventEmitter<void>());
-  /**
-   * Fired when the document is disposed of.
-   */
   public readonly onDidDispose = this._onDidDispose.event;
 
   private readonly _onDidChangeDocument = this._register(new vsc.EventEmitter<{
@@ -117,7 +152,9 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    *
    * This happens when all editors for it have been closed.
    */
-  dispose(): void {
+  async dispose() {
+    this.workerDB[Symbol.dispose]();
+    this.workerLike.terminate();
     this._onDidDispose.fire();
     super.dispose();
   }
@@ -171,25 +208,27 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * Called by VS Code when the user calls `revert` on a document.
    */
   async revert(_cancellation: vsc.CancellationToken): Promise<void> {
-    const diskContent = await SQLiteDocument.readFile(this.uri);
-    this._documentData = diskContent;
-    this._edits = this._savedEdits;
-    diskContent[0] && this._onDidChangeDocument.fire({
-      content: diskContent[0],
-      walContent: diskContent[1],
-      edits: this._edits,
-    });
+    throw Error("TODO");
+    // const diskContent = await SQLiteDocument.readFile(this.uri);
+    // this._documentData = diskContent;
+    // this._edits = this._savedEdits;
+    // diskContent[0] && this._onDidChangeDocument.fire({
+    //   content: diskContent[0],
+    //   walContent: diskContent[1],
+    //   edits: this._edits,
+    // });
   }
 
   async refresh(_cancellation?: vsc.CancellationToken): Promise<void> {
-    const diskContent = await SQLiteDocument.readFile(this.uri);
-    this._documentData = diskContent;
-    this._edits = [];
-    diskContent[0] && this._onDidChangeDocument.fire({
-      content: diskContent[0],
-      walContent: diskContent[1],
-      edits: [],
-    });
+    throw Error("TODO");
+    // const diskContent = await SQLiteDocument.readFile(this.uri);
+    // this._documentData = diskContent;
+    // this._edits = [];
+    // diskContent[0] && this._onDidChangeDocument.fire({
+    //   content: diskContent[0],
+    //   walContent: diskContent[1],
+    //   edits: [],
+    // });
   }
 
   /**
@@ -211,20 +250,6 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       }
     };
   }
-
-  getTransferables(documentData: Uint8Array) {
-    const { filename } = this.uriParts;
-    const { buffer, byteOffset, byteLength } = documentData;
-    const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
-
-    let walValue;
-    if (this.walData) {
-      const { buffer, byteOffset, byteLength } = this.walData
-      walValue = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
-    }
-
-    return { filename, value, walValue };
-  }
 }
 
 export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
@@ -238,11 +263,11 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
 
   async openCustomDocument(
     uri: vsc.Uri,
-    openContext: { backupId?: string },
+    openContext: vsc.CustomDocumentOpenContext,
     _token: vsc.CancellationToken
   ): Promise<SQLiteDocument> {
 
-    const document = await SQLiteDocument.create(uri, openContext.backupId, {
+    const document = await SQLiteDocument.create(this._context, openContext, uri, {
       getFileData: async () => {
         throw Error("Not implemented")
       }
@@ -260,7 +285,6 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
 
     listeners.push(document.onDidChangeContent(async e => {
       // Update all webviews when the document changes
-      // NOTE: per configuration there can only be one webview per uri, so transferring the buffer is ok
       const { filename } = document.uriParts;
       for (const panel of this.webviews.get(document.uri)) {
         const remote = this.webviewRemotes.get(panel);
@@ -278,37 +302,12 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     webviewPanel: vsc.WebviewPanel,
     _token: vsc.CancellationToken
   ): Promise<void> {
-    // Add the webview to our internal set of active webviews
     this.webviews.add(document.uri, webviewPanel);
 
     const webviewEndpoint = new WebviewEndpointAdapter(webviewPanel.webview);
     this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
 
-    let workerDB: Comlink.Remote<WorkerDB>;
-    let initPromise;
-    if (false) {
-    } else {
-      const workerPath = import.meta.env.BROWSER_EXT
-        ? vsc.Uri.joinPath(this._context.extensionUri, 'out', 'worker-browser.js').toString()
-        : (await import('path')).resolve(__dirname, "./worker.js")
-      const worker = new Worker(workerPath);
-      workerDB = Comlink.wrap<WorkerDB>(nodeEndpoint(worker as unknown as NodeEndpoint));
-
-      const { documentData: data, walData, uriParts: { filename } } = document
-      initPromise = workerDB.importDb(filename, Comlink.transfer({
-        data,
-        walData,
-        maxFileSize: getConfiguredMaxFileSize(),
-        mappings: {
-          'sqlite3.wasm': vsc.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build', 'assets', 'sqlite3.wasm').toString(),
-        }
-      }, [
-        ...data ? [data.buffer as ArrayBuffer] : [],
-        ...walData ? [walData.buffer as ArrayBuffer] : [],
-      ]));
-    }
-    initPromise.catch(() => {}) // HACK: prevent unhandled promise rejection
-    Comlink.expose(new VscodeFns(this, document, workerDB, initPromise), webviewEndpoint);
+    Comlink.expose(new VscodeFns(this, document, document.workerDB, document.importDbPromise), webviewEndpoint);
 
     // Setup initial content for the webview
     webviewPanel.webview.options = {

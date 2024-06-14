@@ -27,32 +27,26 @@ export type RegularInit = {
  */
 export class VscodeFns implements Comlink.TRemote<WorkerDB> {
   constructor(
-    readonly parent: SQLiteEditorProvider, 
-    readonly document: SQLiteDocument,
-    readonly workerDB: Comlink.Remote<WorkerDB>,
-    private readonly initPromise: Promise<void>,
+    private readonly provider: SQLiteEditorProvider, 
+    private readonly document: SQLiteDocument,
+    private readonly workerDB: Comlink.Remote<WorkerDB>,
+    private readonly importDbPromise: Promise<void>
   ) {}
 
-  get #webviews() { return this.parent.webviews }
-  get #reporter() { return this.parent.reporter }
+  private get webviews() { return this.provider.webviews }
+  private get reporter() { return this.provider.reporter }
 
-  async ready() {
+  async init() {
     const { document } = this;
-    if (this.#webviews.has(document.uri)) {
-      this.#reporter.sendTelemetryEvent("open");
-      await this.initPromise;
+    if (this.webviews.has(document.uri)) {
+      this.reporter.sendTelemetryEvent("open");
+      await this.importDbPromise;
       return document.uriParts.filename;
     }
     // TODO: propagate errors?
   }
 
-  async refreshFile(): Promise<{
-    filename: string, 
-    editable?: boolean, 
-    maxFileSize: number, 
-    value: Uint8ArrayLike
-    walValue?: Uint8ArrayLike
-  }|string|undefined> {
+  async refreshFile(): Promise<string|undefined> {
 
     const { document } = this;
     if (document.uri.scheme !== 'untitled') {
