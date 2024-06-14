@@ -8,6 +8,20 @@ type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength:
 
 const TooLargeErrorMsg = "File too large. You can increase this limit in the settings under 'Sqlite Viewer: Max File Size'."
 
+export type UntitledInit = { 
+  filename: string, 
+  untitled: true, 
+  editable?: boolean, 
+  maxFileSize: number, 
+};
+export type RegularInit = {
+  filename: string, 
+  editable?: boolean, 
+  maxFileSize: number, 
+  value: Uint8ArrayLike
+  walValue?: Uint8ArrayLike
+}
+
 /**
  * Functions exposed by the vscode host, to be called from within the webview via Comlink
  */
@@ -21,18 +35,7 @@ export class VscodeFns implements Comlink.TRemote<WorkerDB> {
   get #webviews() { return this.parent.webviews }
   get #reporter() { return this.parent.reporter }
 
-  getInitialData(): { 
-    filename: string, 
-    editable?: boolean, 
-    maxFileSize: number, 
-    value: Uint8ArrayLike
-    walValue?: Uint8ArrayLike
-  }|{ 
-    filename: string, 
-    untitled: true, 
-    editable?: boolean, 
-    maxFileSize: number, 
-  }|string|undefined {
+  getInitialData(): UntitledInit|RegularInit|string|undefined {
     const { document } = this;
     if (this.#webviews.has(document.uri)) {
       this.#reporter.sendTelemetryEvent("open");

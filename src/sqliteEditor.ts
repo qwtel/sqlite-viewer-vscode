@@ -1,13 +1,12 @@
 import type TelemetryReporter from '@vscode/extension-telemetry';
 import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
-
+import type { WorkerDB } from '../sqlite-viewer-core/src/worker-db';
+import * as path from "path"
 import * as vsc from 'vscode';
 import * as Comlink from "../sqlite-viewer-core/src/comlink";
 import nodeEndpoint, { type NodeEndpoint } from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
 import { Disposable, disposeAll } from './dispose';
-import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewEndpointAdapter } from './util';
-import * as path from "path"
-import type { WorkerDB, Options as DbOptions, DbParams } from '../sqlite-viewer-core/src/worker-db';
+import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewEndpointAdapter, cspUtil, getUriParts } from './util';
 import { Worker } from './webWorker';
 import { VscodeFns } from './vscodeFns';
 // import type { Credentials } from './credentials';
@@ -82,13 +81,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   }
 
   public get uri() { return this._uri; }
-
-  private pathRegExp = /(?<dirname>.*)\/(?<filename>(?<basename>.*)(?<extname>\.[^.]+))$/
-  public get uriParts() {
-    const { dirname, filename, basename, extname } = this._uri.toString().match(this.pathRegExp)?.groups ?? {}
-    return { dirname, filename, basename, extname };
-  }
-
+  public get uriParts() { return getUriParts(this._uri); }
   public get documentData() { return this._documentData[0] }
   public get walData() { return this._documentData[1] }
 
@@ -218,41 +211,21 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       }
     };
   }
-}
 
-function getTransferables(document: SQLiteDocument, documentData: Uint8Array) {
-  const { filename } = document.uriParts;
-  const { buffer, byteOffset, byteLength } = documentData;
-  const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
+  getTransferables(documentData: Uint8Array) {
+    const { filename } = this.uriParts;
+    const { buffer, byteOffset, byteLength } = documentData;
+    const value = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
 
-  let walValue;
-  if (document.walData) {
-    const { buffer, byteOffset, byteLength } = document.walData
-    walValue = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
+    let walValue;
+    if (this.walData) {
+      const { buffer, byteOffset, byteLength } = this.walData
+      walValue = { buffer, byteOffset, byteLength }; // HACK: need to send uint8array disassembled...
+    }
+
+    return { filename, value, walValue };
   }
-
-  return { filename, value, walValue };
 }
-
-const csp = {
-  defaultSrc: 'default-src',
-  scriptSrc: 'script-src',
-  styleSrc: 'style-src',
-  imgSrc: 'img-src',
-  fontSrc: 'font-src',
-  childSrc: 'child-src',
-  self: "'self'",
-  data: 'data:',
-  blob: 'blob:',
-  inlineStyle: "'unsafe-inline'",
-  unsafeEval: "'unsafe-eval'",
-  wasmUnsafeEval: "'wasm-unsafe-eval'",
-  build(cspObj: Record<string, string[]>) {
-    return Object.entries(cspObj)
-      .map(([k, vs]) => `${k} ${vs.filter(x => x != null).join(' ')};`)
-      .join(' ');
-  }
-} as const;
 
 export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   readonly webviews = new WebviewCollection();
@@ -296,7 +269,7 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
       // NOTE: per configuration there can only be one webview per uri, so transferring the buffer is ok
       for (const panel of this.webviews.get(document.uri)) {
         if (!document.documentData) continue;
-        const { filename, value, walValue } = getTransferables(document, document.documentData);
+        const { filename, value, walValue } = document.getTransferables(document.documentData);
         const remote = this.webviewRemotes.get(panel);
         await remote?.forceUpdate(Comlink.transfer({
           filename, 
@@ -322,9 +295,12 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     const webviewEndpoint = new WebviewEndpointAdapter(webviewPanel.webview);
     this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
 
-    // TODO: create worker here?
-    const worker = new Worker(path.resolve(__dirname, "./worker.js"));
-    const workerDB = Comlink.wrap<WorkerDB>(nodeEndpoint(worker as unknown as NodeEndpoint));
+    let workerDB: Comlink.Remote<WorkerDB>;
+    if (false) {
+    } else {
+      const worker = new Worker(path.resolve(__dirname, "./worker.js"));
+      workerDB = Comlink.wrap<WorkerDB>(nodeEndpoint(worker as unknown as NodeEndpoint));
+    }
 
     Comlink.expose(new VscodeFns(this, document, workerDB), webviewEndpoint);
 
@@ -365,17 +341,17 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     ));
 
     const cspObj = {
-      [csp.defaultSrc]: [webview.cspSource],
-      [csp.scriptSrc]: [webview.cspSource, csp.wasmUnsafeEval], 
-      [csp.styleSrc]: [webview.cspSource, csp.inlineStyle],
-      [csp.imgSrc]: [webview.cspSource, csp.data],
-      [csp.fontSrc]: [webview.cspSource],
-      [csp.childSrc]: [csp.blob],
+      [cspUtil.defaultSrc]: [webview.cspSource],
+      [cspUtil.scriptSrc]: [webview.cspSource, cspUtil.wasmUnsafeEval], 
+      [cspUtil.styleSrc]: [webview.cspSource, cspUtil.inlineStyle],
+      [cspUtil.imgSrc]: [webview.cspSource, cspUtil.data],
+      [cspUtil.fontSrc]: [webview.cspSource],
+      [cspUtil.childSrc]: [cspUtil.blob],
     };
 
     // Only set csp for hosts that are known to correctly set `webview.cspSource`
     const cspStr = IS_VSCODE || IS_VSCODIUM
-      ? csp.build(cspObj)
+      ? cspUtil.build(cspObj)
       : ''
 
     const preparedHtml = html

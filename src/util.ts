@@ -76,3 +76,29 @@ export class WebviewEndpointAdapter {
     this.listeners.delete(handler);
   }
 }
+
+export const cspUtil = {
+  defaultSrc: 'default-src',
+  scriptSrc: 'script-src',
+  styleSrc: 'style-src',
+  imgSrc: 'img-src',
+  fontSrc: 'font-src',
+  childSrc: 'child-src',
+  self: "'self'",
+  data: 'data:',
+  blob: 'blob:',
+  inlineStyle: "'unsafe-inline'",
+  unsafeEval: "'unsafe-eval'",
+  wasmUnsafeEval: "'wasm-unsafe-eval'",
+  build(cspObj: Record<string, string[]>) {
+    return Object.entries(cspObj)
+      .map(([k, vs]) => `${k} ${vs.filter(x => x != null).join(' ')};`)
+      .join(' ');
+  }
+} as const;
+
+const PathRegExp = /(?<dirname>.*)\/(?<filename>(?<basename>.*)(?<extname>\.[^.]+))$/
+export function getUriParts(uri: vsc.Uri) {
+  const { dirname, filename, basename, extname } = decodeURI(uri.toString()).match(PathRegExp)?.groups ?? {}
+  return { dirname, filename, basename, extname };
+}
