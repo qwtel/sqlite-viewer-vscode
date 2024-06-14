@@ -97,8 +97,8 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
 
   if (
     prevVersion === undefined ||
-    prevVersion !== currVersion ||
-    context.extensionMode === vsc.ExtensionMode.Development
+    prevVersion !== currVersion
+    // || context.extensionMode === vsc.ExtensionMode.Development
   ) {
     reporter.sendTelemetryEvent("install");
 
@@ -118,8 +118,8 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
       }
     }
     else if (
-      prevVersion !== currVersion ||
-      context.extensionMode === vsc.ExtensionMode.Development
+      prevVersion !== currVersion
+      || context.extensionMode === vsc.ExtensionMode.Development
     ) {
       let actions;
       const result = await vsc.window.showInformationMessage(

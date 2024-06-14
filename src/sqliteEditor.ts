@@ -1,7 +1,6 @@
 import type TelemetryReporter from '@vscode/extension-telemetry';
 import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
 import type { WorkerDB } from '../sqlite-viewer-core/src/worker-db';
-import * as path from "path"
 import * as vsc from 'vscode';
 import * as Comlink from "../sqlite-viewer-core/src/comlink";
 import nodeEndpoint, { type NodeEndpoint } from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
@@ -160,11 +159,12 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * Called by VS Code when the user saves the document to a new location.
    */
   async saveAs(targetResource: vsc.Uri, cancellation: vsc.CancellationToken): Promise<void> {
-    const fileData = await this._delegate.getFileData();
-    if (cancellation.isCancellationRequested) {
-      return;
-    }
-    await vsc.workspace.fs.writeFile(targetResource, fileData);
+    throw Error("Not implemented")
+    // const fileData = await this._delegate.getFileData();
+    // if (cancellation.isCancellationRequested) {
+    //   return;
+    // }
+    // await vsc.workspace.fs.writeFile(targetResource, fileData);
   }
 
   /**
@@ -244,13 +244,7 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
 
     const document = await SQLiteDocument.create(uri, openContext.backupId, {
       getFileData: async () => {
-        const webviewsForDocument = [...this.webviews.get(document.uri)];
-        if (!webviewsForDocument.length) throw new Error('Could not find webview to save for');
-        const panel = webviewsForDocument[0];
-        const remote = this.webviewRemotes.get(panel)!
-        const data = await remote.getFileData();
-        if (!data) throw new Error("Couldn't get data from webview");
-        return data;
+        throw Error("Not implemented")
       }
     });
 
@@ -267,15 +261,10 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     listeners.push(document.onDidChangeContent(async e => {
       // Update all webviews when the document changes
       // NOTE: per configuration there can only be one webview per uri, so transferring the buffer is ok
+      const { filename } = document.uriParts;
       for (const panel of this.webviews.get(document.uri)) {
-        if (!document.documentData) continue;
-        const { filename, value, walValue } = document.getTransferables(document.documentData);
         const remote = this.webviewRemotes.get(panel);
-        await remote?.forceUpdate(Comlink.transfer({
-          filename, 
-          value,
-          walValue,
-        }, [value.buffer]));
+        await remote?.forceUpdate(filename);
       }
     }));
 
@@ -296,13 +285,30 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
 
     let workerDB: Comlink.Remote<WorkerDB>;
+    let initPromise;
     if (false) {
     } else {
-      const worker = new Worker(path.resolve(__dirname, "./worker.js"));
+      const workerPath = import.meta.env.BROWSER_EXT
+        ? vsc.Uri.joinPath(this._context.extensionUri, 'out', 'worker-browser.js').toString()
+        : (await import('path')).resolve(__dirname, "./worker.js")
+      const worker = new Worker(workerPath);
       workerDB = Comlink.wrap<WorkerDB>(nodeEndpoint(worker as unknown as NodeEndpoint));
-    }
 
-    Comlink.expose(new VscodeFns(this, document, workerDB), webviewEndpoint);
+      const { documentData: data, walData, uriParts: { filename } } = document
+      initPromise = workerDB.importDb(filename, Comlink.transfer({
+        data,
+        walData,
+        maxFileSize: getConfiguredMaxFileSize(),
+        mappings: {
+          'sqlite3.wasm': vsc.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build', 'assets', 'sqlite3.wasm').toString(),
+        }
+      }, [
+        ...data ? [data.buffer as ArrayBuffer] : [],
+        ...walData ? [walData.buffer as ArrayBuffer] : [],
+      ]));
+    }
+    initPromise.catch(() => {}) // HACK: prevent unhandled promise rejection
+    Comlink.expose(new VscodeFns(this, document, workerDB, initPromise), webviewEndpoint);
 
     // Setup initial content for the webview
     webviewPanel.webview.options = {
@@ -361,8 +367,6 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
       .replace('<!--HEAD-->', `
         <meta http-equiv="Content-Security-Policy" content="${cspStr}">
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}" crossorigin/>
-        <link rel="preload" as="fetch" id="assets/worker.js" href="${assetAsWebviewUri("assets/worker.js")}" crossorigin/>
-        <link rel="preload" as="fetch" id="assets/sqlite3.wasm" type="application/wasm" href="${assetAsWebviewUri("assets/sqlite3.wasm")}" crossorigin/>
       `)
       .replace('<!--BODY-->', ``)
 

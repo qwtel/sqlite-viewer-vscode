@@ -30,43 +30,20 @@ export class VscodeFns implements Comlink.TRemote<WorkerDB> {
     readonly parent: SQLiteEditorProvider, 
     readonly document: SQLiteDocument,
     readonly workerDB: Comlink.Remote<WorkerDB>,
+    private readonly initPromise: Promise<void>,
   ) {}
 
   get #webviews() { return this.parent.webviews }
   get #reporter() { return this.parent.reporter }
 
-  getInitialData(): UntitledInit|RegularInit|string|undefined {
+  async ready() {
     const { document } = this;
     if (this.#webviews.has(document.uri)) {
       this.#reporter.sendTelemetryEvent("open");
-      // this.credentials?.token.then(token => token && this.postMessage(webviewPanel, 'token', { token }));
-
-      if (document.uri.scheme === 'untitled') {
-        const maxFileSize = document.getConfiguredMaxFileSize();
-        return {
-          filename: 'untitled',
-          untitled: true,
-          editable: false,
-          maxFileSize,
-        };
-      } else if (document.documentData) {
-        return document.uri.toString();
-        // const editable = false;
-        // // const editable = vscode.workspace.fs.isWritableFileSystem(document.uri.scheme);
-        // const { filename, value, walValue } = getTransferables(document, document.documentData);
-        // const maxFileSize = SQLiteDocument.getConfiguredMaxFileSize();
-        // return Comlink.transfer({
-        //   filename,
-        //   value,
-        //   walValue,
-        //   editable,
-        //   maxFileSize,
-        // }, [value.buffer as ArrayBuffer]);
-      }
-
-      // HACK: There could be other reasons why the data is empty
-      throw Error(TooLargeErrorMsg);
+      await this.initPromise;
+      return document.uriParts.filename;
     }
+    // TODO: propagate errors?
   }
 
   async refreshFile(): Promise<{
@@ -112,6 +89,7 @@ export class VscodeFns implements Comlink.TRemote<WorkerDB> {
   // FIXME: better way to forward these?
 
   importDb(filename: string, args: { [k: string]: any; }): Promise<void> {
+    console.log("importDb (should never happen)", filename)
     return this.workerDB.importDb(filename, args);
   }
   getTableGroups(filename: string) {
