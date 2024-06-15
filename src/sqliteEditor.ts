@@ -85,15 +85,15 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   ): Promise<SQLiteDocument> {
     const { filename } = getUriParts(uri);
 
-    const createWorkerLike = false
+    const createWorker = false
       ? toss('unreachable')
       : createWebWorker;
 
-    const [workerLike, workerDB, importDbPromise] = await createWorkerLike(context, openContext, filename, uri);
+    const [worker, workerDb, importDbPromise] = await createWorker(context, openContext, filename, uri);
 
-    importDbPromise.catch(() => {}) // HACK: prevent unhandled promise rejection
+    importDbPromise.catch(() => {}) // prevent unhandled promise rejection
 
-    return new SQLiteDocument(uri, delegate, workerLike, workerDB, importDbPromise);
+    return new SQLiteDocument(uri, delegate, worker, workerDb, importDbPromise);
   }
 
   getConfiguredMaxFileSize() {
