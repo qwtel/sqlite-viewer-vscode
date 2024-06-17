@@ -4,6 +4,8 @@
 ### Secondary Sidebar
 SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
 
+## v0.6.1 (Pre-Release)
+Added basic keyboard support to table explorer and main view
 
 ## v0.5
 ### WAL Mode Support

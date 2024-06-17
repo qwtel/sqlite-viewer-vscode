@@ -1,4 +1,10 @@
 {
     "editor.tabSize": 2,
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "cSpell.words": [
+        "groupper",
+        "Tabbabilities",
+        "tabbability",
+        "Tabster"
+    ]
 }
