@@ -11,6 +11,18 @@ While this update removes the need for the above workarounds, it does not change
 
 Note that making this work required significant restructuring of the extension, which may cause (unrelated) issues. Please report any you may encounter. 
 
+## v0.5.9
+Improved column filtering:
+- Added a button to invert a colum filter
+- Added a button to filter a column non-nullish (`NULL` or empty string) values. You can combine it with the invert button to filter for nullish values instead.
+- Typing `NULL` or `''` into the column filter will now filter by null or empty string values respectively.
+- Changed representation of empty strings from `""` to `''`. This is to match the filter values above and to distinguish it from the legitimate search target `""`, which can come up in combination with JSON(B) columns. If you need to search for the exact string sequence `''`, use escape characters: `\'\'`.
+- Fixed a bug that caused column filters to not properly reset when deleting the contents of the search box
+
+Experimental support for Views:
+- SQLite Viewer can now view Views. Note that there is a known performance issue for on large views. This feature will retain the "Experimental" qualifier until I can resolve it.
+- Added button to expand/collapse all tables and view in the sidebar
+
 ## v0.5.8
 - Limiting webview Content Security Policy to environments that are known to work.
 This should (finally) make this extension work with GitPod and Google IDX.
