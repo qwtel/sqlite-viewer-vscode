@@ -3,6 +3,9 @@
 ## v0.6 (Pre-Release)
 ### Secondary Sidebar
 SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
+
+## v0.6.3 (Pre-Release)
+Included latest changes from 0.5 branch
  
 ## v0.6.2 (Pre-Release)
 - Improved keyboard support. Page Up/Page Down should now work in most cases
