@@ -25,6 +25,25 @@ function getConfiguredMaxFileSize() {
   return maxFileSize;
 }
 
+async function importDb(workerDB: Comlink.Remote<WorkerDB>, dataFile: vsc.Uri, filename: string, context?: vsc.ExtensionContext) {
+  const [data, walData] = await readFile(dataFile);
+  const transfer = [
+    ...data ? [data.buffer as ArrayBuffer] : [],
+    ...walData ? [walData.buffer as ArrayBuffer] : [],
+  ];
+  const importDbPromise = workerDB.importDb(filename, Comlink.transfer({
+    data,
+    walData,
+    maxFileSize: getConfiguredMaxFileSize(),
+    ...context && { 
+      mappings: {
+        'sqlite3.wasm': vsc.Uri.joinPath(context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build', 'assets', 'sqlite3.wasm').toString(),
+      }
+    },
+  }, transfer));
+  return { promise : importDbPromise }
+}
+
 async function createWebWorker(
   context: vsc.ExtensionContext,
   openContext: vsc.CustomDocumentOpenContext,
@@ -40,18 +59,8 @@ async function createWebWorker(
 
   // If we have a backup, read that. Otherwise read the resource from the workspace
   const dataFile = typeof openContext.backupId === 'string' ? vsc.Uri.parse(openContext.backupId) : uri;
-  const [data, walData] = await readFile(dataFile);
-  const importDbPromise = workerDB.importDb(filename, Comlink.transfer({
-    data,
-    walData,
-    maxFileSize: getConfiguredMaxFileSize(),
-    mappings: {
-      'sqlite3.wasm': vsc.Uri.joinPath(context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build', 'assets', 'sqlite3.wasm').toString(),
-    }
-  }, [
-    ...data ? [data.buffer as ArrayBuffer] : [],
-    ...walData ? [walData.buffer as ArrayBuffer] : [],
-  ]));
+  const { promise: importDbPromise } = await importDb(workerDB, dataFile, filename, context);
+
   return [worker, workerDB, importDbPromise] as const;
 }
 
@@ -188,8 +197,9 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * Called by VS Code when the user saves the document.
    */
   async save(cancellation: vsc.CancellationToken): Promise<void> {
-    await this.saveAs(this.uri, cancellation);
-    this._savedEdits = Array.from(this._edits);
+    throw Error("Not implemented")
+    // await this.saveAs(this.uri, cancellation);
+    // this._savedEdits = Array.from(this._edits);
   }
 
   /**
@@ -197,38 +207,18 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    */
   async saveAs(targetResource: vsc.Uri, cancellation: vsc.CancellationToken): Promise<void> {
     throw Error("Not implemented")
-    // const fileData = await this._delegate.getFileData();
-    // if (cancellation.isCancellationRequested) {
-    //   return;
-    // }
-    // await vsc.workspace.fs.writeFile(targetResource, fileData);
   }
 
   /**
    * Called by VS Code when the user calls `revert` on a document.
    */
   async revert(_cancellation: vsc.CancellationToken): Promise<void> {
-    throw Error("TODO");
-    // const diskContent = await SQLiteDocument.readFile(this.uri);
-    // this._documentData = diskContent;
-    // this._edits = this._savedEdits;
-    // diskContent[0] && this._onDidChangeDocument.fire({
-    //   content: diskContent[0],
-    //   walContent: diskContent[1],
-    //   edits: this._edits,
-    // });
+    throw Error("Not implemented");
   }
 
   async refresh(_cancellation?: vsc.CancellationToken): Promise<void> {
-    throw Error("TODO");
-    // const diskContent = await SQLiteDocument.readFile(this.uri);
-    // this._documentData = diskContent;
-    // this._edits = [];
-    // diskContent[0] && this._onDidChangeDocument.fire({
-    //   content: diskContent[0],
-    //   walContent: diskContent[1],
-    //   edits: [],
-    // });
+    const { promise: importDbPromise } = await importDb(this.workerDB, this.uri, this.uriParts.filename);
+    await importDbPromise;
   }
 
   /**

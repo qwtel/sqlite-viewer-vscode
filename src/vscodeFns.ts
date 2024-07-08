@@ -50,8 +50,8 @@ export class VscodeFns implements Comlink.TRemote<WorkerDB> {
 
     const { document } = this;
     if (document.uri.scheme !== 'untitled') {
-      return document.uri.toString();
-      // await document.refresh()
+      await document.refresh()
+      return document.uriParts.filename;
 
       // if (document.documentData) {
       //   const { filename, value, walValue } = getTransferables(document, document.documentData);
