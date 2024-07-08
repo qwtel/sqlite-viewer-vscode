@@ -123,7 +123,7 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
     ) {
       let actions;
       const result = await vsc.window.showInformationMessage(
-        `SQLite Viewer now adds configuration settings for nesting SQLite-related files. Check out the Changelog for more:`,
+        `SQLite Viewer now has experimental support for Views and more column filter options. Check out the Changelog for details`,
         ...actions = [{ title: 'Open Changelog ↗' }]
       );
 
