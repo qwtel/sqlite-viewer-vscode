@@ -139,6 +139,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     readonly walContent?: Uint8Array|null;
     readonly edits: readonly SQLiteEdit[];
   }>());
+
   /**
    * Fired to notify webviews that the document has changed.
    */
@@ -149,6 +150,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     undo(): void,
     redo(): void,
   }>());
+
   /**
    * Fired to tell VS Code that an edit has occurred in the document.
    *
@@ -287,6 +289,8 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     return document;
   }
 
+  private hostFns?: VscodeFns
+
   async resolveCustomEditor(
     document: SQLiteDocument,
     webviewPanel: vsc.WebviewPanel,
@@ -297,13 +301,22 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     const webviewEndpoint = new WebviewEndpointAdapter(webviewPanel.webview);
     this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
 
-    Comlink.expose(new VscodeFns(this, document, document.workerDB, document.importDbPromise), webviewEndpoint);
+    this.hostFns ||= new VscodeFns(this, document, document.workerDB, document.importDbPromise);
+    Comlink.expose(this.hostFns, webviewEndpoint);
 
-    // Setup initial content for the webview
     webviewPanel.webview.options = {
       enableScripts: true,
     };
     webviewPanel.webview.html = await this.getHtmlForWebview(webviewPanel.webview);
+
+    webviewPanel.onDidDispose(() => {
+      const webviewRemote = this.webviewRemotes.get(webviewPanel);
+      if (webviewRemote) {
+        webviewRemote?.[Symbol.dispose]();
+        this.webviewRemotes.delete(webviewPanel);
+      }
+      webviewEndpoint.terminate();
+    });
   }
 
   private readonly _onDidChangeCustomDocument = new vsc.EventEmitter<vsc.CustomDocumentEditEvent<SQLiteDocument>>();
@@ -368,7 +381,7 @@ const registerOptions = {
     // TODO: serialize state!?
     retainContextWhenHidden: true,
   },
-  supportsMultipleEditorsPerDocument: false,
+  supportsMultipleEditorsPerDocument: true,
 } satisfies Parameters<typeof vsc.window.registerCustomEditorProvider>[2];
 
 export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {

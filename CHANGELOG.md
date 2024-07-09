@@ -11,6 +11,13 @@ While this update removes the need for the above workarounds, it does not change
 
 Note that making this work required significant restructuring of the extension, which may cause (unrelated) issues. Please report any you may encounter. 
 
+## v0.6.4
+It is now possible to __open more than one SQLite Viewer instance per file__. 
+Additionally, opening large files (~1GB) is now much faster, and opening additional tabs of the same file carries no additional cost beyond for the webview itself. 
+
+This is made possible by lifting the WASM instance of SQLite out of the webview and into a web worker within VSCode itself. 
+This makes allows transferring ownership of the file buffer rather than copying into the webview, and also means that multiple webviews can share the same WASM instance.
+
 ## v0.5.10
 - Fixed an issue that caused an entire file to crash when some tables/views are using custom functions
 - Fixed an issue that caused rendering artifacts and column resizing issues in empty tables

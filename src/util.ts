@@ -53,7 +53,7 @@ export class WebviewCollection {
  */
 export class WebviewEndpointAdapter {
   constructor(private readonly webview: vsc.Webview) {}
-  private listeners = new WeakMap<TypedEventListenerOrEventListenerObject<MessageEvent>, vsc.Disposable>
+  private listeners = new Map<TypedEventListenerOrEventListenerObject<MessageEvent>, vsc.Disposable>
   postMessage(message: any, transfer: Transferable[]) {
     // @ts-expect-error: transferables type missing
     this.webview.postMessage(message, transfer);
@@ -74,6 +74,10 @@ export class WebviewEndpointAdapter {
     if (!handler) return;
     this.listeners.get(handler)?.dispose();
     this.listeners.delete(handler);
+  }
+  terminate() {
+    this.listeners.forEach(disposable => disposable.dispose());
+    this.listeners.clear();
   }
 }
 
