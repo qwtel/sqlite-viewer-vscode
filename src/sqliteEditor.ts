@@ -87,7 +87,7 @@ const toss = (msg: string): never => { throw Error(msg) };
 
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   static async create(
-    context: vsc.ExtensionContext,
+    provider: SQLiteEditorProvider,
     openContext: vsc.CustomDocumentOpenContext,
     uri: vsc.Uri,
     delegate: SQLiteDocumentDelegate,
@@ -98,7 +98,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       ? toss('unreachable')
       : createWebWorker;
 
-    const [worker, workerDb, importDbPromise] = await createWorker(context, openContext, filename, uri);
+    const [worker, workerDb, importDbPromise] = await createWorker(provider._context, openContext, filename, uri);
 
     importDbPromise.catch(() => {}) // prevent unhandled promise rejection
 
@@ -259,7 +259,7 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     _token: vsc.CancellationToken
   ): Promise<SQLiteDocument> {
 
-    const document = await SQLiteDocument.create(this._context, openContext, uri, {
+    const document = await SQLiteDocument.create(this, openContext, uri, {
       getFileData: async () => {
         throw Error("Not implemented")
       }
@@ -289,8 +289,6 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     return document;
   }
 
-  private hostFns?: VscodeFns
-
   async resolveCustomEditor(
     document: SQLiteDocument,
     webviewPanel: vsc.WebviewPanel,
@@ -301,8 +299,7 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     const webviewEndpoint = new WebviewEndpointAdapter(webviewPanel.webview);
     this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
 
-    this.hostFns ||= new VscodeFns(this, document, document.workerDB, document.importDbPromise);
-    Comlink.expose(this.hostFns, webviewEndpoint);
+    Comlink.expose(new VscodeFns(this, document, document.workerDB, document.importDbPromise), webviewEndpoint);
 
     webviewPanel.webview.options = {
       enableScripts: true,
