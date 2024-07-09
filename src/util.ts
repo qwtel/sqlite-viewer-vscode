@@ -53,7 +53,7 @@ export class WebviewCollection {
  */
 export class WebviewEndpointAdapter {
   constructor(private readonly webview: vsc.Webview) {}
-  private listeners = new WeakMap<TypedEventListenerOrEventListenerObject<MessageEvent>, vsc.Disposable>
+  private listeners = new Map<TypedEventListenerOrEventListenerObject<MessageEvent>, vsc.Disposable>
   postMessage(message: any, transfer: Transferable[]) {
     // @ts-expect-error: transferables type missing
     this.webview.postMessage(message, transfer);
@@ -75,4 +75,66 @@ export class WebviewEndpointAdapter {
     this.listeners.get(handler)?.dispose();
     this.listeners.delete(handler);
   }
+  terminate() {
+    this.listeners.forEach(disposable => disposable.dispose());
+    this.listeners.clear();
+  }
+}
+
+export class WebviewStreamPair implements vsc.Disposable {
+  #readable;
+  #writable;
+  #disposable: vsc.Disposable | undefined;
+  constructor(private readonly webview: vsc.Webview) {
+    this.#readable = new ReadableStream<Uint8Array>({
+      start: (controller) => {
+        this.#disposable = this.webview.onDidReceiveMessage(data => controller.enqueue(data));
+      },
+      cancel: () => {
+        this.#disposable?.dispose();
+      },
+    });
+    this.#writable = new WritableStream<Uint8Array>({
+      write: (chunk) => {
+        const { buffer, byteOffset, byteLength } = chunk;
+        this.webview.postMessage({ buffer, byteOffset, byteLength });
+      },
+    });
+  }
+  get readable() {
+    return this.#readable;
+  }
+  get writable() {
+    return this.#writable;
+  }
+  dispose() {
+    this.#readable.cancel();
+    this.#writable.abort();
+  }
+}
+
+export const cspUtil = {
+  defaultSrc: 'default-src',
+  scriptSrc: 'script-src',
+  styleSrc: 'style-src',
+  imgSrc: 'img-src',
+  fontSrc: 'font-src',
+  childSrc: 'child-src',
+  self: "'self'",
+  data: 'data:',
+  blob: 'blob:',
+  inlineStyle: "'unsafe-inline'",
+  unsafeEval: "'unsafe-eval'",
+  wasmUnsafeEval: "'wasm-unsafe-eval'",
+  build(cspObj: Record<string, string[]>) {
+    return Object.entries(cspObj)
+      .map(([k, vs]) => `${k} ${vs.filter(x => x != null).join(' ')};`)
+      .join(' ');
+  }
+} as const;
+
+const PathRegExp = /(?<dirname>.*)\/(?<filename>(?<basename>.*)(?<extname>\.[^.]+))$/
+export function getUriParts(uri: vsc.Uri) {
+  const { dirname, filename, basename, extname } = decodeURI(uri.toString()).match(PathRegExp)?.groups ?? {}
+  return { dirname, filename, basename, extname };
 }
