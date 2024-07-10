@@ -110,6 +110,12 @@ export class VscodeFns implements Comlink.TRemote<WorkerDB> {
   exportDb(filename: string): Promise<Uint8Array> {
     return this.workerDB.exportDb(filename);
   }
+  getStorageSize(params: DbParams): Promise<{ totalSize: number; numPages: number; }> {
+    return this.workerDB.getStorageSize(params);
+  }
+  getIndices(params: DbParams): Promise<{ seq: string; name: string; unique: boolean; origin: string; partial: boolean; }[]> {
+    return this.workerDB.getIndices(params);
+  }
   close(filename: string): Promise<void> {
     return this.workerDB.close(filename);
   }
