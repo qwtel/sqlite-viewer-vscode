@@ -6,10 +6,8 @@ SQLite Viewer now features a second sidebar 🎉. It shows either the current ro
 
 ## v0.6.4 (Pre-Release)
 It is now possible to __open more than one SQLite Viewer instance per file__. 
-Additionally, opening large files (~1GB) is now much faster, and opening additional tabs of the same file carries no additional cost beyond for the webview itself. 
-
-This is made possible by lifting the WASM instance of SQLite out of the webview and into a web worker within VSCode itself. 
-This makes allows transferring ownership of the file buffer rather than copying into the webview, and also means that multiple webviews can share the same WASM instance.
+Additionally, opening large files (~1GB) is now much faster, and opening additional tabs of the same file carries no additional cost beyond the webview itself. 
+This was made possible by lifting the WASM instance of SQLite out of the webview and into a web worker within VSCode itself.
 
 ## v0.6.3 (Pre-Release)
 Included latest changes from 0.5 branch
