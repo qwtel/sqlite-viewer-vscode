@@ -53,7 +53,7 @@ const compileNodeMain = () =>
       ...envToDefine({
         BROWSER_EXT: false,
       }),
-    },
+    }
   });
 
 const compileBrowserMain = () =>
@@ -72,6 +72,9 @@ const compileBrowserMain = () =>
       'stream/web',
       'node-fetch',
     ],
+    alias: {
+      'path': resolve('src/noop.js'),
+    },
     minify: !DEV,
     sourcemap: DEV,
     define: {
@@ -118,6 +121,7 @@ const compileBrowserWorker = () =>
       })
     },
     plugins: [
+      // @ts-ignore
       polyfillNode({
         polyfills: {}
       })

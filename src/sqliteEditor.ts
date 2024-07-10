@@ -2,6 +2,7 @@ import type TelemetryReporter from '@vscode/extension-telemetry';
 import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
 import type { WorkerDB } from '../sqlite-viewer-core/src/worker-db';
 import * as vsc from 'vscode';
+import path from 'path';
 import * as Comlink from "../sqlite-viewer-core/src/comlink";
 import nodeEndpoint, { type NodeEndpoint } from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
 import { Disposable, disposeAll } from './dispose';
@@ -52,7 +53,7 @@ async function createWebWorker(
 ) {
   const workerPath = import.meta.env.BROWSER_EXT
     ? vsc.Uri.joinPath(context.extensionUri, 'out', 'worker-browser.js').toString()
-    : (await import('path')).resolve(__dirname, "./worker.js")
+    : path.resolve(__dirname, "./worker.js")
   const worker = new Worker(workerPath);
   const workerEndpoint = nodeEndpoint(worker as unknown as NodeEndpoint);
   const workerDB = Comlink.wrap<WorkerDB>(workerEndpoint);
