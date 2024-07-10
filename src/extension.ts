@@ -107,13 +107,13 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
     ) {
       let actions;
       const result = await vsc.window.showInformationMessage(
-        `SQLite Viewer now supports reading WAL mode databases. Check out the Changelog for details.`,
+        `SQLite Viewer now has a secondary sidebar 🎉. It can show the current row selection or meta data about the current table.`,
         ...actions = [{ title: 'Open Changelog ↗' }]
       );
 
       switch (result) {
         case actions[0]: {
-          return await openChangelog('#v0.5');
+          return await openChangelog('#v0.6');
         }
       }
     }
@@ -123,13 +123,13 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
     ) {
       let actions;
       const result = await vsc.window.showInformationMessage(
-        `SQLite Viewer now has experimental support for Views and more column filter options. Check out the Changelog for details`,
+        `SQLite Viewer can now open more than one than one editor per SQLite file. Check out the changelog for details:`,
         ...actions = [{ title: 'Open Changelog ↗' }]
       );
 
       switch (result) {
         case actions[0]: {
-          return await openChangelog('#v0.5.7');
+          return await openChangelog('#v0.6.4');
         }
       }
     }
