@@ -1,6 +1,8 @@
 import * as vsc from 'vscode';
 import type { TypedEventListenerOrEventListenerObject } from "@worker-tools/typed-event-target";
 
+import { ReadableStream, WritableStream } from './webStream.ts';
+
 // A bunch of tests to figure out where we're running. Some more reliable than others.
 export const IS_VSCODE = vsc.env.uriScheme.includes("vscode");
 export const IS_VSCODIUM = vsc.env.uriScheme.includes("vscodium");

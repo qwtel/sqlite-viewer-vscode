@@ -128,6 +128,8 @@
     "@vscode/extension-telemetry": "^0.9.6",
     "@vscode/vsce": "^2.27.0",
     "@worker-tools/typed-event-target": "^1.0.0",
-    "node-fetch": "^3.3.2"
+    "msgpackr": "^1.10.2",
+    "node-fetch": "^3.3.2",
+    "whatwg-stream-to-async-iter": "^0.6.2"
   }
 }
