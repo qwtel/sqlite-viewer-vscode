@@ -9,7 +9,7 @@ import { Disposable, disposeAll } from './dispose';
 import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStreamPair, cspUtil, getUriParts } from './util';
 import { Worker } from './webWorker';
 import { VscodeFns } from './vscodeFns';
-import { CustomEndpoint } from './pM';
+import { WireEndpoint } from './post-message-over-wire';
 // import type { Credentials } from './credentials';
 
 interface SQLiteEdit {
@@ -298,7 +298,7 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
   ): Promise<void> {
     this.webviews.add(document.uri, webviewPanel);
 
-    const webviewEndpoint = new CustomEndpoint(new WebviewStreamPair(webviewPanel.webview))
+    const webviewEndpoint = new WireEndpoint(new WebviewStreamPair(webviewPanel.webview))
     this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
 
     Comlink.expose(new VscodeFns(this, document, document.workerDB, document.importDbPromise), webviewEndpoint);
