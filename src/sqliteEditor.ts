@@ -1,15 +1,18 @@
 import type TelemetryReporter from '@vscode/extension-telemetry';
 import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
 import type { WorkerDB } from '../sqlite-viewer-core/src/worker-db';
+
 import * as vsc from 'vscode';
 import path from 'path';
+
 import * as Comlink from "../sqlite-viewer-core/src/comlink";
 import nodeEndpoint, { type NodeEndpoint } from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
+import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/post-message-over-wire'
+
 import { Disposable, disposeAll } from './dispose';
 import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStreamPair, cspUtil, getUriParts } from './util';
 import { Worker } from './webWorker';
 import { VscodeFns } from './vscodeFns';
-import { WireEndpoint } from './post-message-over-wire';
 // import type { Credentials } from './credentials';
 
 interface SQLiteEdit {

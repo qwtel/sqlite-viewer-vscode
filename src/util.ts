@@ -1,7 +1,6 @@
 import * as vsc from 'vscode';
 import type { TypedEventListenerOrEventListenerObject } from "@worker-tools/typed-event-target";
-
-import { ReadableStream, WritableStream } from './webStream.ts';
+import * as CBOR from 'cbor-x'
 
 // A bunch of tests to figure out where we're running. Some more reliable than others.
 export const IS_VSCODE = vsc.env.uriScheme.includes("vscode");
@@ -50,8 +49,11 @@ export class WebviewCollection {
   }
 }
 
+const cborDecoder = new CBOR.Decoder({ structuredClone: true, useRecords: false, pack: false, tagUint8Array: true, structures: undefined })
+
 /**
  * A wrapper for a vscode webview that implements Comlink's endpoint interface
+ * @deprecated
  */
 export class WebviewEndpointAdapter {
   constructor(private readonly webview: vsc.Webview) {}
@@ -90,7 +92,11 @@ export class WebviewStreamPair implements vsc.Disposable {
   constructor(private readonly webview: vsc.Webview) {
     this.#readable = new ReadableStream<Uint8Array>({
       start: (controller) => {
-        this.#disposable = this.webview.onDidReceiveMessage(data => controller.enqueue(data));
+        this.#disposable = this.webview.onDidReceiveMessage(data => {
+          // const [header, code, port1, port2, tl, payload] = cborDecoder.decode(data);
+          // console.log("Receiving...", [header, code, port1?.toString(16), port2?.toString(16), tl, payload && { byteLength: payload?.byteLength }])
+          controller.enqueue(data);
+        });
       },
       cancel: () => {
         this.#disposable?.dispose();
@@ -99,6 +105,8 @@ export class WebviewStreamPair implements vsc.Disposable {
     this.#writable = new WritableStream<Uint8Array>({
       write: (chunk) => {
         const { buffer, byteOffset, byteLength } = chunk;
+        // const [header, code, port1, port2, tl, payload] = cborDecoder.decode(chunk);
+        // console.log("Sending...", [header, code, port1?.toString(16), port2?.toString(16), tl, payload && { byteLength: payload?.byteLength }])
         this.webview.postMessage({ buffer, byteOffset, byteLength });
       },
     });

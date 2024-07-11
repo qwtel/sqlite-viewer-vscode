@@ -92,7 +92,7 @@ export class VscodeFns implements Comlink.TRemote<WorkerDB> {
   getCount(params: DbParams, opts?: DbOptions, signal?: AbortSignal): Promise<number> {
     return this.workerDB.getCount(params, opts, signal);
   }
-  getIdsFromToIndex(params: DbParams, start: number, end: number, opts?: DbOptions, signal?: AbortSignal): Promise<(string|number)[]> {
+  getIdsFromToIndex(params: DbParams, start: number, end: number, opts?: DbOptions, signal?: AbortSignal): Promise<Set<string|number>> {
     return this.workerDB.getIdsFromToIndex(params, start, end, opts, signal);
   }
   getPage(params: DbParams, opts: DbOptions = {}, signal?: AbortSignal) {
