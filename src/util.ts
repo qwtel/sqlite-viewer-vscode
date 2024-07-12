@@ -1,6 +1,5 @@
 import * as vsc from 'vscode';
-import type { TypedEventListenerOrEventListenerObject } from "@worker-tools/typed-event-target";
-import * as CBOR from 'cbor-x'
+// import * as CBOR from 'cbor-x'
 
 // A bunch of tests to figure out where we're running. Some more reliable than others.
 export const IS_VSCODE = vsc.env.uriScheme.includes("vscode");
@@ -49,42 +48,14 @@ export class WebviewCollection {
   }
 }
 
-const cborDecoder = new CBOR.Decoder({ structuredClone: true, useRecords: false, pack: false, tagUint8Array: true, structures: undefined })
+// const cborDecoder = new CBOR.Decoder({ structuredClone: true, useRecords: false, pack: false, tagUint8Array: true, structures: undefined });
 
 /**
- * A wrapper for a vscode webview that implements Comlink's endpoint interface
- * @deprecated
+ * Wraps a VSCode webview and returns a readable and writable stream pair.
+ * This can be used to overlay another binary protocol on top of the webview's message passing, such as "post-message-over-wire".
+ * This is especially useful considering how badly implemented object support in webview's `postMessage` is (no structured clone, no message channels, 
+ * randomly emptied buffers...).
  */
-export class WebviewEndpointAdapter {
-  constructor(private readonly webview: vsc.Webview) {}
-  private listeners = new Map<TypedEventListenerOrEventListenerObject<MessageEvent>, vsc.Disposable>
-  postMessage(message: any, transfer: Transferable[]) {
-    // @ts-expect-error: transferables type missing
-    this.webview.postMessage(message, transfer);
-  }
-  addEventListener(_event: "message", handler: TypedEventListenerOrEventListenerObject<MessageEvent>|null) {
-    if (!handler) return;
-    if ("handleEvent" in handler) {
-      this.listeners.set(handler, this.webview.onDidReceiveMessage(data => {
-        handler.handleEvent({ data } as MessageEvent);
-      }));
-    } else {
-      this.listeners.set(handler, this.webview.onDidReceiveMessage(data => {
-        handler({ data } as MessageEvent);
-      }))
-    }
-  }
-  removeEventListener(_event: "message", handler: TypedEventListenerOrEventListenerObject<MessageEvent>|null) {
-    if (!handler) return;
-    this.listeners.get(handler)?.dispose();
-    this.listeners.delete(handler);
-  }
-  terminate() {
-    this.listeners.forEach(disposable => disposable.dispose());
-    this.listeners.clear();
-  }
-}
-
 export class WebviewStreamPair implements vsc.Disposable {
   #readable;
   #writable;

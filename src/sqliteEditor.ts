@@ -1,13 +1,13 @@
 import type TelemetryReporter from '@vscode/extension-telemetry';
 import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
-import type { WorkerDB } from '../sqlite-viewer-core/src/worker-db';
+import type { WorkerFns, WorkerDB } from '../sqlite-viewer-core/src/worker-db';
 
 import * as vsc from 'vscode';
 import path from 'path';
 
 import * as Comlink from "../sqlite-viewer-core/src/comlink";
 import nodeEndpoint, { type NodeEndpoint } from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
-import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/post-message-over-wire'
+import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/post-message-over-wire/comlinked'
 
 import { Disposable, disposeAll } from './dispose';
 import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStreamPair, cspUtil, getUriParts } from './util';
@@ -20,6 +20,7 @@ interface SQLiteEdit {
 }
 
 interface SQLiteDocumentDelegate {
+  extensionUri: vsc.Uri;
   getFileData(): Promise<Uint8Array>;
 }
 
@@ -30,43 +31,42 @@ function getConfiguredMaxFileSize() {
   return maxFileSize;
 }
 
-async function importDb(workerDB: Comlink.Remote<WorkerDB>, dataFile: vsc.Uri, filename: string, context?: vsc.ExtensionContext) {
-  const [data, walData] = await readFile(dataFile);
+const TooLargeErrorMsg = "File too large. You can increase this limit in the settings under 'Sqlite Viewer: Max File Size'."
+
+async function importDb(workerDB: Comlink.Remote<WorkerFns>, xUri: vsc.Uri, filename: string, extensionUri?: vsc.Uri) {
+  const [data, walData] = await readFile(xUri);
   const transfer = [
     ...data ? [data.buffer as ArrayBuffer] : [],
     ...walData ? [walData.buffer as ArrayBuffer] : [],
   ];
-  const importDbPromise = workerDB.importDb(filename, Comlink.transfer({
+  if (data == null && walData == null) return { promise: Promise.reject(Error(TooLargeErrorMsg)) }
+  const workerDbPromise = workerDB.importDb(filename, Comlink.transfer({
     data,
     walData,
     maxFileSize: getConfiguredMaxFileSize(),
-    ...context && { 
+    ...extensionUri && { 
       mappings: {
-        'sqlite3.wasm': vsc.Uri.joinPath(context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build', 'assets', 'sqlite3.wasm').toString(),
+        'sqlite3.wasm': vsc.Uri.joinPath(extensionUri, 'sqlite-viewer-core', 'vscode', 'build', 'assets', 'sqlite3.wasm').toString(),
       }
     },
   }, transfer));
-  return { promise : importDbPromise }
+  return { promise: workerDbPromise }
 }
 
 async function createWebWorker(
-  context: vsc.ExtensionContext,
-  openContext: vsc.CustomDocumentOpenContext,
-  filename: string,
-  uri: vsc.Uri,
+  extensionUri: vsc.Uri,
+  _filename: string,
+  _uri: vsc.Uri,
 ) {
   const workerPath = import.meta.env.BROWSER_EXT
-    ? vsc.Uri.joinPath(context.extensionUri, 'out', 'worker-browser.js').toString()
+    ? vsc.Uri.joinPath(extensionUri, 'out', 'worker-browser.js').toString()
     : path.resolve(__dirname, "./worker.js")
+
   const worker = new Worker(workerPath);
   const workerEndpoint = nodeEndpoint(worker as unknown as NodeEndpoint);
-  const workerDB = Comlink.wrap<WorkerDB>(workerEndpoint);
+  const workerFns = Comlink.wrap<WorkerFns>(workerEndpoint);
 
-  // If we have a backup, read that. Otherwise read the resource from the workspace
-  const dataFile = typeof openContext.backupId === 'string' ? vsc.Uri.parse(openContext.backupId) : uri;
-  const { promise: importDbPromise } = await importDb(workerDB, dataFile, filename, context);
-
-  return [worker, workerDB, importDbPromise] as const;
+  return [worker, workerFns] as const;
 }
 
 async function readFile(uri: vsc.Uri): Promise<[data: Uint8Array|null, walData?: Uint8Array|null]> {
@@ -92,30 +92,30 @@ const toss = (msg: string): never => { throw Error(msg) };
 
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   static async create(
-    provider: SQLiteEditorProvider,
     openContext: vsc.CustomDocumentOpenContext,
     uri: vsc.Uri,
     delegate: SQLiteDocumentDelegate,
   ): Promise<SQLiteDocument> {
-    const { filename } = getUriParts(uri);
-
-    const createWorker = false
+    const createWorkerLike = false
       ? toss('unreachable')
       : createWebWorker;
 
-    const [worker, workerDb, importDbPromise] = await createWorker(provider._context, openContext, filename, uri);
+    // If we have a backup, read that. Otherwise read the resource from the workspace. XXX: This needs a review. When are we backing stuff up?
+    const xUri = typeof openContext.backupId === 'string' ? vsc.Uri.parse(openContext.backupId) : uri;
 
-    importDbPromise.catch(() => {}) // prevent unhandled promise rejection
+    const { filename } = getUriParts(xUri);
+    const [workerLike, workerFns] = await createWorkerLike(delegate.extensionUri, filename, xUri);
 
-    return new SQLiteDocument(uri, delegate, worker, workerDb, importDbPromise);
+    const { promise: workerDbPromise } = await importDb(workerFns, uri, filename, delegate.extensionUri);
+
+    workerDbPromise.catch(() => {}) // prevent unhandled rejection warning (we catch it later)
+
+    return new SQLiteDocument(uri, delegate, workerLike, workerFns, workerDbPromise);
   }
 
-  getConfiguredMaxFileSize() {
-    return getConfiguredMaxFileSize();
-  }
+  getConfiguredMaxFileSize() { return getConfiguredMaxFileSize() }
 
   private readonly _uri: vsc.Uri;
-
   private _edits: Array<SQLiteEdit> = [];
   private _savedEdits: Array<SQLiteEdit> = [];
 
@@ -123,10 +123,10 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
   private constructor(
     uri: vsc.Uri,
-    delegate: SQLiteDocumentDelegate,
+    private delegate: SQLiteDocumentDelegate,
     private readonly workerLike: { terminate(): void },
-    public readonly workerDB: Comlink.Remote<WorkerDB>,
-    public readonly importDbPromise: Promise<void>,
+    private readonly workerFns: Comlink.Remote<WorkerFns>,
+    private workerDbPromise: Promise<Comlink.Remote<WorkerDB>>|null,
   ) {
     super();
     this._uri = uri;
@@ -169,8 +169,8 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * This happens when all editors for it have been closed.
    */
   async dispose() {
-    this.workerDB[Symbol.dispose]();
-    this.workerLike.terminate();
+    this.workerFns[Symbol.dispose]();
+    this.workerLike.terminate(); // XXX: too soon?
     this._onDidDispose.fire();
     super.dispose();
   }
@@ -181,23 +181,24 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * This fires an event to notify VS Code that the document has been edited.
    */
   makeEdit(edit: SQLiteEdit) {
-    this._edits.push(edit);
+    throw Error("Not implemented")
+    // this._edits.push(edit);
 
-    this._onDidChange.fire({
-      label: 'Stroke',
-      undo: async () => {
-        this._edits.pop();
-        this._onDidChangeDocument.fire({
-          edits: this._edits,
-        });
-      },
-      redo: async () => {
-        this._edits.push(edit);
-        this._onDidChangeDocument.fire({
-          edits: this._edits,
-        });
-      }
-    });
+    // this._onDidChange.fire({
+    //   label: 'Stroke',
+    //   undo: async () => {
+    //     this._edits.pop();
+    //     this._onDidChangeDocument.fire({
+    //       edits: this._edits,
+    //     });
+    //   },
+    //   redo: async () => {
+    //     this._edits.push(edit);
+    //     this._onDidChangeDocument.fire({
+    //       edits: this._edits,
+    //     });
+    //   }
+    // });
   }
 
   /**
@@ -223,9 +224,14 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     throw Error("Not implemented");
   }
 
-  async refresh(_cancellation?: vsc.CancellationToken): Promise<void> {
-    const { promise: importDbPromise } = await importDb(this.workerDB, this.uri, this.uriParts.filename);
-    await importDbPromise;
+  async getDb() {
+    await this.workerDbPromise; // in case it was rejected, we want to throw here
+    return this.workerFns.getDb(this.uriParts.filename); // get a fresh one from the source (sending detached one twice)
+  }
+
+  async refreshDb() {
+    const { promise } = await importDb(this.workerFns, this.uri, this.uriParts.filename);
+    return promise;
   }
 
   /**
@@ -234,27 +240,29 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * These backups are used to implement hot exit.
    */
   async backup(destination: vsc.Uri, cancellation: vsc.CancellationToken): Promise<vsc.CustomDocumentBackup> {
-    await this.saveAs(destination, cancellation);
+    throw Error("Not implemented")
+    // await this.saveAs(destination, cancellation);
 
-    return {
-      id: destination.toString(),
-      delete: async () => {
-        try {
-          await vsc.workspace.fs.delete(destination);
-        } catch {
-          // noop
-        }
-      }
-    };
+    // return {
+    //   id: destination.toString(),
+    //   delete: async () => {
+    //     try {
+    //       await vsc.workspace.fs.delete(destination);
+    //     } catch {
+    //       // noop
+    //     }
+    //   }
+    // };
   }
 }
 
 export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   readonly webviews = new WebviewCollection();
-  readonly webviewRemotes = new WeakMap<vsc.WebviewPanel, Comlink.Remote<WebviewFns>>
+  private readonly webviewRemotes = new Map<vsc.WebviewPanel, Comlink.Remote<WebviewFns>>
+  private readonly hostFns = new Map<SQLiteDocument, VscodeFns>();
 
   constructor(
-    readonly _context: vsc.ExtensionContext, 
+    readonly context: vsc.ExtensionContext, 
     readonly reporter: TelemetryReporter,
   ) {}
 
@@ -264,7 +272,8 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     _token: vsc.CancellationToken
   ): Promise<SQLiteDocument> {
 
-    const document = await SQLiteDocument.create(this, openContext, uri, {
+    const document = await SQLiteDocument.create(openContext, uri, {
+      extensionUri: this.context.extensionUri,
       getFileData: async () => {
         throw Error("Not implemented")
       }
@@ -284,12 +293,16 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
       // Update all webviews when the document changes
       const { filename } = document.uriParts;
       for (const panel of this.webviews.get(document.uri)) {
-        const remote = this.webviewRemotes.get(panel);
-        await remote?.forceUpdate(filename);
+        await this.webviewRemotes.get(panel)?.forceUpdate(filename);
       }
     }));
 
-    document.onDidDispose(() => disposeAll(listeners));
+    this.hostFns.set(document, new VscodeFns(this, document));
+
+    document.onDidDispose(() => {
+      this.hostFns.delete(document);
+      disposeAll(listeners)
+    });
 
     return document;
   }
@@ -303,8 +316,7 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
 
     const webviewEndpoint = new WireEndpoint(new WebviewStreamPair(webviewPanel.webview))
     this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
-
-    Comlink.expose(new VscodeFns(this, document, document.workerDB, document.importDbPromise), webviewEndpoint);
+    Comlink.expose(this.hostFns.get(document), webviewEndpoint);
 
     webviewPanel.webview.options = {
       enableScripts: true,
@@ -314,10 +326,10 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     webviewPanel.onDidDispose(() => {
       const webviewRemote = this.webviewRemotes.get(webviewPanel);
       if (webviewRemote) {
-        webviewRemote?.[Symbol.dispose]();
+        webviewRemote[Symbol.dispose]();
         this.webviewRemotes.delete(webviewPanel);
       }
-      webviewEndpoint.terminate();
+      webviewEndpoint.terminate(); // XXX: too soon?
     });
   }
 
@@ -341,8 +353,8 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
   }
 
   private async getHtmlForWebview(webview: vsc.Webview): Promise<string> {
-    const buildUri = vsc.Uri.joinPath(this._context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build');
-    const codiconsUri = vsc.Uri.joinPath(this._context.extensionUri, 'node_modules', 'codicons', 'dist', 'codicon.css');
+    const buildUri = vsc.Uri.joinPath(this.context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build');
+    const codiconsUri = vsc.Uri.joinPath(this.context.extensionUri, 'node_modules', 'codicons', 'dist', 'codicon.css');
 
     const assetAsWebviewUri = (x: string) => webview.asWebviewUri(vsc.Uri.joinPath(buildUri, x));
 

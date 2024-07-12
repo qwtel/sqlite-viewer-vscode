@@ -21,6 +21,7 @@ const baseConfig = {
   entryPoints: [resolve('src/extension.ts')],
   bundle: true,
   format: 'cjs' as const,
+  target: 'es2022',
   external: ['vscode'] as const,
   define: {
     ...envToDefine({
@@ -33,6 +34,7 @@ const baseWorkerConfig = {
   entryPoints: [resolve('src/worker.ts')],
   bundle: true,
   format: 'iife' as const,
+  target: 'es2022',
   define: {
     ...envToDefine({
       VITE_VSCODE: true,
