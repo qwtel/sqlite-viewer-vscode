@@ -1,6 +1,5 @@
 import * as vsc from 'vscode';
 import * as Comlink from "../sqlite-viewer-core/src/comlink";
-import type { WorkerFns, Options as DbOptions, DbParams, WorkerDB } from '../sqlite-viewer-core/src/worker-db';
 import type { SQLiteDocument, SQLiteEditorProvider } from './sqliteEditor';
 // import type { Credentials } from './credentials';
 

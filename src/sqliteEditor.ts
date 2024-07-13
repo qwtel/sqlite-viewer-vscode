@@ -126,7 +126,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     private delegate: SQLiteDocumentDelegate,
     private readonly workerLike: { terminate(): void },
     private readonly workerFns: Comlink.Remote<WorkerFns>,
-    private workerDbPromise: Promise<Comlink.Remote<WorkerDB>>|null,
+    private workerDbPromise: Promise<Comlink.Remote<WorkerDB>>,
   ) {
     super();
     this._uri = uri;
@@ -225,12 +225,12 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   }
 
   async getDb() {
-    await this.workerDbPromise; // in case it was rejected, we want to throw here
-    return this.workerFns.getDb(this.uriParts.filename); // get a fresh one from the source (sending detached one twice)
+    return this.workerDbPromise;
   }
 
   async refreshDb() {
     const { promise } = await importDb(this.workerFns, this.uri, this.uriParts.filename);
+    this.workerDbPromise = promise;
     return promise;
   }
 
@@ -316,7 +316,7 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
 
     const webviewEndpoint = new WireEndpoint(new WebviewStreamPair(webviewPanel.webview))
     this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
-    Comlink.expose(this.hostFns.get(document), webviewEndpoint);
+    Comlink.expose(this.hostFns.get(document)!, webviewEndpoint);
 
     webviewPanel.webview.options = {
       enableScripts: true,
