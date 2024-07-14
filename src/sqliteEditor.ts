@@ -10,7 +10,7 @@ import nodeEndpoint, { type NodeEndpoint } from "../sqlite-viewer-core/src/vendo
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/post-message-over-wire/comlinked'
 
 import { Disposable, disposeAll } from './dispose';
-import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStreamPair, cspUtil, getUriParts } from './util';
+import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cspUtil, getUriParts } from './util';
 import { Worker } from './webWorker';
 import { VscodeFns } from './vscodeFns';
 // import type { Credentials } from './credentials';
@@ -170,7 +170,6 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    */
   async dispose() {
     this.workerFns[Symbol.dispose]();
-    this.workerLike.terminate(); // XXX: too soon?
     this._onDidDispose.fire();
     super.dispose();
   }
@@ -298,7 +297,6 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     }));
 
     this.hostFns.set(document, new VscodeFns(this, document));
-
     document.onDidDispose(() => {
       this.hostFns.delete(document);
       disposeAll(listeners)
@@ -314,7 +312,8 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
   ): Promise<void> {
     this.webviews.add(document.uri, webviewPanel);
 
-    const webviewEndpoint = new WireEndpoint(new WebviewStreamPair(webviewPanel.webview))
+    const webviewStream = new WebviewStream(webviewPanel);
+    const webviewEndpoint = new WireEndpoint(webviewStream, document.uriParts.filename)
     this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
     Comlink.expose(this.hostFns.get(document)!, webviewEndpoint);
 
@@ -326,10 +325,9 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     webviewPanel.onDidDispose(() => {
       const webviewRemote = this.webviewRemotes.get(webviewPanel);
       if (webviewRemote) {
-        webviewRemote[Symbol.dispose]();
         this.webviewRemotes.delete(webviewPanel);
+        webviewRemote[Symbol.dispose]();
       }
-      webviewEndpoint.terminate(); // XXX: too soon?
     });
   }
 

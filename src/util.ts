@@ -1,5 +1,6 @@
 import * as vsc from 'vscode';
-// import * as CBOR from 'cbor-x'
+import * as CBOR from 'cbor-x'
+import { Disposable } from './dispose';
 
 // A bunch of tests to figure out where we're running. Some more reliable than others.
 export const IS_VSCODE = vsc.env.uriScheme.includes("vscode");
@@ -48,7 +49,7 @@ export class WebviewCollection {
   }
 }
 
-// const cborDecoder = new CBOR.Decoder({ structuredClone: true, useRecords: false, pack: false, tagUint8Array: true, structures: undefined });
+const cborDecoder = new CBOR.Decoder({ structuredClone: true, useRecords: false, pack: false, tagUint8Array: true, structures: undefined });
 
 /**
  * Wraps a VSCode webview and returns a readable and writable stream pair.
@@ -56,42 +57,76 @@ export class WebviewCollection {
  * This is especially useful considering how badly implemented object support in webview's `postMessage` is (no structured clone, no message channels, 
  * randomly emptied buffers...).
  */
-export class WebviewStreamPair implements vsc.Disposable {
+export class WebviewStream extends Disposable {
   #readable;
   #writable;
-  #disposable: vsc.Disposable | undefined;
-  constructor(private readonly webview: vsc.Webview) {
+  #readableController!: ReadableStreamDefaultController<Uint8Array>;
+  #writableController!: WritableStreamDefaultController;
+  #readableClosed = false;
+  #writableClosed = false;
+  constructor(private readonly webviewPanel: vsc.WebviewPanel) {
+    super();
     this.#readable = new ReadableStream<Uint8Array>({
       start: (controller) => {
-        this.#disposable = this.webview.onDidReceiveMessage(data => {
+        this.#readableController = controller;
+        this._register(this.webviewPanel.webview.onDidReceiveMessage(data => {
           // const [header, code, port1, port2, tl, payload] = cborDecoder.decode(data);
           // console.log("Receiving...", [header, code, port1?.toString(16), port2?.toString(16), tl, payload && { byteLength: payload?.byteLength }])
-          controller.enqueue(data);
-        });
+          if (data instanceof Uint8Array)
+            controller.enqueue(data);
+        }));
+        this._register(this.webviewPanel.onDidDispose(() => {
+          this.#cleanup(new DOMException('Underlying webviewPanel disposed', 'AbortError'))
+        }));
       },
-      cancel: () => {
-        this.#disposable?.dispose();
+      cancel: (reason) => {
+        this.#readableClosed = true;
+        this.#cleanup(reason);
       },
     });
     this.#writable = new WritableStream<Uint8Array>({
-      write: (chunk) => {
-        const { buffer, byteOffset, byteLength } = chunk;
-        // const [header, code, port1, port2, tl, payload] = cborDecoder.decode(chunk);
-        // console.log("Sending...", [header, code, port1?.toString(16), port2?.toString(16), tl, payload && { byteLength: payload?.byteLength }])
-        this.webview.postMessage({ buffer, byteOffset, byteLength });
+      start: (controller) => {
+        this.#writableController = controller;
+      },
+      write: (chunk, controller) => {
+        try {
+          const { buffer, byteOffset, byteLength } = chunk;
+          // const [header, code, port1, port2, tl, payload] = cborDecoder.decode(chunk);
+          // console.log("Sending...", [header, code, port1?.toString(16), port2?.toString(16), tl, payload && { byteLength: payload?.byteLength }])
+          this.webviewPanel.webview.postMessage({ buffer, byteOffset, byteLength });
+        } catch (err) {
+          // const [header, code, port1, port2, tl, payload] = cborDecoder.decode(chunk);
+          // console.log("could not send", [header, code, port1?.toString(16), port2?.toString(16), tl, payload && { byteLength: payload?.byteLength }])
+          controller.error(err);
+        }
+      },
+      close: () => {
+        this.#writableClosed = true;
+        this.#cleanup(null);
+      },
+      abort: (reason) => {
+        this.#writableClosed = true;
+        this.#cleanup(reason);
       },
     });
   }
-  get readable() {
-    return this.#readable;
+  #cleanup(reason?: any) {
+    super.dispose();
+    if (!this.#readableClosed) {
+      this.#readableClosed = true;
+      this.#readableController[reason ? 'error' : 'close'](reason);
+    }
+    if (!this.#writableClosed) {
+      if (this.#writable.locked || reason)
+        this.#writableController.error(reason ?? new DOMException('WebviewStream disposed', 'AbortError'));
+      else
+        this.#writable.getWriter().close();
+    }
   }
-  get writable() {
-    return this.#writable;
-  }
-  dispose() {
-    this.#readable.cancel();
-    this.#writable.abort();
-  }
+  get readable() { return this.#readable }
+  get writable() { return this.#writable }
+  dispose() { this.#cleanup() }
+  [Symbol.dispose]() { this.#cleanup() }
 }
 
 export const cspUtil = {
