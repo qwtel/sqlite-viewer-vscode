@@ -7,7 +7,7 @@ import path from 'path';
 
 import * as Comlink from "../sqlite-viewer-core/src/comlink";
 import nodeEndpoint, { type NodeEndpoint } from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
-import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/post-message-over-wire/comlinked'
+import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
 import { Disposable, disposeAll } from './dispose';
 import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cspUtil, getUriParts } from './util';
