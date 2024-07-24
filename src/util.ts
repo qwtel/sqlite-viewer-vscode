@@ -49,8 +49,6 @@ export class WebviewCollection {
   }
 }
 
-const cborDecoder = new CBOR.Decoder({ structuredClone: true, useRecords: false, pack: false, tagUint8Array: true, structures: undefined });
-
 /**
  * Wraps a VSCode webview and returns a readable and writable stream pair.
  * This can be used to overlay another binary protocol on top of the webview's message passing, such as "post-message-over-wire".
@@ -117,10 +115,11 @@ export class WebviewStream extends Disposable {
       this.#readableController[reason ? 'error' : 'close'](reason);
     }
     if (!this.#writableClosed) {
+      this.#writableClosed = true;
       if (this.#writable.locked || reason)
         this.#writableController.error(reason ?? new DOMException('WebviewStream disposed', 'AbortError'));
       else
-        this.#writable.getWriter().close();
+        this.#writable.getWriter().close().catch(() => {});
     }
   }
   get readable() { return this.#readable }

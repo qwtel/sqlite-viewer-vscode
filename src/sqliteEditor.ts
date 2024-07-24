@@ -96,6 +96,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     uri: vsc.Uri,
     delegate: SQLiteDocumentDelegate,
   ): Promise<SQLiteDocument> {
+
     const createWorkerLike = false
       ? toss('unreachable')
       : createWebWorker;
@@ -168,7 +169,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    *
    * This happens when all editors for it have been closed.
    */
-  async dispose() {
+  dispose() {
     this.workerFns[Symbol.dispose]();
     this._onDidDispose.fire();
     super.dispose();
