@@ -17,9 +17,15 @@ function envToDefine(env: Record<string, any>): Record<`import.meta.env.${string
   return Object.fromEntries(Object.entries(env).map(([k, v]) => [`import.meta.env.${k}`, JSON.stringify(v)]))
 }
 
-const baseConfig = {
-  entryPoints: [resolve('src/extension.ts')],
+const config = {
   bundle: true,
+  minify: !DEV,
+  sourcemap: DEV,
+} satisfies BuildOptions;
+
+const baseConfig = {
+  ...config,
+  entryPoints: [resolve('src/extension.ts')],
   format: 'cjs' as const,
   target: 'es2022',
   external: ['vscode'] as const,
@@ -31,8 +37,8 @@ const baseConfig = {
 } satisfies BuildOptions;
 
 const baseWorkerConfig = {
+  ...config,
   entryPoints: [resolve('src/worker.ts')],
-  bundle: true,
   format: 'iife' as const,
   target: 'es2022',
   define: {
@@ -48,8 +54,6 @@ const compileNodeMain = () =>
     ...baseConfig,
     outfile: resolve(outDir, 'extension.js'),
     platform: 'node',
-    minify: !DEV,
-    sourcemap: DEV,
     define: {
       ...baseConfig.define,
       ...envToDefine({
@@ -66,6 +70,7 @@ const compileBrowserMain = () =>
     mainFields: ['browser', 'module', 'main'],
     external: [
       ...baseConfig.external,
+      'process',
       'worker_threads',
       'child_process',
       'fs',
@@ -77,8 +82,6 @@ const compileBrowserMain = () =>
     alias: {
       'path': resolve('src/noop.js'),
     },
-    minify: !DEV,
-    sourcemap: DEV,
     define: {
       ...baseConfig.define,
       ...envToDefine({
@@ -97,8 +100,6 @@ const compileNodeWorker = () =>
     ...baseWorkerConfig,
     outfile: resolve(outDir, 'worker.js'),
     platform: 'node',
-    minify: !DEV,
-    sourcemap: DEV,
     define: {
       ...baseWorkerConfig.define,
       ...envToDefine({
@@ -114,8 +115,6 @@ const compileBrowserWorker = () =>
     platform: 'browser',
     mainFields: ['browser', 'module', 'main'],
     external: ['fs/promises', 'path'],
-    minify: !DEV,
-    sourcemap: DEV,
     define: {
       ...baseWorkerConfig.define,
       ...envToDefine({
@@ -123,7 +122,6 @@ const compileBrowserWorker = () =>
       })
     },
     plugins: [
-      // @ts-ignore
       polyfillNode({
         polyfills: {}
       })
