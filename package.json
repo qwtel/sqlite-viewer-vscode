@@ -106,7 +106,8 @@
     "compile:ext:cp": "cp -r node_modules/@vscode/codicons node_modules/codicons",
     "compile:ext:js": "bun run esbuild.ts",
     "compile:app": "cd sqlite-viewer-core && npm run $([ -z \"${DEV}\" ] && echo build-vscode || echo build-vscode-fast)",
-    "compile": "npm run compile:ext & npm run compile:app & wait",
+    "compile:tjs": "cd sqlite-viewer-core && bun run ./pro/esbuild.ts",
+    "compile": "npm run compile:ext & npm run compile:app & npm run compile:tjs & wait",
     "pack": "vsce package --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
     "postversion": "cd sqlite-viewer-core && git tag -a \"vscode/v$(jq -r '.version' ../package.json)\" -m ''",
     "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
@@ -124,12 +125,13 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@std/streams": "npm:@jsr/std__streams@^1.0.0-rc.4",
     "@vscode/codicons": "^0.0.36",
     "@vscode/extension-telemetry": "^0.9.6",
     "@vscode/vsce": "^2.27.0",
     "@worker-tools/typed-event-target": "^1.0.0",
     "@workers/typed-event-target": "npm:@jsr/workers__typed-event-target@^1.0.0",
-    "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.3.5",
+    "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.3.9",
     "cbor-x": "^1.5.9",
     "node-fetch": "^3.3.2",
     "whatwg-stream-to-async-iter": "^0.6.2"

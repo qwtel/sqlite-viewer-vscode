@@ -34,22 +34,24 @@ function getConfiguredMaxFileSize() {
 const TooLargeErrorMsg = "File too large. You can increase this limit in the settings under 'Sqlite Viewer: Max File Size'."
 
 async function importDb(workerDB: Comlink.Remote<WorkerFns>, xUri: vsc.Uri, filename: string, extensionUri?: vsc.Uri) {
-  const [data, walData] = await readFile(xUri);
-  const transfer = [
-    ...data ? [data.buffer as ArrayBuffer] : [],
-    ...walData ? [walData.buffer as ArrayBuffer] : [],
-  ];
-  if (data == null && walData == null) return { promise: Promise.reject(Error(TooLargeErrorMsg)) }
-  const workerDbPromise = workerDB.importDb(filename, Comlink.transfer({
-    data,
-    walData,
-    maxFileSize: getConfiguredMaxFileSize(),
-    ...extensionUri && { 
-      mappings: {
-        'sqlite3.wasm': vsc.Uri.joinPath(extensionUri, 'sqlite-viewer-core', 'vscode', 'build', 'assets', 'sqlite3.wasm').toString(),
-      }
-    },
-  }, transfer));
+  // const [data, walData] = await readFile(xUri);
+  // const transfer = [
+  //   ...data ? [data.buffer as ArrayBuffer] : [],
+  //   ...walData ? [walData.buffer as ArrayBuffer] : [],
+  // ];
+  // if (data == null) return { promise: Promise.reject(Error(TooLargeErrorMsg)) }
+  // const opts = {
+  //   data,
+  //   walData,
+  //   maxFileSize: getConfiguredMaxFileSize(),
+  //   ...extensionUri && { 
+  //     mappings: {
+  //       'sqlite3.wasm': vsc.Uri.joinPath(extensionUri, 'sqlite-viewer-core', 'vscode', 'build', 'assets', 'sqlite3.wasm').toString(),
+  //     }
+  //   },
+  // };
+  // const workerDbPromise = workerDB.importDb(filename, Comlink.transfer(opts, transfer));
+  const workerDbPromise = workerDB.importDb(filename, { uri: xUri.toString() });
   return { promise: workerDbPromise }
 }
 
@@ -97,7 +99,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     delegate: SQLiteDocumentDelegate,
   ): Promise<SQLiteDocument> {
 
-    const createWorkerLike = false
+    const createWorkerLike = true
       ? toss('unreachable')
       : createWebWorker;
 
