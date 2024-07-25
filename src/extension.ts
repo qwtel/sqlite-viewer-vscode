@@ -12,6 +12,7 @@ const NestingPattern = "${capture}.${extname}-*";
 const FileNestingPatternsAdded = 'fileNestingPatternsAdded';
 
 const SyncedKeys = [
+  FullExtensionId,
   FileNestingPatternsAdded
 ];
 
@@ -93,7 +94,7 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
   const currVersion = vsc.extensions.getExtension(FullExtensionId)!.packageJSON.version as string;
 
   // store latest version
-  context.globalState.update(ExtensionId, currVersion);
+  context.globalState.update(FullExtensionId, currVersion);
 
   if (
     prevVersion === undefined ||
@@ -121,17 +122,17 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
       prevVersion !== currVersion ||
       context.extensionMode === vsc.ExtensionMode.Development
     ) {
-      let actions;
-      const result = await vsc.window.showInformationMessage(
-        `SQLite Viewer now has experimental support for Views and more column filter options. Check out the Changelog for details`,
-        ...actions = [{ title: 'Open Changelog ↗' }]
-      );
+      // let actions;
+      // const result = await vsc.window.showInformationMessage(
+      //   `SQLite Viewer now has experimental support for Views and more column filter options. Check out the Changelog for details`,
+      //   ...actions = [{ title: 'Open Changelog ↗' }]
+      // );
 
-      switch (result) {
-        case actions[0]: {
-          return await openChangelog('#v0.5.7');
-        }
-      }
+      // switch (result) {
+      //   case actions[0]: {
+      //     return await openChangelog('#v0.5.7');
+      //   }
+      // }
     }
   }
 }

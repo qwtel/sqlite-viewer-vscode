@@ -11,6 +11,9 @@ While this update removes the need for the above workarounds, it does not change
 
 Note that making this work required significant restructuring of the extension, which may cause (unrelated) issues. Please report any you may encounter. 
 
+## v0.5.11
+- Fixed an issues that caused the update notification to re-appear each time VSCode was restarted
+
 ## v0.5.10
 - Fixed an issue that caused an entire file to crash when some tables/views are using custom functions
 - Fixed an issue that caused rendering artifacts and column resizing issues in empty tables
