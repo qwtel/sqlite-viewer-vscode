@@ -173,6 +173,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    */
   dispose() {
     this.workerFns[Symbol.dispose]();
+    this.workerLike.terminate();
     this._onDidDispose.fire();
     super.dispose();
   }
