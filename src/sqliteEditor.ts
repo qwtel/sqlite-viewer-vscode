@@ -13,7 +13,7 @@ import { Disposable, disposeAll } from './dispose';
 import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cspUtil, getUriParts } from './util';
 import { Worker } from './webWorker';
 import { VscodeFns } from './vscodeFns';
-import { WorkerMeta } from './interface';
+import { WorkerMeta } from './workerMeta';
 // import type { Credentials } from './credentials';
 
 //#region Pro
@@ -51,14 +51,10 @@ async function createWebWorker(
   const workerFns = Comlink.wrap<WorkerFns>(workerEndpoint);
 
   return {
-    workerFns: workerFns,
+    workerFns,
     workerLike: worker,
-    async importDb(xUri, filename) {
+    async importDbWrapper(xUri, filename) {
       const [data, walData] = await readFile(xUri);
-      const transfer = [
-        ...data ? [data.buffer as ArrayBuffer] : [],
-        ...walData ? [walData.buffer as ArrayBuffer] : [],
-      ];
       if (data == null) return { promise: Promise.reject(Error(TooLargeErrorMsg)) }
       const args = {
         data,
@@ -68,6 +64,10 @@ async function createWebWorker(
           'sqlite3.wasm': vsc.Uri.joinPath(extensionUri, 'sqlite-viewer-core', 'vscode', 'build', 'assets', 'sqlite3.wasm').toString(),
         },
       };
+      const transfer = [
+        ...data ? [data.buffer as ArrayBuffer] : [],
+        ...walData ? [walData.buffer as ArrayBuffer] : [],
+      ];
       const workerDbPromise = workerFns.importDb(filename, Comlink.transfer(args, transfer));
       return { promise: workerDbPromise }
     }
@@ -102,7 +102,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     delegate: SQLiteDocumentDelegate,
   ): Promise<SQLiteDocument> {
 
-    const createWorkerLike = true
+    const createWorkerMeta = true
       ? pro__createTxikiWorker
       : createWebWorker;
 
@@ -110,9 +110,9 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     const xUri = typeof openContext.backupId === 'string' ? vsc.Uri.parse(openContext.backupId) : uri;
 
     const { filename } = getUriParts(xUri);
-    const workerMeta = await createWorkerLike(delegate.extensionUri, filename, xUri);
+    const workerMeta = await createWorkerMeta(delegate.extensionUri, filename, xUri);
 
-    const { promise: workerDbPromise } = await workerMeta.importDb(uri, filename, delegate.extensionUri);
+    const { promise: workerDbPromise } = await workerMeta.importDbWrapper(uri, filename, delegate.extensionUri);
 
     workerDbPromise.catch(() => {}) // prevent unhandled rejection warning (we catch it later)
 
@@ -234,7 +234,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   }
 
   async refreshDb() {
-    const { promise } = await this.workerMeta.importDb(this.uri, this.uriParts.filename);
+    const { promise } = await this.workerMeta.importDbWrapper(this.uri, this.uriParts.filename);
     this.workerDbPromise = promise;
     return promise;
   }

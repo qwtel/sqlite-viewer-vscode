@@ -8,5 +8,5 @@ export type WorkerLike = { terminate(): void }
 export interface WorkerMeta {
   workerFns: Remote<WorkerFns>,
   workerLike: WorkerLike,
-  importDb(xUri: Uri, filename: string, extensionUri?: Uri): Awaitable<{ promise: Promise<Remote<WorkerDB>> }>
+  importDbWrapper(xUri: Uri, filename: string, extensionUri?: Uri): Awaitable<{ promise: Promise<Remote<WorkerDB>> }>
 }
