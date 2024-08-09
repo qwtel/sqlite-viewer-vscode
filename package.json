@@ -3,7 +3,7 @@
   "name": "sqlite-viewer",
   "displayName": "SQLite Viewer",
   "description": "SQLite Viewer for VSCode",
-  "version": "0.6.4-dev.0",
+  "version": "0.6.4-dev.5",
   "publisher": "qwtel",
   "private": true,
   "license": "LICENSE.md",
@@ -17,10 +17,6 @@
   },
   "categories": [
     "Other"
-  ],
-  "activationEvents": [
-    "onCustomEditor:sqlite-viewer.view",
-    "onCustomEditor:sqlite-viewer.option"
   ],
   "main": "./out/extension.js",
   "browser": "./out/extension-browser.js",
@@ -106,9 +102,10 @@
     "compile:ext:cp": "cp -r node_modules/@vscode/codicons node_modules/codicons",
     "compile:ext:js": "bun run esbuild.ts",
     "compile:app": "cd sqlite-viewer-core && npm run $([ -z \"${DEV}\" ] && echo build-vscode || echo build-vscode-fast)",
-    "compile:tjs": "cd sqlite-viewer-core && bun run ./pro/esbuild.ts",
-    "compile": "npm run compile:ext & npm run compile:app & npm run compile:tjs & wait",
-    "pack": "vsce package --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
+    "compile:tjs": "cd sqlite-viewer-core && npm run build-tjs",
+    "compile:bin": "npm run compile:tjs && bun run bin.ts",
+    "compile": "npm run compile:bin && npm run compile:ext && npm run compile:app",
+    "package": "bun run pack.ts",
     "postversion": "cd sqlite-viewer-core && git tag -a \"vscode/v$(jq -r '.version' ../package.json)\" -m ''",
     "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
     "pre-publish": "vsce publish --pre-release --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/preview/",
@@ -117,7 +114,9 @@
     "codium:publish": "ovsx publish"
   },
   "devDependencies": {
+    "@txikijs/types": "^24.6.0",
     "@types/vscode": "^1.83.1",
+    "bun-types": "^1.1.22",
     "esbuild": "^0.21.5",
     "esbuild-plugin-alias": "^0.2.1",
     "esbuild-plugin-polyfill-node": "^0.3.0",

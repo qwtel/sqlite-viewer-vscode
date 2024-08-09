@@ -73,6 +73,7 @@ const compileBrowserMain = () =>
       'process',
       'worker_threads',
       'child_process',
+      'os',
       'fs',
       'path',
       'stream',
