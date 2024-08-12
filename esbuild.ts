@@ -54,6 +54,9 @@ const compileNodeMain = () =>
     ...baseConfig,
     outfile: resolve(outDir, 'extension.js'),
     platform: 'node',
+    alias: {
+      '@workers/node-serialization-api': 'node:v8',
+    },
     define: {
       ...baseConfig.define,
       ...envToDefine({
@@ -89,11 +92,13 @@ const compileBrowserMain = () =>
         BROWSER_EXT: true,
       }),
     },
-    // plugins: [
-    //   polyfillNode({
-    //     polyfills: {}
-    //   })
-    // ],
+    plugins: [
+      polyfillNode({
+        polyfills: {
+          buffer: true,
+        }
+      })
+    ],
   });
 
 const compileNodeWorker = () =>
@@ -101,6 +106,9 @@ const compileNodeWorker = () =>
     ...baseWorkerConfig,
     outfile: resolve(outDir, 'worker.js'),
     platform: 'node',
+    alias: {
+      '@workers/node-serialization-api': 'node:v8',
+    },
     define: {
       ...baseWorkerConfig.define,
       ...envToDefine({

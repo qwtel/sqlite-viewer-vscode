@@ -321,6 +321,9 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
 
     const webviewStream = new WebviewStream(webviewPanel);
     const webviewEndpoint = new WireEndpoint(webviewStream, document.uriParts.filename)
+    webviewEndpoint.addEventListener('messageerror', ev => console.error(ev.data))
+    webviewEndpoint.addEventListener('error', ev => console.error(ev.error))
+
     this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
     Comlink.expose(this.hostFns.get(document)!, webviewEndpoint);
 
