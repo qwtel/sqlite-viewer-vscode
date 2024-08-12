@@ -1,13 +1,13 @@
 {
   "icon": "documentation/icon.png",
-  "name": "sqlite-viewer",
-  "displayName": "SQLite Viewer",
-  "description": "SQLite Viewer for VSCode",
+  "name": "testy-mc-testface",
+  "displayName": "Testy McTestface",
+  "description": "",
   "version": "0.6.4-dev.5",
   "publisher": "qwtel",
   "private": true,
   "license": "LICENSE.md",
-  "homepage": "https://sqliteviewer.app",
+  "homepage": "",
   "repository": {
     "type": "git",
     "url": "https://github.com/qwtel/sqlite-viewer-vscode"
@@ -21,7 +21,7 @@
   "main": "./out/extension.js",
   "browser": "./out/extension-browser.js",
   "extensionKind": [
-    "ui"
+    "workspace"
   ],
   "contributes": {
     "languages": [
@@ -40,8 +40,8 @@
     ],
     "customEditors": [
       {
-        "viewType": "sqlite-viewer.view",
-        "displayName": "SQLite Viewer",
+        "viewType": "testy-mc-testface.view",
+        "displayName": "Testy McTestface",
         "selector": [
           {
             "filenamePattern": "*.sqlite"
@@ -64,8 +64,8 @@
         ]
       },
       {
-        "viewType": "sqlite-viewer.option",
-        "displayName": "SQLite Viewer",
+        "viewType": "testy-mc-testface.option",
+        "displayName": "Testy McTestface",
         "selector": [
           {
             "filenamePattern": "*"
@@ -75,7 +75,7 @@
       }
     ],
     "configuration": {
-      "title": "SQLite Viewer",
+      "title": "Testy McTestface",
       "properties": {
         "sqliteViewer.maxFileSize": {
           "type": "number",
@@ -89,9 +89,9 @@
     },
     "commands": [
       {
-        "command": "sqlite-viewer.addFileNestingPatterns",
+        "command": "testy-mc-testface.addFileNestingPatterns",
         "title": "Add SQLite File Nesting Patterns",
-        "category": "SQLite Viewer"
+        "category": "Testy McTestface"
       }
     ]
   },
@@ -107,11 +107,11 @@
     "compile": "npm run compile:bin && npm run compile:ext && npm run compile:app",
     "package": "bun run pack.ts",
     "postversion": "cd sqlite-viewer-core && git tag -a \"vscode/v$(jq -r '.version' ../package.json)\" -m ''",
-    "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
-    "pre-publish": "vsce publish --pre-release --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/preview/",
+    "publish": "bun run pack.ts --kind publish",
+    "pre-publish": "bun run pack.ts --kind publish --pre-release",
     "prepack": "sed -i '' s~https://sqliteviewer\\.app~https://sqliteviewer.app?ref=vscode~g *.md",
     "postpack": "sed -i '' s/\\?ref=vscode//g *.md",
-    "codium:publish": "ovsx publish"
+    "codium:publish": "echo \"TODO\" && exit 1 && ovsx publish"
   },
   "devDependencies": {
     "@txikijs/types": "^24.6.0",

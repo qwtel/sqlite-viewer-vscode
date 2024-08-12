@@ -1,5 +1,4 @@
 import * as vsc from 'vscode';
-import * as CBOR from 'cbor-x'
 import { Disposable } from './dispose';
 
 // A bunch of tests to figure out where we're running. Some more reliable than others.

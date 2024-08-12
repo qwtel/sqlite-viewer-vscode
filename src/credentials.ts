@@ -4,7 +4,7 @@ import { fetch } from './webFetch';
 
 const GITHUB_AUTH_PROVIDER_ID = 'github';
 
-const extensionId = 'qwtel.sqlite-viewer'
+const extensionId = 'qwtel.testy-mc-testface';
 
 /** 
  * The GitHub Authentication Provider accepts the scopes described here:

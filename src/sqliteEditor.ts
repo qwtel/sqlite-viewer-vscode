@@ -17,6 +17,7 @@ import { WorkerMeta } from './workerMeta';
 // import type { Credentials } from './credentials';
 
 //#region Pro
+import { ExtensionId } from './constants';
 //#endregion
 
 interface SQLiteEdit {
@@ -403,7 +404,7 @@ const registerOptions = {
 } satisfies Parameters<typeof vsc.window.registerCustomEditorProvider>[2];
 
 export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {
-  static viewType = 'sqlite-viewer.view';
+  static viewType = `${ExtensionId}.view`;
 
   public static register(context: vsc.ExtensionContext, reporter: TelemetryReporter): vsc.Disposable {
     return vsc.window.registerCustomEditorProvider(
@@ -414,7 +415,7 @@ export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {
 }
 
 export class SQLiteEditorOptionProvider extends SQLiteEditorProvider {
-  static viewType = 'sqlite-viewer.option';
+  static viewType = `${ExtensionId}.option`;
 
   public static register(context: vsc.ExtensionContext, reporter: TelemetryReporter): vsc.Disposable {
     return vsc.window.registerCustomEditorProvider(
