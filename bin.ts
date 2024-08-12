@@ -2,7 +2,6 @@
 
 import { $ } from "bun";
 import fs from 'node:fs/promises';
-import { parseArgs } from "node:util";
 
 import URL from 'url';
 import path from 'path'
@@ -20,7 +19,7 @@ const matrix = [
   "win32-arm64",
   "linux-x64",
   "linux-arm64",
-  // "linux-armhf",
+  "linux-armhf",
   "alpine-x64",
   "alpine-arm64",
   "darwin-x64",
@@ -33,7 +32,7 @@ const targetToZigTriple = {
   "win32-arm64" : "aarch64-windows",
   "linux-x64" : "x86_64-linux-gnu",
   "linux-arm64" : "aarch64-linux-gnu",
-  // "linux-armhf" : "",
+  "linux-armhf" : "arm-linux-gnueabihf",
   "alpine-x64" : "x86_64-linux-musl",
   "alpine-arm64" : "aarch64-linux-musl",
   "darwin-x64" : "x86_64-macos",
