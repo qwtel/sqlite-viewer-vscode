@@ -17,7 +17,7 @@ import { WorkerMeta } from './workerMeta';
 // import type { Credentials } from './credentials';
 
 //#region Pro
-import { ExtensionId } from './constants';
+import { ConfigurationSection, ExtensionId } from './constants';
 //#endregion
 
 interface SQLiteEdit {
@@ -30,7 +30,7 @@ interface SQLiteDocumentDelegate {
 }
 
 function getConfiguredMaxFileSize() {
-  const config = vsc.workspace.getConfiguration('sqliteViewer');
+  const config = vsc.workspace.getConfiguration(ConfigurationSection);
   const maxFileSizeMB = config.get<number>('maxFileSize') ?? 200;
   const maxFileSize = maxFileSizeMB * 2 ** 20;
   return maxFileSize;

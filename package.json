@@ -77,7 +77,7 @@
     "configuration": {
       "title": "Testy McTestface",
       "properties": {
-        "sqliteViewer.maxFileSize": {
+        "testyMcTestface.maxFileSize": {
           "type": "number",
           "minimum": 0,
           "maximum": 4000,
