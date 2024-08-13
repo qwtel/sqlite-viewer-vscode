@@ -6,7 +6,7 @@ import * as vsc from 'vscode';
 import path from 'path';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
-import nodeEndpoint, { type NodeEndpoint } from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
+import nodeEndpoint from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
 import { Disposable, disposeAll } from './dispose';
@@ -19,6 +19,8 @@ import { WorkerMeta } from './workerMeta';
 //#region Pro
 import { ConfigurationSection, ExtensionId } from './constants';
 //#endregion
+
+const pro__IsPro = false;
 
 interface SQLiteEdit {
   readonly data: Uint8Array;
@@ -48,7 +50,7 @@ async function createWebWorker(
     : path.resolve(__dirname, "./worker.js")
 
   const worker = new Worker(workerPath);
-  const workerEndpoint = nodeEndpoint(worker as unknown as NodeEndpoint);
+  const workerEndpoint = nodeEndpoint(worker);
   const workerFns = Caplink.wrap<WorkerFns>(workerEndpoint);
 
   return {
@@ -103,7 +105,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     delegate: SQLiteDocumentDelegate,
   ): Promise<SQLiteDocument> {
 
-    const createWorkerMeta = true
+    const createWorkerMeta = pro__IsPro && !import.meta.env.BROWSER_EXT
       ? pro__createTxikiWorker
       : createWebWorker;
 
