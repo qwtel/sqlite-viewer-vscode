@@ -6,6 +6,8 @@ import fs from 'node:fs/promises';
 import URL from 'url';
 import path from 'path'
 
+import { ProcessTitle } from "./src/constants";
+
 const __filename = URL.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -55,22 +57,28 @@ export const compileBin = async () => {
 
   const target = _target as typeof matrix[number];
 
-  const inFile = path.resolve(tmpDir, 'bundle.js');
-  const outFile = path.resolve(outDir, 'bin', 'sqlite_viewer_helper');
+  const ext = target.startsWith('win32') ? '.exe' : '';
+  const filename = target.startsWith('win32')
+    ? ProcessTitle + ext
+    : ProcessTitle.toLowerCase().replaceAll(' ', '-');
 
-  await fs.unlink(outFile).catch(() => {});
-  await fs.mkdir(path.resolve(outDir, 'bin'), { recursive: true });
+  const inFile = path.resolve(tmpDir, 'bundle.js');
+  const outBinDir = path.resolve(outDir, 'bin');
+  const outBinFile = path.resolve(outBinDir, filename);
+
+  await fs.rmdir(outBinDir, { recursive: true });
+  await fs.mkdir(outBinDir, { recursive: true });
 
   if (!Bun.env.TJS_ZIG_OUT) throw new Error('TJS_ZIG_OUT not set');
 
-  const exe$ = target.includes('win32') ? '.exe' : '';
-  const exePath = path.join(Bun.env.TJS_ZIG_OUT, targetToZigTriple[target], 'tjs' + exe$);
+  const exePath = path.join(Bun.env.TJS_ZIG_OUT, targetToZigTriple[target], 'tjs' + ext);
   console.log({
     exePath, 
     inFile, 
-    outFile
-  })
-  await $`tjs compile -x ${exePath} ${inFile} ${outFile + exe$}`;
+    outFile: outBinFile
+  });
+  await $`tjs compile -x ${exePath} ${inFile} ${outBinFile}`;
+  console.log(`Compiled binary for target: ${target}`);
 };
 
 if (import.meta.main) {

@@ -11,3 +11,5 @@ export const FileNestingPatternsAdded = 'fileNestingPatternsAdded';
 export const SyncedKeys = [
   FileNestingPatternsAdded
 ];
+
+export const ProcessTitle = 'SQLite Viewer Helper';

@@ -9,7 +9,7 @@ const targets = [
   "win32-arm64",
   "linux-x64",
   "linux-arm64",
-  // "linux-armhf",
+  "linux-armhf",
   "alpine-x64",
   "alpine-arm64",
   "darwin-x64",
@@ -21,7 +21,7 @@ export const packageExt = async (opts: {
   kind?: string,
   target?: string,
   'pre-release'?: boolean,
-}) => {
+}, env = Bun.env) => {
   let { kind, target, 'pre-release': preRelease } = opts;
 
   if (kind && !kinds.includes(kind as any)) {
@@ -46,7 +46,7 @@ export const packageExt = async (opts: {
     "--baseContentUrl", "https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/"
   ], {
     env: { 
-      ...Bun.env, 
+      ...env, 
       TJS_ZIG_OUT: "~/GitHub/txiki.js/zig-out", 
       VSCODE_EXT_TARGET: target,
     },
