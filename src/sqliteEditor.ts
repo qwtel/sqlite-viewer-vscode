@@ -105,13 +105,12 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     uri: vsc.Uri,
     delegate: SQLiteDocumentDelegate,
   ): Promise<SQLiteDocument> {
-    const { extensionKind } = vsc.extensions.getExtension(FullExtensionId) ?? {}
 
     const localMode = !vsc.env.remoteName;
-    const remoteWorkspaceMode = !!vsc.env.remoteName && extensionKind === vsc.ExtensionKind.Workspace;
-    const canUseNative = localMode || remoteWorkspaceMode;
+    const remoteWorkspaceMode = !!vsc.env.remoteName && vsc.extensions.getExtension(FullExtensionId)?.extensionKind === vsc.ExtensionKind.Workspace;
+    const canUseNativeSqlite3 = localMode || remoteWorkspaceMode;
 
-    const createWorkerMeta = !import.meta.env.BROWSER_EXT && pro__IsPro && canUseNative // Do not change this line
+    const createWorkerMeta = !import.meta.env.BROWSER_EXT && pro__IsPro && canUseNativeSqlite3 // Do not change this line
       ? pro__createTxikiWorker 
       : createWebWorker;
 
