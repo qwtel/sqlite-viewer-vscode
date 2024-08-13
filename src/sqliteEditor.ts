@@ -105,7 +105,9 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     delegate: SQLiteDocumentDelegate,
   ): Promise<SQLiteDocument> {
 
-    const createWorkerMeta = pro__IsPro && !import.meta.env.BROWSER_EXT
+    const workspaceUIMode = (vsc.workspace.workspaceFolders?.length ?? 0) > 0;
+
+    const createWorkerMeta = pro__IsPro && !workspaceUIMode && !import.meta.env.BROWSER_EXT
       ? pro__createTxikiWorker
       : createWebWorker;
 
