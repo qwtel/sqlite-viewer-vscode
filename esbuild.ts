@@ -55,7 +55,7 @@ const compileNodeMain = () =>
     outfile: resolve(outDir, 'extension.js'),
     platform: 'node',
     alias: {
-      '@workers/node-serialization-api': 'node:v8',
+      '@workers/v8-value-serializer/v8': 'node:v8',
     },
     define: {
       ...baseConfig.define,
@@ -107,7 +107,7 @@ const compileNodeWorker = () =>
     outfile: resolve(outDir, 'worker.js'),
     platform: 'node',
     alias: {
-      '@workers/node-serialization-api': 'node:v8',
+      '@workers/v8-value-serializer/v8': 'node:v8',
     },
     define: {
       ...baseWorkerConfig.define,
