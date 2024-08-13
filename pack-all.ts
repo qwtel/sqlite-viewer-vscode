@@ -15,7 +15,7 @@ const matrix = [
   "alpine-arm64",
   "darwin-x64",
   "darwin-arm64",
-  // "web",
+  "web",
 ] as const;
 
 for (const [i, target] of matrix.entries()) {

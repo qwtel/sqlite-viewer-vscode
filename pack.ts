@@ -1,6 +1,8 @@
 /// <reference types="bun-types" />
 
 import { parseArgs } from "node:util";
+import os from "node:os";
+import path from "node:path";
 
 const kinds = ["package", "publish"] as const
 
@@ -47,7 +49,7 @@ export const packageExt = async (opts: {
   ], {
     env: { 
       ...env, 
-      TJS_ZIG_OUT: "~/GitHub/txiki.js/zig-out", 
+      TJS_ZIG_OUT: path.resolve(os.homedir(), "./GitHub/txiki.js/zig-out"), 
       VSCODE_EXT_TARGET: target,
     },
     stdout: "inherit",
