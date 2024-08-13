@@ -14,7 +14,7 @@ const targets = [
   "alpine-arm64",
   "darwin-x64",
   "darwin-arm64",
-  // "web",
+  "web",
 ] as const;
 
 export const packageExt = async (opts: {

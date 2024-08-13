@@ -137,17 +137,21 @@ const compileBrowserWorker = () =>
     ]
   });
 
-const compileExt = async () => {
+const compileExt = async (target?: string) => {
+  const isWeb = target === 'web';
   await Promise.all([
-    compileNodeMain(),
-    compileBrowserMain(),
-    compileNodeWorker(),
-    compileBrowserWorker(),
+    ...isWeb ? [] : [compileNodeMain()],
+    ...[compileBrowserMain()],
+    ...isWeb ? [] : [compileNodeWorker()],
+    ...[compileBrowserWorker()],
   ]);
 };
 
-compileExt().then(() => {
-  console.log('Compilation completed.');
-}).catch((error) => {
-  console.error('Compilation failed.');
-});
+if (import.meta.main) {
+  const target = process.env.VSCODE_EXT_TARGET
+  compileExt(target).then(() => {
+    console.log('Compilation completed.');
+  }).catch((error) => {
+    console.error('Compilation failed.');
+  });
+}

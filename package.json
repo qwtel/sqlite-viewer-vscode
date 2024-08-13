@@ -3,7 +3,7 @@
   "name": "testy-mc-testface",
   "displayName": "Testy McTestface",
   "description": "",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "qwtel",
   "private": true,
   "license": "LICENSE.md",
@@ -21,7 +21,8 @@
   "main": "./out/extension.js",
   "browser": "./out/extension-browser.js",
   "extensionKind": [
-    "workspace"
+    "workspace",
+    "ui"
   ],
   "contributes": {
     "languages": [
