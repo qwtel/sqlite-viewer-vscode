@@ -17,7 +17,7 @@ import { WorkerMeta } from './workerMeta';
 // import type { Credentials } from './credentials';
 
 //#region Pro
-import { ConfigurationSection, ExtensionId } from './constants';
+import { ConfigurationSection, ExtensionId, FullExtensionId } from './constants';
 //#endregion
 
 const pro__IsPro = false;
@@ -66,6 +66,7 @@ async function createWebWorker(
         mappings: {
           'sqlite3.wasm': vsc.Uri.joinPath(extensionUri, 'sqlite-viewer-core', 'vscode', 'build', 'assets', 'sqlite3.wasm').toString(),
         },
+        readOnly: true,
       };
       const transfer = [
         ...data ? [data.buffer as ArrayBuffer] : [],
@@ -104,11 +105,14 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     uri: vsc.Uri,
     delegate: SQLiteDocumentDelegate,
   ): Promise<SQLiteDocument> {
+    const { extensionKind } = vsc.extensions.getExtension(FullExtensionId) ?? {}
 
-    const workspaceUIMode = (vsc.workspace.workspaceFolders?.length ?? 0) > 0;
+    const localMode = !vsc.env.remoteName;
+    const remoteWorkspaceMode = !!vsc.env.remoteName && extensionKind === vsc.ExtensionKind.Workspace;
+    const canUseNative = localMode || remoteWorkspaceMode;
 
-    const createWorkerMeta = pro__IsPro && !workspaceUIMode && !import.meta.env.BROWSER_EXT
-      ? pro__createTxikiWorker
+    const createWorkerMeta = !import.meta.env.BROWSER_EXT && pro__IsPro && canUseNative // Do not change this line
+      ? pro__createTxikiWorker 
       : createWebWorker;
 
     // If we have a backup, read that. Otherwise read the resource from the workspace. XXX: This needs a review. When are we backing stuff up?
@@ -119,7 +123,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
     const { promise: workerDbPromise } = await workerMeta.importDbWrapper(uri, filename, delegate.extensionUri);
 
-    workerDbPromise.catch(() => {}) // prevent unhandled rejection warning (we catch it later)
+    workerDbPromise.catch(() => {}) // prevent unhandled rejection warning (caught elsewhere)
 
     return new SQLiteDocument(uri, delegate, workerMeta, workerDbPromise);
   }
