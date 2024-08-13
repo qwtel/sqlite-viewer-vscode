@@ -1,5 +1,5 @@
 import { Uri } from "vscode"
-import { Remote } from "../sqlite-viewer-core/src/comlink"
+import { Remote } from "../sqlite-viewer-core/src/caplink"
 import { WorkerDB, WorkerFns } from "../sqlite-viewer-core/src/worker-db"
 
 export type Awaitable<T> = T | PromiseLike<T>

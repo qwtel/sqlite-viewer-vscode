@@ -5,7 +5,7 @@ import type { WorkerFns, WorkerDB } from '../sqlite-viewer-core/src/worker-db';
 import * as vsc from 'vscode';
 import path from 'path';
 
-import * as Comlink from "../sqlite-viewer-core/src/comlink";
+import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import nodeEndpoint, { type NodeEndpoint } from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
@@ -49,7 +49,7 @@ async function createWebWorker(
 
   const worker = new Worker(workerPath);
   const workerEndpoint = nodeEndpoint(worker as unknown as NodeEndpoint);
-  const workerFns = Comlink.wrap<WorkerFns>(workerEndpoint);
+  const workerFns = Caplink.wrap<WorkerFns>(workerEndpoint);
 
   return {
     workerFns,
@@ -69,7 +69,7 @@ async function createWebWorker(
         ...data ? [data.buffer as ArrayBuffer] : [],
         ...walData ? [walData.buffer as ArrayBuffer] : [],
       ];
-      const workerDbPromise = workerFns.importDb(filename, Comlink.transfer(args, transfer));
+      const workerDbPromise = workerFns.importDb(filename, Caplink.transfer(args, transfer));
       return { promise: workerDbPromise }
     }
   }
@@ -132,7 +132,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     uri: vsc.Uri,
     private delegate: SQLiteDocumentDelegate,
     private readonly workerMeta: WorkerMeta,
-    private workerDbPromise: Promise<Comlink.Remote<WorkerDB>>,
+    private workerDbPromise: Promise<Caplink.Remote<WorkerDB>>,
   ) {
     super();
     this._uri = uri;
@@ -264,7 +264,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
 export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   readonly webviews = new WebviewCollection();
-  private readonly webviewRemotes = new Map<vsc.WebviewPanel, Comlink.Remote<WebviewFns>>
+  private readonly webviewRemotes = new Map<vsc.WebviewPanel, Caplink.Remote<WebviewFns>>
   private readonly hostFns = new Map<SQLiteDocument, VscodeFns>();
 
   constructor(
@@ -324,8 +324,8 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
     webviewEndpoint.addEventListener('messageerror', ev => console.error(ev.data))
     webviewEndpoint.addEventListener('error', ev => console.error(ev.error))
 
-    this.webviewRemotes.set(webviewPanel, Comlink.wrap(webviewEndpoint));
-    Comlink.expose(this.hostFns.get(document)!, webviewEndpoint);
+    this.webviewRemotes.set(webviewPanel, Caplink.wrap(webviewEndpoint));
+    Caplink.expose(this.hostFns.get(document)!, webviewEndpoint);
 
     webviewPanel.webview.options = {
       enableScripts: true,
