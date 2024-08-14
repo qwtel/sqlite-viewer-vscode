@@ -1,5 +1,6 @@
 import * as vsc from 'vscode';
 import type { SQLiteDocument, SQLiteEditorProvider } from './sqliteEditor';
+import { FullExtensionId } from './constants';
 // import type { Credentials } from './credentials';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
@@ -55,5 +56,9 @@ export class VscodeFns {
     await vsc.workspace.fs.writeFile(dlUri, data);
     if (!metaKey) await vsc.commands.executeCommand('vscode.open', dlUri);
     return;
+  }
+  
+  async openExtensionStorePage() {
+    await vsc.commands.executeCommand('extension.open', FullExtensionId)
   }
 }

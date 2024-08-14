@@ -105,7 +105,7 @@
     "compile:app": "cd sqlite-viewer-core && npm run $([ -z \"${DEV}\" ] && echo build-vscode || echo build-vscode-fast)",
     "compile:tjs": "cd sqlite-viewer-core && npm run build-tjs",
     "compile:bin": "npm run compile:tjs && bun run bin.ts",
-    "compile": "npm run clean && npm run compile:bin && npm run compile:ext && npm run compile:app",
+    "compile": "npm run clean && (npm run compile:bin & npm run compile:ext & npm run compile:app & wait)",
     "package": "bun run pack.ts",
     "postversion": "cd sqlite-viewer-core && git tag -a \"vscode/v$(jq -r '.version' ../package.json)\" -m ''",
     "publish": "bun run pack.ts --kind publish",
