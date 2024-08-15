@@ -84,7 +84,7 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
   const currVersion = vsc.extensions.getExtension(FullExtensionId)!.packageJSON.version as string;
 
   // store latest version
-  context.globalState.update(ExtensionId, currVersion);
+  context.globalState.update(FullExtensionId, currVersion);
 
   if (
     prevVersion === undefined ||
@@ -110,7 +110,7 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
     }
     else if (
       prevVersion !== currVersion
-      || context.extensionMode === vsc.ExtensionMode.Development
+      // || context.extensionMode === vsc.ExtensionMode.Development
     ) {
       let actions;
       const result = await vsc.window.showInformationMessage(
