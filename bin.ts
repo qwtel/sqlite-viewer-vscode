@@ -54,6 +54,7 @@ export const compileBin = async (targetArg?: string) => {
   }
 
   const target = targetArg as typeof targets[number];
+  console.log({ target })
 
   const ext = target.startsWith('win32') ? '.exe' : '';
   const filename = target.startsWith('win32')

@@ -9,6 +9,7 @@ import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import nodeEndpoint from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
+import { ConfigurationSection, ExtensionId, FullExtensionId } from './constants';
 import { Disposable, disposeAll } from './dispose';
 import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cspUtil, getUriParts } from './util';
 import { Worker } from './webWorker';
@@ -17,7 +18,6 @@ import { WorkerMeta } from './workerMeta';
 // import type { Credentials } from './credentials';
 
 //#region Pro
-import { ConfigurationSection, ExtensionId, FullExtensionId } from './constants';
 //#endregion
 
 const pro__IsPro = false;
