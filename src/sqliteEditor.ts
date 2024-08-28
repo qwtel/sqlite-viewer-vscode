@@ -18,6 +18,7 @@ import { WorkerMeta } from './workerMeta';
 // import type { Credentials } from './credentials';
 
 //#region Pro
+const pro__createTxikiWorker: () => never = () => { throw new Error("Not implemented") }
 //#endregion
 
 const pro__IsPro = false;
@@ -96,8 +97,6 @@ async function readFile(uri: vsc.Uri): Promise<[data: Uint8Array|null, walData?:
     vsc.workspace.fs.readFile(walUri).then(x => x, () => null)
   ]);
 }
-
-const pro__createTxikiWorker: () => never = () => { throw new Error("Not implemented") }
 
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   static async create(
