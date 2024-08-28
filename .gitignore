@@ -1,6 +1,7 @@
 node_modules
 bun.lockb
 out
+tmp
 exampleFiles
 *.vsix
 *.zip
