@@ -1,13 +1,13 @@
 {
   "icon": "documentation/icon.png",
-  "name": "testy-mc-testface",
-  "displayName": "Testy McTestface",
-  "description": "",
-  "version": "0.1.4",
+  "name": "sqlite-viewer",
+  "displayName": "SQLite Viewer",
+  "description": "SQLite Viewer for VSCode",
+  "version": "0.6.5-dev.0",
   "publisher": "qwtel",
   "private": true,
   "license": "LICENSE.md",
-  "homepage": "",
+  "homepage": "https://sqliteviewer.app",
   "repository": {
     "type": "git",
     "url": "https://github.com/qwtel/sqlite-viewer-vscode"
@@ -21,7 +21,6 @@
   "main": "./out/extension.js",
   "browser": "./out/extension-browser.js",
   "extensionKind": [
-    "workspace",
     "ui"
   ],
   "contributes": {
@@ -41,8 +40,8 @@
     ],
     "customEditors": [
       {
-        "viewType": "testy-mc-testface.view",
-        "displayName": "Testy McTestface",
+        "viewType": "sqlite-viewer.view",
+        "displayName": "SQLite Viewer",
         "selector": [
           {
             "filenamePattern": "*.sqlite"
@@ -65,8 +64,8 @@
         ]
       },
       {
-        "viewType": "testy-mc-testface.option",
-        "displayName": "Testy McTestface",
+        "viewType": "sqlite-viewer.option",
+        "displayName": "SQLite Viewer",
         "selector": [
           {
             "filenamePattern": "*"
@@ -76,9 +75,9 @@
       }
     ],
     "configuration": {
-      "title": "Testy McTestface",
+      "title": "SQLite Viewer",
       "properties": {
-        "testyMcTestface.maxFileSize": {
+        "sqliteViewer.maxFileSize": {
           "type": "number",
           "minimum": 0,
           "maximum": 4000,
@@ -90,9 +89,9 @@
     },
     "commands": [
       {
-        "command": "testy-mc-testface.addFileNestingPatterns",
+        "command": "sqlite-viewer.addFileNestingPatterns",
         "title": "Add SQLite File Nesting Patterns",
-        "category": "Testy McTestface"
+        "category": "SQLite Viewer"
       }
     ]
   },
