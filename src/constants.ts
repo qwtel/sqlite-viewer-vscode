@@ -9,6 +9,7 @@ export const NestingPattern = "${capture}.${extname}-*";
 export const FileNestingPatternsAdded = 'fileNestingPatternsAdded';
 
 export const SyncedKeys = [
+  FullExtensionId,
   FileNestingPatternsAdded
 ];
 

@@ -112,17 +112,17 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
       prevVersion !== currVersion
       // || context.extensionMode === vsc.ExtensionMode.Development
     ) {
-      let actions;
-      const result = await vsc.window.showInformationMessage(
-        `SQLite Viewer can now open more than one than one editor per SQLite file. Check out the changelog for details:`,
-        ...actions = [{ title: 'Open Changelog ↗' }]
-      );
+      // let actions;
+      // const result = await vsc.window.showInformationMessage(
+      //   `SQLite Viewer can now open more than one than one editor per SQLite file. Check out the changelog for details:`,
+      //   ...actions = [{ title: 'Open Changelog ↗' }]
+      // );
 
-      switch (result) {
-        case actions[0]: {
-          return await openChangelog('#v0.6.4');
-        }
-      }
+      // switch (result) {
+      //   case actions[0]: {
+      //     return await openChangelog('#v0.6.4');
+      //   }
+      // }
     }
   }
 }
