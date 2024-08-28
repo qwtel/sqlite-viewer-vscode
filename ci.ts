@@ -19,8 +19,8 @@ const matrix = [
 ] as const;
 
 for (const [i, target] of matrix.entries()) {
-  await packageExt({ target, kind: "publish" }, i === 0 ? Bun.env : { 
-    ...Bun.env, 
-    VSCODE_EXT_SKIP_COMPILE: "1" 
-  });
+  await packageExt(
+    { target, kind: "publish" }, 
+    i === 0 ? Bun.env : { ...Bun.env, VSCODE_EXT_SKIP_COMPILE: "1" },
+  );
 }

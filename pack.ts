@@ -36,17 +36,18 @@ export const packageExt = async (opts: {
   }
 
   if (!target) {
-    console.warn("Assuming target: darwin-arm64");
-    target = "darwin-arm64"; // FIXME: make host platform
+    console.warn(`Running '${kind}' without target`);
   }
 
-  const proc = Bun.spawn([
+  const cmd = [
     "vsce", 
     kind,
     ...preRelease ? ["--pre-release"] : [], 
-    "--target", target, 
+    ...target ? ["--target", target] : [], 
     "--baseContentUrl", "https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/"
-  ], {
+  ];
+  console.log(`Spawning '${cmd.join(" ")}':`);
+  const proc = Bun.spawn(cmd, {
     env: { 
       ...env, 
       TJS_ZIG_OUT: path.resolve(os.homedir(), "./GitHub/txiki.js/zig-out"), 
