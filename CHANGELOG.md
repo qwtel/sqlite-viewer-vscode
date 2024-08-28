@@ -4,6 +4,9 @@
 ### Secondary Sidebar
 SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
 
+## v0.6.5 (Pre-Release)
+Code refactoring, no externally visible changes 
+
 ## v0.6.4 (Pre-Release)
 It is now possible to __open more than one SQLite Viewer instance per file__. 
 Additionally, opening large files (~1GB) is now much faster, and opening additional tabs of the same file carries no additional cost beyond the webview itself. 
