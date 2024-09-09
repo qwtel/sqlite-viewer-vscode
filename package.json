@@ -114,7 +114,7 @@
     "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
     "pre-publish": "vsce publish --pre-release --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/preview/",
     "prepack": "sed -i '' s~https://sqliteviewer\\.app~https://sqliteviewer.app?ref=vscode~g *.md",
-    "postpack": "sed -i '' s/\\?ref=vscode//g *.md",
+    "postpack": "sed -i '' s~https://sqliteviewer\\.app?ref=vscode~https://sqliteviewer.app~g *.md",
     "codium:publish": "ovsx publish"
   },
   "devDependencies": {
