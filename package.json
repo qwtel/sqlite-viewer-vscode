@@ -110,7 +110,7 @@
     "publish": "bun run pack.ts --kind publish",
     "pre-publish": "bun run pack.ts --kind publish --pre-release",
     "prepack": "sed -i '' s~https://sqliteviewer\\.app~https://sqliteviewer.app?ref=vscode~g *.md",
-    "postpack": "sed -i '' s/\\?ref=vscode//g *.md",
+    "postpack": "sed -i '' s~https://sqliteviewer\\.app?ref=vscode~https://sqliteviewer.app~g *.md",
     "codium:publish": "echo \"TODO\" && exit 1 && ovsx publish"
   },
   "devDependencies": {
