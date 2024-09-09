@@ -11,6 +11,9 @@ While this update removes the need for the above workarounds, it does not change
 
 Note that making this work required significant restructuring of the extension, which may cause (unrelated) issues. Please report any you may encounter. 
 
+## v0.5.13
+- Replaced 3rd party ad with 1st party ad: Check out [Hydejack](https://hydejack.com/?ref=vscode), a Jekyll theme for hackers, nerds, and academics, made by yours truly.
+
 ## v0.5.12
 - Fixed an issue related to square brackets in column names
 
