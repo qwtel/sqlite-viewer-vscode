@@ -12,9 +12,9 @@ import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-
 import { ConfigurationSection, ExtensionId, FullExtensionId } from './constants';
 import { Disposable, disposeAll } from './dispose';
 import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cspUtil, getUriParts } from './util';
-import { Worker } from './webWorker';
 import { VscodeFns } from './vscodeFns';
-import { WorkerMeta } from './workerMeta';
+import { WorkerBundle } from './workerBundle';
+import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
 // import type { Credentials } from './credentials';
 
 //#region Pro
@@ -32,72 +32,6 @@ interface SQLiteDocumentDelegate {
   getFileData(): Promise<Uint8Array>;
 }
 
-function getConfiguredMaxFileSize() {
-  const config = vsc.workspace.getConfiguration(ConfigurationSection);
-  const maxFileSizeMB = config.get<number>('maxFileSize') ?? 200;
-  const maxFileSize = maxFileSizeMB * 2 ** 20;
-  return maxFileSize;
-}
-
-const TooLargeErrorMsg = "File too large. You can increase this limit in the settings under 'Sqlite Viewer: Max File Size'."
-
-async function createWebWorker(
-  extensionUri: vsc.Uri,
-  _filename: string,
-  _uri: vsc.Uri,
-): Promise<WorkerMeta> {
-  const workerPath = import.meta.env.BROWSER_EXT
-    ? vsc.Uri.joinPath(extensionUri, 'out', 'worker-browser.js').toString()
-    : path.resolve(__dirname, "./worker.js")
-
-  const worker = new Worker(workerPath);
-  const workerEndpoint = nodeEndpoint(worker);
-  const workerFns = Caplink.wrap<WorkerFns>(workerEndpoint);
-
-  return {
-    workerFns,
-    workerLike: worker,
-    async importDbWrapper(xUri, filename) {
-      const [data, walData] = await readFile(xUri);
-      if (data == null) return { promise: Promise.reject(Error(TooLargeErrorMsg)) }
-      const args = {
-        data,
-        walData,
-        maxFileSize: getConfiguredMaxFileSize(),
-        mappings: {
-          'sqlite3.wasm': vsc.Uri.joinPath(extensionUri, 'sqlite-viewer-core', 'vscode', 'build', 'assets', 'sqlite3.wasm').toString(),
-        },
-        readOnly: true,
-      };
-      const transfer = [
-        ...data ? [data.buffer as ArrayBuffer] : [],
-        ...walData ? [walData.buffer as ArrayBuffer] : [],
-      ];
-      const workerDbPromise = workerFns.importDb(filename, Caplink.transfer(args, transfer));
-      return { promise: workerDbPromise }
-    }
-  }
-}
-
-async function readFile(uri: vsc.Uri): Promise<[data: Uint8Array|null, walData?: Uint8Array|null]> {
-  if (uri.scheme === 'untitled') {
-    return [new Uint8Array(), null];
-  }
-
-  const maxFileSize = getConfiguredMaxFileSize();
-
-  const walUri = uri.with({ path: uri.path + '-wal' })
-
-  const stat = await vsc.workspace.fs.stat(uri)
-  if (maxFileSize !== 0 && stat.size > maxFileSize)
-    return [null, null];
-
-  return Promise.all([
-    vsc.workspace.fs.readFile(uri),
-    vsc.workspace.fs.readFile(walUri).then(x => x, () => null)
-  ]);
-}
-
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   static async create(
     openContext: vsc.CustomDocumentOpenContext,
@@ -109,7 +43,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     const remoteWorkspaceMode = !!vsc.env.remoteName && vsc.extensions.getExtension(FullExtensionId)?.extensionKind === vsc.ExtensionKind.Workspace;
     const canUseNativeSqlite3 = localMode || remoteWorkspaceMode;
 
-    const createWorkerMeta = !import.meta.env.BROWSER_EXT && pro__IsPro && canUseNativeSqlite3 // Do not change this line
+    const createWorkerBundle = !import.meta.env.BROWSER_EXT && pro__IsPro && canUseNativeSqlite3 // Do not change this line
       ? pro__createTxikiWorker 
       : createWebWorker;
 
@@ -117,13 +51,10 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     const xUri = typeof openContext.backupId === 'string' ? vsc.Uri.parse(openContext.backupId) : uri;
 
     const { filename } = getUriParts(xUri);
-    const workerMeta = await createWorkerMeta(delegate.extensionUri, filename, xUri);
+    const workerBundle = await createWorkerBundle(delegate.extensionUri, filename, xUri);
 
-    const { promise: workerDbPromise } = await workerMeta.importDbWrapper(uri, filename, delegate.extensionUri);
-
-    workerDbPromise.catch(() => {}) // prevent unhandled rejection warning (caught elsewhere)
-
-    return new SQLiteDocument(uri, delegate, workerMeta, workerDbPromise);
+    const { promise: workerDbPromise } = await workerBundle.importDbWrapper(uri, filename, delegate.extensionUri);
+    return new SQLiteDocument(uri, delegate, workerBundle, workerDbPromise);
   }
 
   getConfiguredMaxFileSize() { return getConfiguredMaxFileSize() }
@@ -137,7 +68,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   private constructor(
     uri: vsc.Uri,
     private delegate: SQLiteDocumentDelegate,
-    private readonly workerMeta: WorkerMeta,
+    private readonly workerBundle: WorkerBundle,
     private workerDbPromise: Promise<Caplink.Remote<WorkerDB>>,
   ) {
     super();
@@ -181,8 +112,8 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * This happens when all editors for it have been closed.
    */
   dispose() {
-    this.workerMeta.workerFns[Symbol.dispose]();
-    this.workerMeta.workerLike.terminate();
+    this.workerBundle.workerFns[Symbol.dispose]();
+    this.workerBundle.workerLike.terminate();
     this._onDidDispose.fire();
     super.dispose();
   }
@@ -241,7 +172,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   }
 
   async refreshDb() {
-    const { promise } = await this.workerMeta.importDbWrapper(this.uri, this.uriParts.filename);
+    const { promise } = await this.workerBundle.importDbWrapper(this.uri, this.uriParts.filename);
     this.workerDbPromise = promise;
     return promise;
   }

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { fetch } from './webFetch';
+import { fetch } from './compat/fetch';
 import { FullExtensionId } from './constants';
 // import * as jose from 'jose';
 
