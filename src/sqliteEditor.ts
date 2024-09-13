@@ -1,6 +1,6 @@
 import type TelemetryReporter from '@vscode/extension-telemetry';
 import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
-import type { WorkerFns, WorkerDB } from '../sqlite-viewer-core/src/worker-db';
+import type { WorkerFns, WorkerDB, SqlValue } from '../sqlite-viewer-core/src/worker-db';
 
 import * as vsc from 'vscode';
 import path from 'path';
@@ -11,7 +11,7 @@ import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-
 
 import { ConfigurationSection, ExtensionId, FullExtensionId } from './constants';
 import { Disposable, disposeAll } from './dispose';
-import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cspUtil, getUriParts } from './util';
+import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancellationTokenToAbortSignal, cspUtil, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
 import { WorkerBundle } from './workerBundle';
 import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
@@ -23,13 +23,15 @@ const pro__createTxikiWorker: () => never = () => { throw new Error("Not impleme
 
 const pro__IsPro = false;
 
-interface SQLiteEdit {
-  readonly data: Uint8Array;
-}
+export type SQLiteEdit = { 
+  label: string, 
+  query: string, 
+  params: SqlValue[],
+  oldParams: SqlValue[], 
+};
 
 interface SQLiteDocumentDelegate {
   extensionUri: vsc.Uri;
-  getFileData(): Promise<Uint8Array>;
 }
 
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
@@ -38,14 +40,17 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     uri: vsc.Uri,
     delegate: SQLiteDocumentDelegate,
   ): Promise<SQLiteDocument> {
+    const extension = vsc.extensions.getExtension(FullExtensionId);
 
     const localMode = !vsc.env.remoteName;
-    const remoteWorkspaceMode = !!vsc.env.remoteName && vsc.extensions.getExtension(FullExtensionId)?.extensionKind === vsc.ExtensionKind.Workspace;
-    const canUseNativeSqlite3 = localMode || remoteWorkspaceMode;
+    const remoteWorkspaceMode = !!vsc.env.remoteName && extension?.extensionKind === vsc.ExtensionKind.Workspace;
 
+    const canUseNativeSqlite3 = localMode || remoteWorkspaceMode;
     const createWorkerBundle = !import.meta.env.BROWSER_EXT && pro__IsPro && canUseNativeSqlite3 // Do not change this line
       ? pro__createTxikiWorker 
       : createWebWorker;
+
+    // const readWriteMode = !import.meta.env.BROWSER_EXT && pro__IsPro && canUseNativeSqlite3;
 
     // If we have a backup, read that. Otherwise read the resource from the workspace. XXX: This needs a review. When are we backing stuff up?
     const xUri = typeof openContext.backupId === 'string' ? vsc.Uri.parse(openContext.backupId) : uri;
@@ -54,7 +59,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     const workerBundle = await createWorkerBundle(delegate.extensionUri, filename, xUri);
 
     const { promise: workerDbPromise } = await workerBundle.importDbWrapper(uri, filename, delegate.extensionUri);
-    return new SQLiteDocument(uri, delegate, workerBundle, workerDbPromise);
+    return new SQLiteDocument(uri, workerBundle, workerDbPromise);
   }
 
   getConfiguredMaxFileSize() { return getConfiguredMaxFileSize() }
@@ -63,17 +68,13 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   private _edits: Array<SQLiteEdit> = [];
   private _savedEdits: Array<SQLiteEdit> = [];
 
-  private readonly _delegate: SQLiteDocumentDelegate;
-
   private constructor(
     uri: vsc.Uri,
-    private delegate: SQLiteDocumentDelegate,
     private readonly workerBundle: WorkerBundle,
     private workerDbPromise: Promise<Caplink.Remote<WorkerDB>>,
   ) {
     super();
     this._uri = uri;
-    this._delegate = delegate;
   }
 
   public get uri() { return this._uri; }
@@ -83,8 +84,6 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   public readonly onDidDispose = this._onDidDispose.event;
 
   private readonly _onDidChangeDocument = this._register(new vsc.EventEmitter<{
-    readonly content?: Uint8Array;
-    readonly walContent?: Uint8Array|null;
     readonly edits: readonly SQLiteEdit[];
   }>());
 
@@ -124,47 +123,54 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * This fires an event to notify VS Code that the document has been edited.
    */
   makeEdit(edit: SQLiteEdit) {
-    throw Error("Not implemented")
-    // this._edits.push(edit);
-
-    // this._onDidChange.fire({
-    //   label: 'Stroke',
-    //   undo: async () => {
-    //     this._edits.pop();
-    //     this._onDidChangeDocument.fire({
-    //       edits: this._edits,
-    //     });
-    //   },
-    //   redo: async () => {
-    //     this._edits.push(edit);
-    //     this._onDidChangeDocument.fire({
-    //       edits: this._edits,
-    //     });
-    //   }
-    // });
+    this._edits.push(edit);
+    this._onDidChange.fire({
+      label: edit.label,
+      undo: async () => {
+        const edit = this._edits.pop()!;
+        const remote = await this.getDb();
+        await remote.applyEdit(edit.query, edit.oldParams);
+        this._onDidChangeDocument.fire({ edits: this._edits });
+      },
+      redo: async () => {
+        this._edits.push(edit);
+        const remote = await this.getDb();
+        await remote.applyEdit(edit.query, edit.params);
+        this._onDidChangeDocument.fire({ edits: this._edits });
+      }
+    });
   }
 
   /**
    * Called by VS Code when the user saves the document.
    */
-  async save(cancellation: vsc.CancellationToken): Promise<void> {
-    throw Error("Not implemented")
-    // await this.saveAs(this.uri, cancellation);
-    // this._savedEdits = Array.from(this._edits);
+  async save(token: vsc.CancellationToken): Promise<void> {
+    const remote = await this.getDb();
+    await remote.commit(cancellationTokenToAbortSignal(token));
+    this._savedEdits = Array.from(this._edits);
   }
 
   /**
    * Called by VS Code when the user saves the document to a new location.
    */
   async saveAs(targetResource: vsc.Uri, cancellation: vsc.CancellationToken): Promise<void> {
-    throw Error("Not implemented")
+    const remote = await this.getDb();
+    const stat = await vsc.workspace.fs.stat(this.uri);
+    if (stat.size > this.getConfiguredMaxFileSize()) {
+      throw new Error("File too large to save");
+    }
+    const { filename } = this.uriParts;
+    const data = await remote.exportDb(filename, cancellationTokenToAbortSignal(cancellation));
+    vsc.workspace.fs.writeFile(targetResource, data);
   }
 
   /**
    * Called by VS Code when the user calls `revert` on a document.
    */
-  async revert(_cancellation: vsc.CancellationToken): Promise<void> {
-    throw Error("Not implemented");
+  async revert(token: vsc.CancellationToken): Promise<void> {
+    const remote = await this.getDb();
+    await remote.rollback(cancellationTokenToAbortSignal(token));
+    // XXX: how to handle savedEdits in this case?
   }
 
   async getDb() {
@@ -183,6 +189,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * These backups are used to implement hot exit.
    */
   async backup(destination: vsc.Uri, cancellation: vsc.CancellationToken): Promise<vsc.CustomDocumentBackup> {
+    // TODO: we can make this work!
     throw Error("Not implemented")
     // await this.saveAs(destination, cancellation);
 
@@ -217,19 +224,16 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
 
     const document = await SQLiteDocument.create(openContext, uri, {
       extensionUri: this.context.extensionUri,
-      getFileData: async () => {
-        throw Error("Not implemented")
-      }
+      // getFileData: async () => {
+      //   throw Error("Not implemented")
+      // }
     });
 
     const listeners: vsc.Disposable[] = [];
 
-    listeners.push(document.onDidChange(e => {
+    listeners.push(document.onDidChange(edit => {
       // Tell VS Code that the document has been edited by the use.
-      this._onDidChangeCustomDocument.fire({
-        document,
-        ...e,
-      });
+      this._onDidChangeCustomDocument.fire({ document, ...edit });
     }));
 
     listeners.push(document.onDidChangeContent(async e => {
@@ -279,6 +283,7 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
   }
 
   private readonly _onDidChangeCustomDocument = new vsc.EventEmitter<vsc.CustomDocumentEditEvent<SQLiteDocument>>();
+
   public readonly onDidChangeCustomDocument = this._onDidChangeCustomDocument.event;
 
   public saveCustomDocument(document: SQLiteDocument, cancellation: vsc.CancellationToken): Thenable<void> {

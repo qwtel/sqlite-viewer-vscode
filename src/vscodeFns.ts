@@ -1,5 +1,5 @@
 import * as vsc from 'vscode';
-import type { SQLiteDocument, SQLiteEditorProvider } from './sqliteEditor';
+import type { SQLiteDocument, SQLiteEdit, SQLiteEditorProvider } from './sqliteEditor';
 import { FullExtensionId } from './constants';
 // import type { Credentials } from './credentials';
 
@@ -60,5 +60,9 @@ export class VscodeFns {
   
   async openExtensionStorePage() {
     await vsc.commands.executeCommand('extension.open', FullExtensionId)
+  }
+
+  async fireEditEvent(edit: SQLiteEdit) {
+    this.document.makeEdit(edit);
   }
 }

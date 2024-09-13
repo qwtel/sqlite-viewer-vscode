@@ -153,3 +153,10 @@ export function getUriParts(uri: vsc.Uri) {
   const { dirname, filename, basename, extname } = decodeURI(uri.toString()).match(PathRegExp)?.groups ?? {}
   return { dirname, filename, basename, extname };
 }
+
+export function cancellationTokenToAbortSignal(token: vsc.CancellationToken): AbortSignal {
+  const ctrl = new AbortController();
+  if (token.isCancellationRequested) ctrl.abort(); 
+  else token.onCancellationRequested(() => ctrl.abort());
+  return ctrl.signal;
+}
