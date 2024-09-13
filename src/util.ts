@@ -1,5 +1,6 @@
 import * as vsc from 'vscode';
 import { Disposable } from './dispose';
+import { ReadableStream, WritableStream } from './o/stream/web';
 
 // A bunch of tests to figure out where we're running. Some more reliable than others.
 export const IS_VSCODE = vsc.env.uriScheme.includes("vscode");

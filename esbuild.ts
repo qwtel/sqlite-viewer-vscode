@@ -14,7 +14,9 @@ console.log({ DEV })
 const outDir = resolve('out')
 
 function envToDefine(env: Record<string, any>): Record<`import.meta.env.${string}`, string> {
-  return Object.fromEntries(Object.entries(env).map(([k, v]) => [`import.meta.env.${k}`, JSON.stringify(v)]))
+  const res =  Object.fromEntries(Object.entries(env).map(([k, v]) => [`import.meta.env.${k}`, JSON.stringify(v)]))
+  console.log(res)
+  return res;
 }
 
 const config = {
@@ -31,6 +33,7 @@ const baseConfig = {
   external: ['vscode'] as const,
   define: {
     ...envToDefine({
+      DEV,
       VITE_VSCODE: true,
     }),
   },
@@ -43,6 +46,7 @@ const baseWorkerConfig = {
   target: 'es2022',
   define: {
     ...envToDefine({
+      DEV,
       VITE_VSCODE: true,
     }),
     'import.meta.url': '"file:./sqlite-viewer-core/vscode/build/assets/"',
@@ -60,6 +64,7 @@ const compileNodeMain = () =>
     define: {
       ...baseConfig.define,
       ...envToDefine({
+        DEV,
         BROWSER_EXT: false,
       }),
     }
@@ -89,6 +94,7 @@ const compileBrowserMain = () =>
     define: {
       ...baseConfig.define,
       ...envToDefine({
+        DEV,
         BROWSER_EXT: true,
       }),
     },
@@ -112,6 +118,7 @@ const compileNodeWorker = () =>
     define: {
       ...baseWorkerConfig.define,
       ...envToDefine({
+        DEV,
         BROWSER_EXT: false,
       })
     },
@@ -127,6 +134,7 @@ const compileBrowserWorker = () =>
     define: {
       ...baseWorkerConfig.define,
       ...envToDefine({
+        DEV,
         BROWSER_EXT: true,
       })
     },

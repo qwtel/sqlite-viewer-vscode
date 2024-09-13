@@ -3,8 +3,12 @@
     "cmake.configureOnOpen": false,
     "cSpell.words": [
         "groupper",
+        "RESTOREPOINT",
+        "ROWID",
+        "SAVEPOINT",
         "Tabbabilities",
         "tabbability",
-        "Tabster"
+        "Tabster",
+        "UNDOPOINT"
     ]
 }
