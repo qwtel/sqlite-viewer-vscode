@@ -1,6 +1,6 @@
 import type TelemetryReporter from '@vscode/extension-telemetry';
 import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
-import type { WorkerFns, WorkerDB, SqlValue } from '../sqlite-viewer-core/src/worker-db';
+import type { WorkerFns, WorkerDb, SqlValue } from '../sqlite-viewer-core/src/worker-db';
 
 import * as vsc from 'vscode';
 
@@ -73,7 +73,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   private constructor(
     uri: vsc.Uri,
     private readonly workerBundle: WorkerBundle,
-    private workerDbPromise: Promise<Caplink.Remote<WorkerDB>>,
+    private workerDbPromise: Promise<Caplink.Remote<WorkerDb>>,
   ) {
     super();
     this._uri = uri;
