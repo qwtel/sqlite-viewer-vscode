@@ -3,7 +3,6 @@ import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
 import type { WorkerFns, WorkerDB, SqlValue } from '../sqlite-viewer-core/src/worker-db';
 
 import * as vsc from 'vscode';
-import path from 'path';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import nodeEndpoint from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
@@ -34,19 +33,22 @@ interface SQLiteDocumentDelegate {
   extensionUri: vsc.Uri;
 }
 
+  const Extension = vsc.extensions.getExtension(FullExtensionId);
+
+  const LocalMode = !vsc.env.remoteName;
+  const RemoteWorkspaceMode = !!vsc.env.remoteName && Extension?.extensionKind === vsc.ExtensionKind.Workspace;
+  const ReadWriteMode = LocalMode || RemoteWorkspaceMode;
+
+  const IsReadWrite = !import.meta.env.BROWSER_EXT && pro__IsPro && ReadWriteMode;
+
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   static async create(
     openContext: vsc.CustomDocumentOpenContext,
     uri: vsc.Uri,
     delegate: SQLiteDocumentDelegate,
   ): Promise<SQLiteDocument> {
-    const extension = vsc.extensions.getExtension(FullExtensionId);
 
-    const localMode = !vsc.env.remoteName;
-    const remoteWorkspaceMode = !!vsc.env.remoteName && extension?.extensionKind === vsc.ExtensionKind.Workspace;
-
-    const canUseNativeSqlite3 = localMode || remoteWorkspaceMode;
-    const createWorkerBundle = !import.meta.env.BROWSER_EXT && pro__IsPro && canUseNativeSqlite3 // Do not change this line
+    const createWorkerBundle = !import.meta.env.BROWSER_EXT && pro__IsPro && ReadWriteMode // Do not change this line
       ? pro__createTxikiWorker 
       : createWebWorker;
 
@@ -206,10 +208,10 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   }
 }
 
-export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
+export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorProvider<SQLiteDocument> {
   readonly webviews = new WebviewCollection();
-  private readonly webviewRemotes = new Map<vsc.WebviewPanel, Caplink.Remote<WebviewFns>>
-  private readonly hostFns = new Map<SQLiteDocument, VscodeFns>();
+  protected readonly webviewRemotes = new Map<vsc.WebviewPanel, Caplink.Remote<WebviewFns>>
+  protected readonly hostFns = new Map<SQLiteDocument, VscodeFns>();
 
   constructor(
     readonly context: vsc.ExtensionContext, 
@@ -229,28 +231,21 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
       // }
     });
 
-    const listeners: vsc.Disposable[] = [];
-
-    listeners.push(document.onDidChange(edit => {
-      // Tell VS Code that the document has been edited by the use.
-      this._onDidChangeCustomDocument.fire({ document, ...edit });
-    }));
-
-    listeners.push(document.onDidChangeContent(async e => {
-      // Update all webviews when the document changes
-      const { filename } = document.uriParts;
-      for (const panel of this.webviews.get(document.uri)) {
-        await this.webviewRemotes.get(panel)?.forceUpdate(filename);
-      }
-    }));
+    const listeners = this.setupListeners(document);
 
     this.hostFns.set(document, new VscodeFns(this, document));
+
     document.onDidDispose(() => {
       this.hostFns.delete(document);
       disposeAll(listeners)
     });
 
     return document;
+  }
+
+  protected setupListeners(_document: SQLiteDocument): vsc.Disposable[] {
+    // noop 
+    return [];
   }
 
   async resolveCustomEditor(
@@ -280,26 +275,6 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
         webviewRemote[Symbol.dispose]();
       }
     });
-  }
-
-  private readonly _onDidChangeCustomDocument = new vsc.EventEmitter<vsc.CustomDocumentEditEvent<SQLiteDocument>>();
-
-  public readonly onDidChangeCustomDocument = this._onDidChangeCustomDocument.event;
-
-  public saveCustomDocument(document: SQLiteDocument, cancellation: vsc.CancellationToken): Thenable<void> {
-    return document.save(cancellation);
-  }
-
-  public saveCustomDocumentAs(document: SQLiteDocument, destination: vsc.Uri, cancellation: vsc.CancellationToken): Thenable<void> {
-    return document.saveAs(destination, cancellation);
-  }
-
-  public revertCustomDocument(document: SQLiteDocument, cancellation: vsc.CancellationToken): Thenable<void> {
-    return document.revert(cancellation);
-  }
-
-  public backupCustomDocument(document: SQLiteDocument, context: vsc.CustomDocumentBackupContext, cancellation: vsc.CancellationToken): Thenable<vsc.CustomDocumentBackup> {
-    return document.backup(context.destination, cancellation);
   }
 
   private async getHtmlForWebview(webview: vsc.Webview): Promise<string> {
@@ -340,6 +315,46 @@ export class SQLiteEditorProvider implements vsc.CustomEditorProvider<SQLiteDocu
   }
 }
 
+export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
+  protected setupListeners(document: SQLiteDocument): vsc.Disposable[] {
+    const listeners: vsc.Disposable[] = [];
+
+    listeners.push(document.onDidChange(edit => {
+      // Tell VS Code that the document has been edited by the use.
+      this._onDidChangeCustomDocument.fire({ document, ...edit });
+    }));
+
+    listeners.push(document.onDidChangeContent(async e => {
+      // Update all webviews when the document changes
+      const { filename } = document.uriParts;
+      for (const panel of this.webviews.get(document.uri)) {
+        await this.webviewRemotes.get(panel)?.forceUpdate(filename);
+      }
+    }));
+
+    return listeners;
+  }
+
+  private readonly _onDidChangeCustomDocument = new vsc.EventEmitter<vsc.CustomDocumentEditEvent<SQLiteDocument>>();
+  public readonly onDidChangeCustomDocument = this._onDidChangeCustomDocument.event;
+
+  public saveCustomDocument(document: SQLiteDocument, cancellation: vsc.CancellationToken): Thenable<void> {
+    return document.save(cancellation);
+  }
+
+  public saveCustomDocumentAs(document: SQLiteDocument, destination: vsc.Uri, cancellation: vsc.CancellationToken): Thenable<void> {
+    return document.saveAs(destination, cancellation);
+  }
+
+  public revertCustomDocument(document: SQLiteDocument, cancellation: vsc.CancellationToken): Thenable<void> {
+    return document.revert(cancellation);
+  }
+
+  public backupCustomDocument(document: SQLiteDocument, context: vsc.CustomDocumentBackupContext, cancellation: vsc.CancellationToken): Thenable<vsc.CustomDocumentBackup> {
+    return document.backup(context.destination, cancellation);
+  }
+}
+
 const registerOptions = {
   webviewOptions: {
     // TODO: serialize state!?
@@ -348,7 +363,7 @@ const registerOptions = {
   supportsMultipleEditorsPerDocument: true,
 } satisfies Parameters<typeof vsc.window.registerCustomEditorProvider>[2];
 
-export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {
+export class SQLiteEditorDefaultProvider extends (IsReadWrite ? SQLiteEditorProvider : SQLiteReadonlyEditorProvider) {
   static viewType = `${ExtensionId}.view`;
 
   public static register(context: vsc.ExtensionContext, reporter: TelemetryReporter): vsc.Disposable {
@@ -359,7 +374,7 @@ export class SQLiteEditorDefaultProvider extends SQLiteEditorProvider {
   }
 }
 
-export class SQLiteEditorOptionProvider extends SQLiteEditorProvider {
+export class SQLiteEditorOptionProvider extends (IsReadWrite ? SQLiteEditorProvider : SQLiteReadonlyEditorProvider) {
   static viewType = `${ExtensionId}.option`;
 
   public static register(context: vsc.ExtensionContext, reporter: TelemetryReporter): vsc.Disposable {

@@ -1,5 +1,5 @@
 import * as vsc from 'vscode';
-import type { SQLiteDocument, SQLiteEdit, SQLiteEditorProvider } from './sqliteEditor';
+import { SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
 import { FullExtensionId } from './constants';
 // import type { Credentials } from './credentials';
 
@@ -24,7 +24,7 @@ export type RegularInit = {
  */
 export class VscodeFns {
   constructor(
-    private readonly provider: SQLiteEditorProvider, 
+    private readonly provider: SQLiteEditorProvider|SQLiteReadonlyEditorProvider, 
     private readonly document: SQLiteDocument,
   ) {}
 
@@ -39,6 +39,10 @@ export class VscodeFns {
     }
     throw new Error("Document not found in webviews");
   }
+
+  get readOnly() {
+    return this.provider instanceof SQLiteReadonlyEditorProvider;
+  } 
 
   async refreshFile() {
     const { document } = this;

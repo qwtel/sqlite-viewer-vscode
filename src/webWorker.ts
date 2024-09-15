@@ -38,7 +38,7 @@ export async function createWebWorker(
     workerLike: worker,
     async importDbWrapper(xUri, filename) {
       const [data, walData] = await readFile(xUri);
-      if (data == null) return { promise: Promise.reject(Error(TooLargeErrorMsg)) }
+      if (data == null) return { promise: Promise.reject(new Error(TooLargeErrorMsg)) }
       const args = {
         data,
         walData,
