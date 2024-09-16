@@ -33,13 +33,13 @@ interface SQLiteDocumentDelegate {
   extensionUri: vsc.Uri;
 }
 
-  const Extension = vsc.extensions.getExtension(FullExtensionId);
+const Extension = vsc.extensions.getExtension(FullExtensionId);
 
-  const LocalMode = !vsc.env.remoteName;
-  const RemoteWorkspaceMode = !!vsc.env.remoteName && Extension?.extensionKind === vsc.ExtensionKind.Workspace;
-  const ReadWriteMode = LocalMode || RemoteWorkspaceMode;
+const LocalMode = !vsc.env.remoteName;
+const RemoteWorkspaceMode = !!vsc.env.remoteName && Extension?.extensionKind === vsc.ExtensionKind.Workspace;
+const ReadWriteMode = LocalMode || RemoteWorkspaceMode;
 
-  const IsReadWrite = !import.meta.env.BROWSER_EXT && pro__IsPro && ReadWriteMode;
+const IsReadWrite = !import.meta.env.BROWSER_EXT && pro__IsPro && ReadWriteMode;
 
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   static async create(
@@ -59,16 +59,16 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
     const { filename } = getUriParts(xUri);
     const workerBundle = await createWorkerBundle(delegate.extensionUri, filename, xUri);
+    const { promise } = await workerBundle.createWorkerDb(uri, filename, delegate.extensionUri);
 
-    const { promise: workerDbPromise } = await workerBundle.importDbWrapper(uri, filename, delegate.extensionUri);
-    return new SQLiteDocument(uri, workerBundle, workerDbPromise);
+    return new SQLiteDocument(uri, workerBundle, promise);
   }
 
   getConfiguredMaxFileSize() { return getConfiguredMaxFileSize() }
 
-  private readonly _uri: vsc.Uri;
-  private _edits: Array<SQLiteEdit> = [];
-  private _savedEdits: Array<SQLiteEdit> = [];
+  readonly #uri: vsc.Uri;
+  #edits: Array<SQLiteEdit> = [];
+  #savedEdits: Array<SQLiteEdit> = [];
 
   private constructor(
     uri: vsc.Uri,
@@ -76,23 +76,23 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     private workerDbPromise: Promise<Caplink.Remote<WorkerDb>>,
   ) {
     super();
-    this._uri = uri;
+    this.#uri = uri;
   }
 
-  public get uri() { return this._uri; }
-  public get uriParts() { return getUriParts(this._uri); }
+  public get uri() { return this.#uri; }
+  public get uriParts() { return getUriParts(this.#uri); }
 
-  private readonly _onDidDispose = this._register(new vsc.EventEmitter<void>());
-  public readonly onDidDispose = this._onDidDispose.event;
+  readonly #onDidDispose = this._register(new vsc.EventEmitter<void>());
+  public readonly onDidDispose = this.#onDidDispose.event;
 
-  private readonly _onDidChangeDocument = this._register(new vsc.EventEmitter<{
+  readonly #onDidChangeDocument = this._register(new vsc.EventEmitter<{
     readonly edits: readonly SQLiteEdit[];
   }>());
 
   /**
    * Fired to notify webviews that the document has changed.
    */
-  public readonly onDidChangeContent = this._onDidChangeDocument.event;
+  public readonly onDidChangeContent = this.#onDidChangeDocument.event;
 
   private readonly _onDidChange = this._register(new vsc.EventEmitter<{
     readonly label: string,
@@ -114,8 +114,8 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    */
   dispose() {
     this.workerBundle.workerFns[Symbol.dispose]();
-    this.workerBundle.workerLike.terminate();
-    this._onDidDispose.fire();
+    // this.workerBundle.workerLike.terminate();
+    this.#onDidDispose.fire();
     super.dispose();
   }
 
@@ -125,20 +125,20 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * This fires an event to notify VS Code that the document has been edited.
    */
   makeEdit(edit: SQLiteEdit) {
-    this._edits.push(edit);
+    this.#edits.push(edit);
     this._onDidChange.fire({
       label: edit.label,
       undo: async () => {
-        const edit = this._edits.pop()!;
+        const edit = this.#edits.pop()!;
         const remote = await this.getDb();
         await remote.applyEdit(edit.query, edit.oldParams);
-        this._onDidChangeDocument.fire({ edits: this._edits });
+        this.#onDidChangeDocument.fire({ edits: this.#edits });
       },
       redo: async () => {
-        this._edits.push(edit);
+        this.#edits.push(edit);
         const remote = await this.getDb();
         await remote.applyEdit(edit.query, edit.params);
-        this._onDidChangeDocument.fire({ edits: this._edits });
+        this.#onDidChangeDocument.fire({ edits: this.#edits });
       }
     });
   }
@@ -149,7 +149,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   async save(token: vsc.CancellationToken): Promise<void> {
     const remote = await this.getDb();
     await remote.commit(cancellationTokenToAbortSignal(token));
-    this._savedEdits = Array.from(this._edits);
+    this.#savedEdits = Array.from(this.#edits);
   }
 
   /**
@@ -180,7 +180,8 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   }
 
   async refreshDb() {
-    const { promise } = await this.workerBundle.importDbWrapper(this.uri, this.uriParts.filename);
+    (await this.workerDbPromise.catch())?.[Symbol.dispose]();
+    const { promise } = await this.workerBundle.createWorkerDb(this.uri, this.uriParts.filename);
     this.workerDbPromise = promise;
     return promise;
   }

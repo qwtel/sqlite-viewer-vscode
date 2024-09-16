@@ -31,12 +31,11 @@ export async function createWebWorker(
 
   const worker = new Worker(workerPath);
   const workerEndpoint = nodeEndpoint(worker);
-  const workerFns = Caplink.wrap<WorkerFns>(workerEndpoint);
+  const workerFns = Caplink.wrap<WorkerFns>(workerEndpoint, undefined, { owned: true });
 
   return {
     workerFns,
-    workerLike: worker,
-    async importDbWrapper(xUri, filename) {
+    async createWorkerDb(xUri, filename) {
       const [data, walData] = await readFile(xUri);
       if (data == null) return { promise: Promise.reject(new Error(TooLargeErrorMsg)) }
       const args = {
@@ -53,7 +52,7 @@ export async function createWebWorker(
         ...walData ? [walData.buffer as ArrayBuffer] : [],
       ];
       const workerDbPromise = workerFns.importDb(filename, Caplink.transfer(args, transfer));
-      workerDbPromise.catch(() => {}) // prevent unhandled rejection warning (caught elsewhere)
+      workerDbPromise.catch() // prevent unhandled rejection warning (caught elsewhere)
       return { promise: workerDbPromise }
     }
   }

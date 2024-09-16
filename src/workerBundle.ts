@@ -7,6 +7,5 @@ export type WorkerLike = { terminate(): void }
 
 export interface WorkerBundle {
   workerFns: Remote<WorkerFns>,
-  workerLike: WorkerLike,
-  importDbWrapper(xUri: Uri, filename: string, extensionUri?: Uri): Awaitable<{ promise: Promise<Remote<WorkerDb>> }>
+  createWorkerDb(xUri: Uri, filename: string, extensionUri?: Uri): Awaitable<{ promise: Promise<Remote<WorkerDb>> }>
 }
