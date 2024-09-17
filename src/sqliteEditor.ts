@@ -1,14 +1,14 @@
 import type TelemetryReporter from '@vscode/extension-telemetry';
+import * as v8 from '@workers/v8-value-serializer/v8';
 import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
-import type { WorkerFns, WorkerDb, SqlValue } from '../sqlite-viewer-core/src/worker-db';
+import type { WorkerDb, SqlValue } from '../sqlite-viewer-core/src/worker-db';
 
 import * as vsc from 'vscode';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
-import nodeEndpoint from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
-import { ConfigurationSection, ExtensionId, FullExtensionId } from './constants';
+import { ExtensionId, FullExtensionId } from './constants';
 import { Disposable, disposeAll } from './dispose';
 import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancellationTokenToAbortSignal, cspUtil, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
@@ -46,6 +46,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     openContext: vsc.CustomDocumentOpenContext,
     uri: vsc.Uri,
     delegate: SQLiteDocumentDelegate,
+    token: vsc.CancellationToken,
   ): Promise<SQLiteDocument> {
 
     const createWorkerBundle = !import.meta.env.BROWSER_EXT && pro__IsPro && ReadWriteMode // Do not change this line
@@ -54,29 +55,43 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
     // const readWriteMode = !import.meta.env.BROWSER_EXT && pro__IsPro && canUseNativeSqlite3;
 
-    // If we have a backup, read that. Otherwise read the resource from the workspace. XXX: This needs a review. When are we backing stuff up?
-    const xUri = typeof openContext.backupId === 'string' ? vsc.Uri.parse(openContext.backupId) : uri;
-
-    const { filename } = getUriParts(xUri);
-    const workerBundle = await createWorkerBundle(delegate.extensionUri, filename, xUri);
+    const { filename } = getUriParts(uri);
+    const workerBundle = await createWorkerBundle(delegate.extensionUri, filename, uri);
     const { promise } = await workerBundle.createWorkerDb(uri, filename, delegate.extensionUri);
+    
+    let edits: SQLiteEdit[] = []
+    if (typeof openContext.backupId === 'string') {
+      const editsUri = vsc.Uri.parse(openContext.backupId);
+      const editsBuffer = await vsc.workspace.fs.readFile(editsUri);
+      edits = v8.deserialize(editsBuffer);
+    }
 
-    return new SQLiteDocument(uri, workerBundle, promise);
+    // XXX: no like
+    const signal = cancellationTokenToAbortSignal(token);
+    promise.then(async (dbRemote) => {
+      for (const { query, params } of edits) {
+        await dbRemote.applyEdit(query, params, signal);
+      }
+    });
+
+    return new SQLiteDocument(uri, workerBundle, promise, edits);
   }
 
   getConfiguredMaxFileSize() { return getConfiguredMaxFileSize() }
 
   readonly #uri: vsc.Uri;
-  #edits: Array<SQLiteEdit> = [];
-  #savedEdits: Array<SQLiteEdit> = [];
+  #edits: SQLiteEdit[] = [];
+  #savedEdits: SQLiteEdit[] = [];
 
   private constructor(
     uri: vsc.Uri,
     private readonly workerBundle: WorkerBundle,
     private workerDbPromise: Promise<Caplink.Remote<WorkerDb>>,
+    edits: SQLiteEdit[] = [],
   ) {
     super();
     this.#uri = uri;
+    this.#edits = edits;
   }
 
   public get uri() { return this.#uri; }
@@ -130,14 +145,14 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       label: edit.label,
       undo: async () => {
         const edit = this.#edits.pop()!;
-        const remote = await this.getDb();
-        await remote.applyEdit(edit.query, edit.oldParams);
+        const dbRemote = await this.getDb();
+        await dbRemote.applyEdit(edit.query, edit.oldParams);
         this.#onDidChangeDocument.fire({ edits: this.#edits });
       },
       redo: async () => {
         this.#edits.push(edit);
-        const remote = await this.getDb();
-        await remote.applyEdit(edit.query, edit.params);
+        const dbRemote = await this.getDb();
+        await dbRemote.applyEdit(edit.query, edit.params);
         this.#onDidChangeDocument.fire({ edits: this.#edits });
       }
     });
@@ -191,21 +206,16 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    *
    * These backups are used to implement hot exit.
    */
-  async backup(destination: vsc.Uri, cancellation: vsc.CancellationToken): Promise<vsc.CustomDocumentBackup> {
-    // TODO: we can make this work!
-    throw Error("Not implemented")
-    // await this.saveAs(destination, cancellation);
+  async backup(destination: vsc.Uri, _token: vsc.CancellationToken): Promise<vsc.CustomDocumentBackup> {
+    const unsavedEdits = this.#edits.slice(this.#edits.findIndex(x => !this.#savedEdits.includes(x)));
+    await vsc.workspace.fs.writeFile(destination, v8.serialize(unsavedEdits));
 
-    // return {
-    //   id: destination.toString(),
-    //   delete: async () => {
-    //     try {
-    //       await vsc.workspace.fs.delete(destination);
-    //     } catch {
-    //       // noop
-    //     }
-    //   }
-    // };
+    return {
+      id: destination.toString(),
+      delete: async () => {
+        try { await vsc.workspace.fs.delete(destination) } catch { /* noop */ }
+      }
+    };
   }
 }
 
@@ -222,7 +232,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
   async openCustomDocument(
     uri: vsc.Uri,
     openContext: vsc.CustomDocumentOpenContext,
-    _token: vsc.CancellationToken
+    token: vsc.CancellationToken
   ): Promise<SQLiteDocument> {
 
     const document = await SQLiteDocument.create(openContext, uri, {
@@ -230,7 +240,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       // getFileData: async () => {
       //   throw Error("Not implemented")
       // }
-    });
+    }, token);
 
     const listeners = this.setupListeners(document);
 
@@ -358,8 +368,8 @@ export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implement
 
 const registerOptions = {
   webviewOptions: {
-    // TODO: serialize state!?
-    retainContextWhenHidden: true,
+    enableFindWidget: false,
+    retainContextWhenHidden: true, // TODO: serialize state!?
   },
   supportsMultipleEditorsPerDocument: true,
 } satisfies Parameters<typeof vsc.window.registerCustomEditorProvider>[2];
