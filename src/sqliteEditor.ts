@@ -25,8 +25,9 @@ const pro__IsPro = false;
 export type SQLiteEdit = { 
   label: string, 
   query: string, 
-  oldValues: SqlValue[],
-  newValues: SqlValue[],
+  values: SqlValue[],
+  undoQuery?: string,
+  undoValues: SqlValue[],
 };
 
 interface SQLiteDocumentDelegate {
@@ -129,7 +130,6 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    */
   dispose() {
     this.workerBundle.workerFns[Symbol.dispose]();
-    // this.workerBundle.workerLike.terminate();
     this.#onDidDispose.fire();
     super.dispose();
   }
@@ -173,14 +173,14 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   /**
    * Called by VS Code when the user saves the document to a new location.
    */
-  async saveAs(targetResource: vsc.Uri, cancellation: vsc.CancellationToken): Promise<void> {
+  async saveAs(targetResource: vsc.Uri, token: vsc.CancellationToken): Promise<void> {
     const dbRemote = await this.getDb();
     const stat = await vsc.workspace.fs.stat(this.uri);
     if (stat.size > this.getConfiguredMaxFileSize()) {
       throw new Error("File too large to save");
     }
     const { filename } = this.uriParts;
-    const data = await dbRemote.exportDb(filename, cancellationTokenToAbortSignal(cancellation));
+    const data = await dbRemote.exportDb(filename, cancellationTokenToAbortSignal(token));
     vsc.workspace.fs.writeFile(targetResource, data);
   }
 
