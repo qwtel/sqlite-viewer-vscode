@@ -69,7 +69,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     // XXX: no like
     const signal = cancellationTokenToAbortSignal(token);
     const workerDbPromise = promise
-      .then(dbRemote => dbRemote.applyEditBatch(edits, signal))
+      .then(dbRemote => dbRemote.applyEdits(edits, signal))
       .then(() => promise);
 
     return new SQLiteDocument(uri, workerBundle, workerDbPromise);
@@ -148,14 +148,14 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       undo: async () => {
         const edit = history.edits[--history.cursor];
         const dbRemote = await this.getDb();
-        await dbRemote.applyEdit(edit.query, [edit.oldValue]);
+        await dbRemote.undo(edit);
         this.#onDidChangeDocument.fire({ /* edits: this.#edits */ });
       },
       redo: async () => {
         if (history.cursor >= history.edits.length) return;
         const edit = history.edits[history.cursor++];
         const dbRemote = await this.getDb();
-        await dbRemote.applyEdit(edit.query, [edit.newValue]);
+        await dbRemote.redo(edit);
         this.#onDidChangeDocument.fire({ /* edits: this.#edits */ });
       }
     });
@@ -215,8 +215,6 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     const unsavedEdits = history.edits.slice(history.savedCursor, history.cursor);
     const unsavedEditsBuffer = v8.serialize(unsavedEdits);
     await vsc.workspace.fs.writeFile(destination, unsavedEditsBuffer);
-
-    console.log('backup', destination.toString(), unsavedEdits);
 
     return {
       id: destination.toString(),
