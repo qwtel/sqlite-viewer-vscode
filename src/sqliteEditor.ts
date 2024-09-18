@@ -25,8 +25,8 @@ const pro__IsPro = false;
 export type SQLiteEdit = { 
   label: string, 
   query: string, 
-  oldValue: SqlValue,
-  newValue: SqlValue,
+  oldValues: SqlValue[],
+  newValues: SqlValue[],
 };
 
 interface SQLiteDocumentDelegate {
