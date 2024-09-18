@@ -25,8 +25,8 @@ const pro__IsPro = false;
 export type SQLiteEdit = { 
   label: string, 
   query: string, 
-  params: SqlValue[],
-  oldParams: SqlValue[], 
+  oldValue: SqlValue,
+  newValue: SqlValue,
 };
 
 interface SQLiteDocumentDelegate {
@@ -68,30 +68,30 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
     // XXX: no like
     const signal = cancellationTokenToAbortSignal(token);
-    promise.then(async (dbRemote) => {
-      for (const { query, params } of edits) {
-        await dbRemote.applyEdit(query, params, signal);
-      }
-    });
+    const workerDbPromise = promise
+      .then(dbRemote => dbRemote.applyEditBatch(edits, signal))
+      .then(() => promise);
 
-    return new SQLiteDocument(uri, workerBundle, promise, edits);
+    return new SQLiteDocument(uri, workerBundle, workerDbPromise);
   }
 
   getConfiguredMaxFileSize() { return getConfiguredMaxFileSize() }
 
   readonly #uri: vsc.Uri;
-  #edits: SQLiteEdit[] = [];
-  #savedEdits: SQLiteEdit[] = [];
+
+  #history = {
+    cursor: 0,
+    savedCursor: 0,
+    edits: [] as SQLiteEdit[]
+  }
 
   private constructor(
     uri: vsc.Uri,
     private readonly workerBundle: WorkerBundle,
     private workerDbPromise: Promise<Caplink.Remote<WorkerDb>>,
-    edits: SQLiteEdit[] = [],
   ) {
     super();
     this.#uri = uri;
-    this.#edits = edits;
   }
 
   public get uri() { return this.#uri; }
@@ -101,7 +101,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   public readonly onDidDispose = this.#onDidDispose.event;
 
   readonly #onDidChangeDocument = this._register(new vsc.EventEmitter<{
-    readonly edits: readonly SQLiteEdit[];
+    // readonly edits: readonly SQLiteEdit[];
   }>());
 
   /**
@@ -140,20 +140,23 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * This fires an event to notify VS Code that the document has been edited.
    */
   makeEdit(edit: SQLiteEdit) {
-    this.#edits.push(edit);
+    const history = this.#history;
+    history.edits = history.edits.slice(0, history.cursor).concat(edit);
+    history.cursor = history.edits.length;
     this._onDidChange.fire({
       label: edit.label,
       undo: async () => {
-        const edit = this.#edits.pop()!;
+        const edit = history.edits[--history.cursor];
         const dbRemote = await this.getDb();
-        await dbRemote.applyEdit(edit.query, edit.oldParams);
-        this.#onDidChangeDocument.fire({ edits: this.#edits });
+        await dbRemote.applyEdit(edit.query, [edit.oldValue]);
+        this.#onDidChangeDocument.fire({ /* edits: this.#edits */ });
       },
       redo: async () => {
-        this.#edits.push(edit);
+        if (history.cursor >= history.edits.length) return;
+        const edit = history.edits[history.cursor++];
         const dbRemote = await this.getDb();
-        await dbRemote.applyEdit(edit.query, edit.params);
-        this.#onDidChangeDocument.fire({ edits: this.#edits });
+        await dbRemote.applyEdit(edit.query, [edit.newValue]);
+        this.#onDidChangeDocument.fire({ /* edits: this.#edits */ });
       }
     });
   }
@@ -162,22 +165,22 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * Called by VS Code when the user saves the document.
    */
   async save(token: vsc.CancellationToken): Promise<void> {
-    const remote = await this.getDb();
-    await remote.commit(cancellationTokenToAbortSignal(token));
-    this.#savedEdits = Array.from(this.#edits);
+    const dbRemote = await this.getDb();
+    await dbRemote.commit(cancellationTokenToAbortSignal(token));
+    this.#history.savedCursor = this.#history.cursor;
   }
 
   /**
    * Called by VS Code when the user saves the document to a new location.
    */
   async saveAs(targetResource: vsc.Uri, cancellation: vsc.CancellationToken): Promise<void> {
-    const remote = await this.getDb();
+    const dbRemote = await this.getDb();
     const stat = await vsc.workspace.fs.stat(this.uri);
     if (stat.size > this.getConfiguredMaxFileSize()) {
       throw new Error("File too large to save");
     }
     const { filename } = this.uriParts;
-    const data = await remote.exportDb(filename, cancellationTokenToAbortSignal(cancellation));
+    const data = await dbRemote.exportDb(filename, cancellationTokenToAbortSignal(cancellation));
     vsc.workspace.fs.writeFile(targetResource, data);
   }
 
@@ -185,8 +188,8 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * Called by VS Code when the user calls `revert` on a document.
    */
   async revert(token: vsc.CancellationToken): Promise<void> {
-    const remote = await this.getDb();
-    await remote.rollback(cancellationTokenToAbortSignal(token));
+    const dbRemote = await this.getDb();
+    await dbRemote.rollback(cancellationTokenToAbortSignal(token));
     // XXX: how to handle savedEdits in this case?
   }
 
@@ -207,13 +210,20 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * These backups are used to implement hot exit.
    */
   async backup(destination: vsc.Uri, _token: vsc.CancellationToken): Promise<vsc.CustomDocumentBackup> {
-    const unsavedEdits = this.#edits.slice(this.#edits.findIndex(x => !this.#savedEdits.includes(x)));
-    await vsc.workspace.fs.writeFile(destination, v8.serialize(unsavedEdits));
+    const history = this.#history;
+    if (history.savedCursor > history.cursor) throw Error("Invalid cursor state");
+    const unsavedEdits = history.edits.slice(history.savedCursor, history.cursor);
+    const unsavedEditsBuffer = v8.serialize(unsavedEdits);
+    await vsc.workspace.fs.writeFile(destination, unsavedEditsBuffer);
+
+    console.log('backup', destination.toString(), unsavedEdits);
 
     return {
       id: destination.toString(),
       delete: async () => {
-        try { await vsc.workspace.fs.delete(destination) } catch { /* noop */ }
+        try {
+          await vsc.workspace.fs.delete(destination) 
+        } catch { /* noop */ }
       }
     };
   }
@@ -335,11 +345,12 @@ export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implement
       this._onDidChangeCustomDocument.fire({ document, ...edit });
     }));
 
-    listeners.push(document.onDidChangeContent(async e => {
+    listeners.push(document.onDidChangeContent(async () => {
       // Update all webviews when the document changes
       const { filename } = document.uriParts;
       for (const panel of this.webviews.get(document.uri)) {
-        await this.webviewRemotes.get(panel)?.forceUpdate(filename);
+        const webviewRemote = this.webviewRemotes.get(panel);
+        await webviewRemote?.forceUpdate(filename);
       }
     }));
 
