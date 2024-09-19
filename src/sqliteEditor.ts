@@ -198,10 +198,14 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   }
 
   async refreshDb() {
-    (await this.workerDbPromise.catch())?.[Symbol.dispose]();
-    const { promise } = await this.workerBundle.createWorkerDb(this.uri, this.uriParts.filename);
-    this.workerDbPromise = promise;
-    return promise;
+    const dbRemote = await this.workerDbPromise;
+    if ((await dbRemote.type) === 'wasm') {
+      dbRemote[Symbol.dispose]();
+      const { promise } = await this.workerBundle.createWorkerDb(this.uri, this.uriParts.filename);
+      this.workerDbPromise = promise;
+      return promise;
+    }
+    return this.workerDbPromise;
   }
 
   /**
