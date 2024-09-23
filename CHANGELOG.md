@@ -4,8 +4,11 @@
 ### Secondary Sidebar
 SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
 
+## v0.6.7 (Pre-Release)
+Code refactoring, no externally visible changes 
+
 ## v0.6.6 (Pre-Release)
-- Replaced 3rd party ad with 1st party ad: Check out [Hydejack](https://hydejack.com/?ref=vscode), a Jekyll theme for hackers, nerds, and academics, made by yours truly.
+Replaced 3rd party ad with 1st party ad: Check out [Hydejack](https://hydejack.com/?ref=vscode), a Jekyll theme for hackers, nerds, and academics, made by yours truly.
 
 ## v0.6.5 (Pre-Release)
 Code refactoring, no externally visible changes 
