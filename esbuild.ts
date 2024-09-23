@@ -42,7 +42,7 @@ const baseConfig = {
 const baseWorkerConfig = {
   ...config,
   entryPoints: [resolve('src/worker.ts')],
-  format: 'iife' as const,
+  format: 'esm' as const,
   target: 'es2022',
   define: {
     ...envToDefine({
