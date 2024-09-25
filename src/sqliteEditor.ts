@@ -18,6 +18,15 @@ import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
 
 //#region Pro
 const pro__createTxikiWorker: () => never = () => { throw new Error("Not implemented") }
+class UndoHistory<_T> {
+  static deserialize(_buffer: Uint8Array): never { throw new Error("Not implemented") }
+  constructor(_max: number) {}
+  push(_edit: SQLiteEdit): never { throw new Error("Not implemented") }
+  undo(): never { throw new Error("Not implemented") }
+  redo(): never { throw new Error("Not implemented") }
+  save(): never { throw new Error("Not implemented") }
+  backup(): never { throw new Error("Not implemented") }
+}
 //#endregion
 
 const pro__IsPro = false;
@@ -67,10 +76,8 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       edits = v8.deserialize(editsBuffer);
     }
 
-    // XXX: no like
-    const signal = cancellationTokenToAbortSignal(token);
     const workerDbPromise = promise
-      .then(dbRemote => dbRemote.applyEdits(edits, signal))
+      .then(dbRemote => dbRemote.applyEdits(edits, cancellationTokenToAbortSignal(token)))
       .then(() => promise);
 
     return new SQLiteDocument(uri, workerBundle, workerDbPromise);
@@ -80,11 +87,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
   readonly #uri: vsc.Uri;
 
-  #history = {
-    cursor: 0,
-    savedCursor: 0,
-    edits: [] as SQLiteEdit[]
-  }
+  #history = new UndoHistory<SQLiteEdit>(100);
 
   private constructor(
     uri: vsc.Uri,
@@ -112,8 +115,8 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
   private readonly _onDidChange = this._register(new vsc.EventEmitter<{
     readonly label: string,
-    undo(): void,
-    redo(): void,
+    undo(): void|Promise<void>,
+    redo(): void|Promise<void>,
   }>());
 
   /**
@@ -141,19 +144,19 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    */
   makeEdit(edit: SQLiteEdit) {
     const history = this.#history;
-    history.edits = history.edits.slice(0, history.cursor).concat(edit);
-    history.cursor = history.edits.length;
+    history.push(edit);
     this._onDidChange.fire({
       label: edit.label,
       undo: async () => {
-        const edit = history.edits[--history.cursor];
+        const edit = history.undo();
+        if (!edit) return;
         const dbRemote = await this.getDb();
         await dbRemote.undo(edit);
         this.#onDidChangeDocument.fire({ /* edits: this.#edits */ });
       },
       redo: async () => {
-        if (history.cursor >= history.edits.length) return;
-        const edit = history.edits[history.cursor++];
+        const edit = history.redo();
+        if (!edit) return;
         const dbRemote = await this.getDb();
         await dbRemote.redo(edit);
         this.#onDidChangeDocument.fire({ /* edits: this.#edits */ });
@@ -167,7 +170,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   async save(token: vsc.CancellationToken): Promise<void> {
     const dbRemote = await this.getDb();
     await dbRemote.commit(cancellationTokenToAbortSignal(token));
-    this.#history.savedCursor = this.#history.cursor;
+    this.#history.save();
   }
 
   /**
@@ -214,10 +217,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * These backups are used to implement hot exit.
    */
   async backup(destination: vsc.Uri, _token: vsc.CancellationToken): Promise<vsc.CustomDocumentBackup> {
-    const history = this.#history;
-    if (history.savedCursor > history.cursor) throw Error("Invalid cursor state");
-    const unsavedEdits = history.edits.slice(history.savedCursor, history.cursor);
-    const unsavedEditsBuffer = v8.serialize(unsavedEdits);
+    const unsavedEditsBuffer = this.#history.backup();
     await vsc.workspace.fs.writeFile(destination, unsavedEditsBuffer);
 
     return {

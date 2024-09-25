@@ -69,4 +69,16 @@ export class VscodeFns {
   async fireEditEvent(edit: SQLiteEdit) {
     this.document.makeEdit(edit);
   }
+
+  async showInformationMessage<T extends string|vsc.MessageItem>(message: string, options?: vsc.MessageOptions, ...items: T[]): Promise<T | undefined> {
+    return await vsc.window.showInformationMessage(message, options, ...items as any[]);
+  }
+
+  async showWarningMessage<T extends string|vsc.MessageItem>(message: string, options?: vsc.MessageOptions, ...items: T[]): Promise<T | undefined> {
+    return await vsc.window.showWarningMessage(message, options, ...items as any[]);
+  }
+
+  async showErrorMessage<T extends string|vsc.MessageItem>(message: string, options?: vsc.MessageOptions, ...items: T[]): Promise<T | undefined> {
+    return await vsc.window.showErrorMessage(message, options, ...items as any[]);
+  }
 }
