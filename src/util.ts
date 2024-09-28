@@ -1,5 +1,6 @@
 import * as vsc from 'vscode';
-import type { TypedEventListenerOrEventListenerObject } from "@worker-tools/typed-event-target";
+import { Disposable } from './dispose';
+import { ReadableStream, WritableStream } from './o/stream/web';
 
 // A bunch of tests to figure out where we're running. Some more reliable than others.
 export const IS_VSCODE = vsc.env.uriScheme.includes("vscode");
@@ -49,30 +50,113 @@ export class WebviewCollection {
 }
 
 /**
- * A wrapper for a vscode webview that implements Comlink's endpoint interface
+ * Wraps a VSCode webview and returns a readable and writable stream pair.
+ * This can be used to overlay another binary protocol on top of the webview's message passing, such as "post-message-over-wire".
+ * This is especially useful considering how badly implemented object support in webview's `postMessage` is (no structured clone, no message channels, 
+ * randomly emptied buffers...).
  */
-export class WebviewEndpointAdapter {
-  constructor(private readonly webview: vsc.Webview) {}
-  private listeners = new WeakMap<TypedEventListenerOrEventListenerObject<MessageEvent>, vsc.Disposable>
-  postMessage(message: any, transfer: Transferable[]) {
-    // @ts-expect-error: transferables type missing
-    this.webview.postMessage(message, transfer);
+export class WebviewStream extends Disposable {
+  #readable;
+  #writable;
+  #readableController!: ReadableStreamDefaultController<Uint8Array>;
+  #writableController!: WritableStreamDefaultController;
+  #readableClosed = false;
+  #writableClosed = false;
+  constructor(private readonly webviewPanel: vsc.WebviewPanel) {
+    super();
+    this.#readable = new ReadableStream<Uint8Array>({
+      start: (controller) => {
+        this.#readableController = controller;
+        this._register(this.webviewPanel.webview.onDidReceiveMessage(data => {
+          // const [header, code, port1, port2, tl, payload] = cborDecoder.decode(data);
+          // console.log("Receiving...", [header, code, port1?.toString(16), port2?.toString(16), tl, payload && { byteLength: payload?.byteLength }])
+          if (data instanceof Uint8Array)
+            controller.enqueue(data);
+        }));
+        this._register(this.webviewPanel.onDidDispose(() => {
+          this.#cleanup(new DOMException('Underlying webviewPanel disposed', 'AbortError'))
+        }));
+      },
+      cancel: (reason) => {
+        this.#readableClosed = true;
+        this.#cleanup(reason);
+      },
+    });
+    this.#writable = new WritableStream<Uint8Array>({
+      start: (controller) => {
+        this.#writableController = controller;
+      },
+      write: (chunk, controller) => {
+        try {
+          const { buffer, byteOffset, byteLength } = chunk;
+          // const [header, code, port1, port2, tl, payload] = cborDecoder.decode(chunk);
+          // console.log("Sending...", [header, code, port1?.toString(16), port2?.toString(16), tl, payload && { byteLength: payload?.byteLength }])
+          this.webviewPanel.webview.postMessage({ buffer, byteOffset, byteLength });
+        } catch (err) {
+          // const [header, code, port1, port2, tl, payload] = cborDecoder.decode(chunk);
+          // console.log("could not send", [header, code, port1?.toString(16), port2?.toString(16), tl, payload && { byteLength: payload?.byteLength }])
+          controller.error(err);
+        }
+      },
+      close: () => {
+        this.#writableClosed = true;
+        this.#cleanup(null);
+      },
+      abort: (reason) => {
+        this.#writableClosed = true;
+        this.#cleanup(reason);
+      },
+    });
   }
-  addEventListener(_event: "message", handler: TypedEventListenerOrEventListenerObject<MessageEvent>|null) {
-    if (!handler) return;
-    if ("handleEvent" in handler) {
-      this.listeners.set(handler, this.webview.onDidReceiveMessage(data => {
-        handler.handleEvent({ data } as MessageEvent);
-      }));
-    } else {
-      this.listeners.set(handler, this.webview.onDidReceiveMessage(data => {
-        handler({ data } as MessageEvent);
-      }))
+  #cleanup(reason?: any) {
+    super.dispose();
+    if (!this.#readableClosed) {
+      this.#readableClosed = true;
+      this.#readableController[reason ? 'error' : 'close'](reason);
+    }
+    if (!this.#writableClosed) {
+      this.#writableClosed = true;
+      if (this.#writable.locked || reason)
+        this.#writableController.error(reason ?? new DOMException('WebviewStream disposed', 'AbortError'));
+      else
+        this.#writable.getWriter().close().catch(() => {});
     }
   }
-  removeEventListener(_event: "message", handler: TypedEventListenerOrEventListenerObject<MessageEvent>|null) {
-    if (!handler) return;
-    this.listeners.get(handler)?.dispose();
-    this.listeners.delete(handler);
+  get readable() { return this.#readable }
+  get writable() { return this.#writable }
+  dispose() { this.#cleanup() }
+  [Symbol.dispose]() { this.#cleanup() }
+}
+
+export const cspUtil = {
+  defaultSrc: 'default-src',
+  scriptSrc: 'script-src',
+  styleSrc: 'style-src',
+  imgSrc: 'img-src',
+  fontSrc: 'font-src',
+  childSrc: 'child-src',
+  self: "'self'",
+  data: 'data:',
+  blob: 'blob:',
+  inlineStyle: "'unsafe-inline'",
+  unsafeEval: "'unsafe-eval'",
+  wasmUnsafeEval: "'wasm-unsafe-eval'",
+  build(cspObj: Record<string, string[]>) {
+    return Object.entries(cspObj)
+      .map(([k, vs]) => `${k} ${vs.filter(x => x != null).join(' ')};`)
+      .join(' ');
   }
+} as const;
+
+const PathRegExp = /(?<dirname>.*)\/(?<filename>(?<basename>.*)(?<extname>\.[^.]+))$/
+export function getUriParts(uri: vsc.Uri) {
+  const { dirname, filename, basename, extname } = decodeURI(uri.toString()).match(PathRegExp)?.groups ?? {}
+  return { dirname, filename, basename, extname };
+}
+
+export function cancellationTokenToAbortSignal(token: vsc.CancellationToken): AbortSignal {
+  const ctrl = new AbortController();
+  if (token.isCancellationRequested) ctrl.abort(); 
+  else token.onCancellationRequested(() => ctrl.abort());
+  return ctrl.signal;
 }

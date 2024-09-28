@@ -44,6 +44,9 @@ This distribution also includes software licensed under the following terms:
 `wa-sqlite`: [MIT]
 > Copyright (c) 2023 Roy T. Hashimoto
 
+`tabster`: [MIT]
+> Copyright (c) Microsoft Corporation.
+
 SQLite : [Public Domain](https://sqlite.org/copyright.html)
 
 [MIT]: https://mit-license.org

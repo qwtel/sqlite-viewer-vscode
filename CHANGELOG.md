@@ -1,5 +1,45 @@
 # CHANGELOG
 
+## v0.7
+- Added basic keyboard navigation support. It is still quite easy to lose the focus, especially when using Page Up/Page Down keys.
+- Added button to collapse the sidebar
+- Various minor fixes and improvements
+- Added expand/collapse all button to tables sidebar
+- It is now possible to __open more than one SQLite Viewer instance per file__. 
+  Additionally, opening large files (~1GB) is now much faster, and opening additional tabs of the same file carries little additional cost.
+
+Note that this release includes signification restructuring of the extension, which may cause (unrelated) issues.
+Please [report](https://github.com/qwtel/sqlite-viewer-vscode/issues) any issues you encounter. 
+
+## v0.6 (Pre-Release)
+### Secondary Sidebar
+~~SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.~~
+This has been shelved for now, please remain on the pre-release channel if you need the sidebar.
+
+## v0.6.7 (Pre-Release)
+Code refactoring, no externally visible changes 
+
+## v0.6.6 (Pre-Release)
+Replaced 3rd party ad with 1st party ad: Check out [Hydejack](https://hydejack.com/?ref=vscode), a Jekyll theme for hackers, nerds, and academics, made by yours truly.
+
+## v0.6.5 (Pre-Release)
+Code refactoring, no externally visible changes 
+
+## v0.6.4 (Pre-Release)
+It is now possible to __open more than one SQLite Viewer instance per file__. 
+Additionally, opening large files (~1GB) is now much faster, and opening additional tabs of the same file carries no additional cost beyond the webview itself. 
+
+## v0.6.3 (Pre-Release)
+Included latest changes from 0.5 branch
+ 
+## v0.6.2 (Pre-Release)
+- Improved keyboard support. Page Up/Page Down should now work in most cases
+- Added expand/collapse all button to tables sidebar
+- Fixed a performance regression when rendering a table for the first time
+
+## v0.6.1 (Pre-Release)
+Added basic keyboard support to table explorer and main view
+
 ## v0.5
 ### WAL Mode Support
 This version introduces support for __reading WAL mode databases__. It works across all VSCode file systems including local, remote, and even on github.dev.

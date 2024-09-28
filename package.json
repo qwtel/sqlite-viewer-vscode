@@ -3,7 +3,7 @@
   "name": "sqlite-viewer",
   "displayName": "SQLite Viewer",
   "description": "SQLite Viewer for VSCode",
-  "version": "0.5.13",
+  "version": "0.7.0",
   "publisher": "qwtel",
   "private": true,
   "license": "LICENSE.md",
@@ -17,10 +17,6 @@
   },
   "categories": [
     "Other"
-  ],
-  "activationEvents": [
-    "onCustomEditor:sqlite-viewer.view",
-    "onCustomEditor:sqlite-viewer.option"
   ],
   "main": "./out/extension.js",
   "browser": "./out/extension-browser.js",
@@ -101,34 +97,41 @@
   },
   "scripts": {
     "clean": "rm -rf out && rm -rf sqlite-viewer-core/vscode/build",
-    "vscode:prepublish": "npm run clean && npm run compile",
-    "compile:ext": "npm run compile:ext:cp & npm run compile:ext:node & npm run compile:ext:browser & wait",
+    "vscode:prepublish": "npm run $([ -z \"${VSCODE_EXT_SKIP_COMPILE}\" ] && echo compile || echo compile:bin)",
+    "compile:ext": "npm run compile:ext:cp & npm run compile:ext:js & wait",
     "compile:ext:cp": "cp -r node_modules/@vscode/codicons node_modules/codicons",
-    "compile:ext:_base": "esbuild ./src/extension.ts $([ -z \"${DEV}\" ] && echo --minify || echo --sourcemap) --bundle --external:vscode --format=cjs",
-    "compile:ext:node": "npm run compile:ext:_base -- --outfile=out/extension.js --platform=node",
-    "compile:ext:browser": "npm run compile:ext:_base -- --outfile=out/extension-browser.js --platform=browser --external:node-fetch",
+    "compile:ext:js": "bun run esbuild.ts",
     "compile:app": "cd sqlite-viewer-core && npm run $([ -z \"${DEV}\" ] && echo build-vscode || echo build-vscode-fast)",
-    "compile": "npm run compile:ext & npm run compile:app & wait",
-    "pack": "vsce package --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
+    "compile:tjs": "cd sqlite-viewer-core && npm run build-tjs",
+    "compile:bin": "exit 0",
+    "compile": "npm run clean && npm run compile:bin && npm run compile:ext && npm run compile:app",
+    "package": "bun run pack.ts",
     "postversion": "cd sqlite-viewer-core && git tag -a \"vscode/v$(jq -r '.version' ../package.json)\" -m ''",
-    "publish": "vsce publish --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/",
-    "pre-publish": "vsce publish --pre-release --baseContentUrl=https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/preview/",
+    "publish": "bun run pack.ts --kind publish",
+    "pre-publish": "bun run pack.ts --kind publish --pre-release",
     "prepack": "sed -i '' s~https://sqliteviewer\\.app~https://sqliteviewer.app?ref=vscode~g *.md",
     "postpack": "sed -i '' s~https://sqliteviewer\\.app?ref=vscode~https://sqliteviewer.app~g *.md",
-    "codium:publish": "ovsx publish"
+    "codium:publish": "bun run pack.ts --tool ovsx --kind publish"
   },
   "devDependencies": {
+    "@txikijs/types": "^24.6.0",
     "@types/vscode": "^1.83.1",
-    "esbuild": "^0.21.5",
+    "bun-types": "^1.1.29",
+    "esbuild": "^0.24.0",
     "esbuild-plugin-alias": "^0.2.1",
-    "ovsx": "^0.9.1",
-    "typescript": "^5.4.5"
+    "esbuild-plugin-polyfill-node": "^0.3.0",
+    "ovsx": "^0.9.4",
+    "typescript": "^5.6.2"
   },
   "dependencies": {
+    "@std/streams": "npm:@jsr/std__streams@^1.0.5",
     "@vscode/codicons": "^0.0.36",
-    "@vscode/extension-telemetry": "^0.9.6",
-    "@vscode/vsce": "^2.27.0",
+    "@vscode/extension-telemetry": "^0.9.7",
+    "@vscode/vsce": "^2.32.0",
     "@worker-tools/typed-event-target": "^1.0.0",
-    "node-fetch": "^3.3.2"
+    "@workers/typed-event-target": "npm:@jsr/workers__typed-event-target@^1.0.0",
+    "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.5.4",
+    "node-fetch": "^3.3.2",
+    "whatwg-stream-to-async-iter": "^0.6.2"
   }
 }

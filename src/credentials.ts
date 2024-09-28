@@ -1,12 +1,8 @@
 import * as vscode from 'vscode';
-import acquireFetch from './acquireFetch';
+import { FullExtensionId } from './constants';
 // import * as jose from 'jose';
 
 const GITHUB_AUTH_PROVIDER_ID = 'github';
-
-const extensionId = 'qwtel.sqlite-viewer'
-
-const { fetch } = acquireFetch();
 
 /** 
  * The GitHub Authentication Provider accepts the scopes described here:
@@ -60,7 +56,7 @@ export class Credentials {
 			const session = await vscode.authentication.getSession(GITHUB_AUTH_PROVIDER_ID, SCOPES, { createIfNone: false });
 			if (session) {
 				const { account, accessToken } = session;
-				const previousToken = context.globalState.get<string>(`${extensionId}/tokens/${account.id}`);
+				const previousToken = context.globalState.get<string>(`${FullExtensionId}/tokens/${account.id}`);
 				try {
 					if (previousToken && await checkExpiration(previousToken)) {
 						return previousToken;
@@ -72,7 +68,7 @@ export class Credentials {
 						});
 						if (response.ok) {
 							const { token } = await response.json() as { token: string };
-							context.globalState.update(`${extensionId}/tokens/${account.id}`, token);
+							context.globalState.update(`${FullExtensionId}/tokens/${account.id}`, token);
 							return token;
 						}
 						/* fallthrough */

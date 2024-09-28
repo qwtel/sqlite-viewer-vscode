@@ -3,35 +3,37 @@ import * as vscode from 'vscode';
 export function disposeAll(disposables: vscode.Disposable[]): void {
   while (disposables.length) {
     const item = disposables.pop();
-    if (item) {
-      item.dispose();
-    }
+    item?.dispose();
   }
 }
 
-export abstract class Disposable {
-  private _isDisposed = false;
+export abstract class Disposable implements vscode.Disposable {
+  #isDisposed = false;
 
-  protected _disposables: vscode.Disposable[] = [];
+  #disposables: vscode.Disposable[] = [];
 
-  public dispose(): any {
-    if (this._isDisposed) {
+  dispose(): any {
+    if (this.#isDisposed) {
       return;
     }
-    this._isDisposed = true;
-    disposeAll(this._disposables);
+    this.#isDisposed = true;
+    disposeAll(this.#disposables);
+  }
+
+  [Symbol.dispose]() {
+    return this.dispose();
   }
 
   protected _register<T extends vscode.Disposable>(value: T): T {
-    if (this._isDisposed) {
+    if (this.#isDisposed) {
       value.dispose();
     } else {
-      this._disposables.push(value);
+      this.#disposables.push(value);
     }
     return value;
   }
 
   protected get isDisposed(): boolean {
-    return this._isDisposed;
+    return this.#isDisposed;
   }
 }

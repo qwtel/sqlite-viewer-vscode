@@ -1,12 +1,15 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
 		"target": "ES2021",
 		"lib": ["ES2021", "DOM"],
 		"outDir": "out",
 		"sourceMap": true,
 		"strict": true,
 		"rootDir": ".",
+		"noEmit": true,
+		"allowImportingTsExtensions": true
 	},
-	"exclude": ["node_modules", ".vscode-test", "_sqlite-viewer-app"],
+	"exclude": [],
 }

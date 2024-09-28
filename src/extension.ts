@@ -2,22 +2,12 @@ import * as vsc from 'vscode';
 import { SQLiteEditorDefaultProvider, SQLiteEditorOptionProvider } from './sqliteEditor';
 import TelemetryReporter from '@vscode/extension-telemetry';
 import { IS_VSCODE } from './util';
+import { ExtensionId, FileNestingPatternsAdded, FullExtensionId, NestingPattern, SyncedKeys, TelemetryKey } from './constants';
 // import { Credentials } from './credentials';
 
-const ExtensionId = 'sqlite-viewer'
-const FullExtensionId = `qwtel.${ExtensionId}`
-const Key = "36072a93-f98f-4c93-88c3-8870add45a57";
-
-const NestingPattern = "${capture}.${extname}-*";
-const FileNestingPatternsAdded = 'fileNestingPatternsAdded';
-
-const SyncedKeys = [
-  FullExtensionId,
-  FileNestingPatternsAdded
-];
 
 export async function activate(context: vsc.ExtensionContext) {
-  const reporter = new TelemetryReporter(Key);
+  const reporter = new TelemetryReporter(TelemetryKey);
   context.subscriptions.push(reporter);
 
   // const credentials = new Credentials(context);
@@ -98,8 +88,8 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
 
   if (
     prevVersion === undefined ||
-    prevVersion !== currVersion ||
-    context.extensionMode === vsc.ExtensionMode.Development
+    prevVersion !== currVersion
+    // || context.extensionMode === vsc.ExtensionMode.Development
   ) {
     reporter.sendTelemetryEvent("install");
 
@@ -108,29 +98,29 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
     ) {
       let actions;
       const result = await vsc.window.showInformationMessage(
-        `SQLite Viewer now supports reading WAL mode databases. Check out the Changelog for details.`,
+        `SQLite Viewer now has a secondary sidebar 🎉. It can show the current row selection or meta data about the current table.`,
         ...actions = [{ title: 'Open Changelog ↗' }]
       );
 
       switch (result) {
         case actions[0]: {
-          return await openChangelog('#v0.5');
+          return await openChangelog('#v0.6');
         }
       }
     }
     else if (
-      prevVersion !== currVersion ||
-      context.extensionMode === vsc.ExtensionMode.Development
+      prevVersion !== currVersion
+      // || context.extensionMode === vsc.ExtensionMode.Development
     ) {
       // let actions;
       // const result = await vsc.window.showInformationMessage(
-      //   `SQLite Viewer now has experimental support for Views and more column filter options. Check out the Changelog for details`,
+      //   `SQLite Viewer can now open more than one than one editor per SQLite file. Check out the changelog for details:`,
       //   ...actions = [{ title: 'Open Changelog ↗' }]
       // );
 
       // switch (result) {
       //   case actions[0]: {
-      //     return await openChangelog('#v0.5.7');
+      //     return await openChangelog('#v0.6.4');
       //   }
       // }
     }
