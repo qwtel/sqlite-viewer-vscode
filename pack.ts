@@ -20,11 +20,14 @@ const targets = [
 ] as const;
 
 export const packageExt = async (opts: {
+  tool?: string,
   kind?: string,
   target?: string,
   'pre-release'?: boolean,
 }, env = Bun.env) => {
-  let { kind, target, 'pre-release': preRelease } = opts;
+  let { tool, kind, target, 'pre-release': preRelease } = opts;
+
+  tool ||= "vsce";
 
   if (kind && !kinds.includes(kind as any)) {
     throw new Error(`Invalid kind: ${kind}. Must be one of: ${kinds.join(', ')}`);
@@ -40,11 +43,11 @@ export const packageExt = async (opts: {
   }
 
   const cmd = [
-    "vsce", 
+    tool, 
     kind,
     ...preRelease ? ["--pre-release"] : [], 
     ...target ? ["--target", target] : [], 
-    "--baseContentUrl", "https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/"
+    ...tool === "vsce" ? ["--baseContentUrl", "https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/"] : []
   ];
   console.log(`Spawning '${cmd.join(" ")}':`);
   const proc = Bun.spawn(cmd, {
