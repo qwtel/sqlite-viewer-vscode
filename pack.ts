@@ -69,6 +69,7 @@ if (import.meta.main) {
   const args = parseArgs({
     args: Bun.argv,
     options: {
+      tool: { type: 'string' },
       kind: { type: 'string' },
       target: { type: 'string' },
       "pre-release": { type: 'boolean' },
