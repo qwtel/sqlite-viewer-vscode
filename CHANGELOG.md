@@ -1,8 +1,20 @@
 # CHANGELOG
 
+## v0.7
+- Added basic keyboard navigation support. It is still quite easy to lose the focus, especially when using Page Up/Page Down keys.
+- Added button to collapse the sidebar
+- Various minor fixes and improvements
+- Added expand/collapse all button to tables sidebar
+- It is now possible to __open more than one SQLite Viewer instance per file__. 
+  Additionally, opening large files (~1GB) is now much faster, and opening additional tabs of the same file carries little additional cost.
+
+Note that this release includes signification restructuring of the extension, which may cause (unrelated) issues.
+Please [report](https://github.com/qwtel/sqlite-viewer-vscode/issues) any issues you encounter. 
+
 ## v0.6 (Pre-Release)
 ### Secondary Sidebar
-SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
+~~SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.~~
+This has been shelved for now, please remain on the pre-release channel if you need the sidebar.
 
 ## v0.6.7 (Pre-Release)
 Code refactoring, no externally visible changes 
@@ -16,7 +28,6 @@ Code refactoring, no externally visible changes
 ## v0.6.4 (Pre-Release)
 It is now possible to __open more than one SQLite Viewer instance per file__. 
 Additionally, opening large files (~1GB) is now much faster, and opening additional tabs of the same file carries no additional cost beyond the webview itself. 
-This was made possible by lifting the WASM instance of SQLite out of the webview and into a web worker within VSCode itself.
 
 ## v0.6.3 (Pre-Release)
 Included latest changes from 0.5 branch
