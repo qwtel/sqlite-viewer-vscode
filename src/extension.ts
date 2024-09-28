@@ -96,17 +96,17 @@ async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryRe
     if (
       isMajorUpdate(currVersion, prevVersion)
     ) {
-      let actions;
-      const result = await vsc.window.showInformationMessage(
-        `SQLite Viewer now has a secondary sidebar 🎉. It can show the current row selection or meta data about the current table.`,
-        ...actions = [{ title: 'Open Changelog ↗' }]
-      );
+      // let actions;
+      // const result = await vsc.window.showInformationMessage(
+      //   `SQLite Viewer now has a secondary sidebar 🎉. It can show the current row selection or meta data about the current table.`,
+      //   ...actions = [{ title: 'Open Changelog ↗' }]
+      // );
 
-      switch (result) {
-        case actions[0]: {
-          return await openChangelog('#v0.6');
-        }
-      }
+      // switch (result) {
+      //   case actions[0]: {
+      //     return await openChangelog('#v0.6');
+      //   }
+      // }
     }
     else if (
       prevVersion !== currVersion

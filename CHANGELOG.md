@@ -1,6 +1,9 @@
 # CHANGELOG
 
-## v0.7
+## v0.7.1
+Fixed version update banner from being shown again
+
+## v0.7.0
 - Added basic keyboard navigation support. It is still quite easy to lose the focus, especially when using Page Up/Page Down keys.
 - Added button to collapse the sidebar
 - Various minor fixes and improvements
