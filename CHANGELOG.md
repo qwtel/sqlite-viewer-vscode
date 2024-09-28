@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v0.7.2
+Fixed telemetry connection string error
+
 ## v0.7.1
 Fixed version update banner from being shown again
 

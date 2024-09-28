@@ -2,12 +2,12 @@ import * as vsc from 'vscode';
 import { SQLiteEditorDefaultProvider, SQLiteEditorOptionProvider } from './sqliteEditor';
 import TelemetryReporter from '@vscode/extension-telemetry';
 import { IS_VSCODE } from './util';
-import { ExtensionId, FileNestingPatternsAdded, FullExtensionId, NestingPattern, SyncedKeys, TelemetryKey } from './constants';
+import { ExtensionId, FileNestingPatternsAdded, FullExtensionId, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
 // import { Credentials } from './credentials';
 
 
 export async function activate(context: vsc.ExtensionContext) {
-  const reporter = new TelemetryReporter(TelemetryKey);
+  const reporter = new TelemetryReporter(TelemetryConnectionString);
   context.subscriptions.push(reporter);
 
   // const credentials = new Credentials(context);
