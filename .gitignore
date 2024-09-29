@@ -5,6 +5,7 @@ tmp
 exampleFiles
 *.vsix
 *.zip
+*.local
 sqlite-viewer-*
 !sqlite-viewer-core
 _sqlite-viewer-app

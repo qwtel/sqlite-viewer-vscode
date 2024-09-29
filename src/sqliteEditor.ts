@@ -28,7 +28,7 @@ class UndoHistory<_T> {
 }
 //#endregion
 
-const pro__IsPro = false;
+const pro__IsPro = !!import.meta.env.SQLITE_VIEWER_PRO;
 
 export type SQLiteEdit = {
   label: string,

@@ -35,6 +35,7 @@ const baseConfig = {
     ...envToDefine({
       DEV,
       VITE_VSCODE: true,
+      SQLITE_VIEWER_PRO: import.meta.env.SQLITE_VIEWER_PRO,
     }),
   },
 } satisfies BuildOptions;
