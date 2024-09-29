@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.7.3
+- The initial size of the sidebar is now based on available space
+- Resizing the sidebar and columns should now work when using the extension with a web-based version of VSCode on and iPad or other touch device
+- Row buttons no longer take up space while the row is not in the hovered state
+- Various bug fixes and improvements
+
 ## v0.7.2
 Fixed telemetry connection string error
 
