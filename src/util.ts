@@ -134,6 +134,7 @@ export const cspUtil = {
   styleSrc: 'style-src',
   imgSrc: 'img-src',
   fontSrc: 'font-src',
+  frameSrc: 'frame-src',
   childSrc: 'child-src',
   self: "'self'",
   data: 'data:',

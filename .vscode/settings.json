@@ -6,6 +6,7 @@
         "RESTOREPOINT",
         "ROWID",
         "SAVEPOINT",
+        "sqliteviewer",
         "Tabbabilities",
         "tabbability",
         "Tabster",

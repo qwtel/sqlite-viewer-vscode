@@ -266,9 +266,17 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     return document;
   }
 
-  protected setupListeners(_document: SQLiteDocument): vsc.Disposable[] {
-    // noop
-    return [];
+  protected setupListeners(document: SQLiteDocument): vsc.Disposable[] {
+    const listeners: vsc.Disposable[] = [];
+
+    listeners.push(vsc.window.onDidChangeActiveColorTheme(async (theme) => {
+      for (const panel of this.webviews.get(document.uri)) {
+        const webviewRemote = this.webviewRemotes.get(panel);
+        await webviewRemote?.setColorScheme(themeToCss(theme));
+      }
+    }));
+
+    return listeners;
   }
 
   async resolveCustomEditor(
@@ -315,6 +323,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       [cspUtil.styleSrc]: [webview.cspSource, cspUtil.inlineStyle],
       [cspUtil.imgSrc]: [webview.cspSource, cspUtil.data],
       [cspUtil.fontSrc]: [webview.cspSource],
+      [cspUtil.frameSrc]: [this.context.extensionMode === vsc.ExtensionMode.Development ? '*' : 'vscode.sqliteviewer.app'],
       [cspUtil.childSrc]: [cspUtil.blob],
     };
 
@@ -329,6 +338,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       })
       .replace('<!--HEAD-->', `
         <meta http-equiv="Content-Security-Policy" content="${cspStr}">
+        <meta name="color-scheme" content="${themeToCss(vsc.window.activeColorTheme)}">
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}" crossorigin/>
       `)
       .replace('<!--BODY-->', ``)
@@ -337,9 +347,22 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
   }
 }
 
+function themeToCss(theme: vsc.ColorTheme) {
+  switch (theme.kind) {
+    case vsc.ColorThemeKind.Dark:
+      return 'dark';
+    case vsc.ColorThemeKind.Light:
+      return 'light';
+    case vsc.ColorThemeKind.HighContrast:
+      return 'dark';
+    case vsc.ColorThemeKind.HighContrastLight:
+      return 'light';
+  }
+}
+
 export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   protected setupListeners(document: SQLiteDocument): vsc.Disposable[] {
-    const listeners: vsc.Disposable[] = [];
+    const listeners: vsc.Disposable[] = super.setupListeners(document);
 
     listeners.push(document.onDidChange(edit => {
       // Tell VS Code that the document has been edited by the use.
