@@ -1,4 +1,4 @@
-## Refund Policy for SQLite Viewer PRO
+# Refund Policy for SQLite Viewer PRO
 
 Last updated: 5 Oct 2024
 
@@ -7,4 +7,3 @@ SQLite Viewer PRO offers a 14-day refund policy. If you are not satisfied with y
 After the 14-day period, no refunds will be issued.
 
 For questions or concerns, please contact vscode@sqliteviewer.app.
-

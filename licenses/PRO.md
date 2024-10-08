@@ -3,16 +3,16 @@
 Last updated: 5 Oct 2024
 
 ## 1. Acceptance of Terms
-By installing or using the SQLite Viewer PRO for Visual Studio Code (VSCode) extension ("Extension"), you agree to comply with and be bound by these Terms of Use ("Terms"). If you do not agree to these Terms, do not install or use the Extension.
+By installing or using the SQLite Viewer PRO for Visual Studio Code (VS Code) extension ("Extension"), you agree to comply with and be bound by these Terms of Use ("Terms"). If you do not agree to these Terms, do not install or use the Extension.
 
 ## 2. License to Use the Extension
-Upon purchasing a valid license for SQLite Viewer for VSCode PRO, the publisher grants you a non-exclusive, worldwide, royalty-free license to use the PRO version of the Extension for any purpose, including commercial applications, subject to the terms and conditions set forth herein.
+Upon purchasing a valid license for SQLite Viewer PRO, the publisher grants you a non-exclusive, worldwide, royalty-free license to use the PRO version of the Extension for any purpose, including commercial applications, subject to the terms and conditions set forth herein.
 
 ## 3. Restrictions
 - __No Modification or Reverse Engineering__: You may not modify, reverse engineer, decompile, or disassemble the Extension, in whole or in part.
 - __No Redistribution__: You may not redistribute the Extension, including premium features, in any form.
 - __No Derivative Works__: You may not create derivative works based on the Extension.
-- __No Transfer of Rights__: You may not rent, lease, lend, sell, sublicense, assign, or transfer your rights in the PRO version of the Extension to any third party.
+- __No Transfer of Rights__: You may not rent, lease, lend, sell, sublicense, assign, or transfer your rights in the Extension to any third party.
 - __No Use in High-Risk Activities__: The Extension is not designed for use in hazardous environments requiring fail-safe performance, such as in the operation of nuclear facilities, aircraft navigation or communication systems, air traffic control, direct life support machines, or weapons systems, where failure could lead directly to death, personal injury, or severe physical or environmental damage.
 - __Compliance with Laws__: You must comply with all applicable laws and regulations in your use of the Extension.
 - __User Responsibility__: You are responsible for maintaining the confidentiality of any non-public information about your systems and for any activities or actions performed using the Extension.
@@ -32,7 +32,7 @@ The Extension's source code is proprietary and owned by the publisher. You are n
 ## 6. Trademarks
 The term "SQLite" is a trademark of Hipp, Wyrick & Company, Inc. The use of "SQLite" in the name of this Extension is in accordance with the SQLite trademark usage guidelines. This Extension is an independent product and has not been authorized, sponsored, or otherwise approved by Hipp, Wyrick & Company, Inc.
 
-The term "Visual Studio Code" (VSCode) is a trademark of Microsoft Corporation. This Extension is an independent product and has not been authorized, sponsored, or otherwise approved by Microsoft Corporation.
+The term "Visual Studio Code" (VS Code) is a trademark of Microsoft Corporation. This Extension is an independent product and has not been authorized, sponsored, or otherwise approved by Microsoft Corporation.
 
 ## 7. Payment and Fees
 - __Pricing__: The PRO version of the Extension is provided on a paid basis. Pricing details are outlined on the publisher’s website or sales platform. All fees are payable in the currency specified during the purchase process.

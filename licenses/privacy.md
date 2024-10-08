@@ -1,10 +1,10 @@
-## Privacy Policy for SQLite Viewer PRO
+# Privacy Policy for SQLite Viewer PRO
 
 Last updated: 5 Oct 2024
 
-This Privacy Policy outlines how we collect and use data when you use SQLite Viewer for Visual Studio Code (VSCode) extension ("Extension"). By using the Extension, you agree to the terms described below.
+This Privacy Policy outlines how we collect and use data when you use SQLite Viewer for Visual Studio Code (VS Code) extension ("Extension"). By using the Extension, you agree to the terms described below.
 
-### 1. Data We Collect
+## 1. Data We Collect
 
 We may collect the following types of telemetry data to improve the Extension:
 
@@ -15,7 +15,7 @@ We may collect the following types of telemetry data to improve the Extension:
 
 We do not collect personally identifiable information (PII) such as your IP or contact details.
 
-### 2. How We Use Your Data
+## 2. How We Use Your Data
 
 The data collected helps us:
 
@@ -25,7 +25,7 @@ The data collected helps us:
 
 Your data is used solely to improve the Extension’s performance and user experience.
 
-### 3. Data Sharing
+## 3. Data Sharing
 
 We may share telemetry data with trusted third parties to:
 
@@ -34,19 +34,19 @@ We may share telemetry data with trusted third parties to:
 
 Third parties are bound by strict data protection standards and cannot use your data for any other purposes. We do not sell your data.
 
-### 4. Data Security
+## 4. Data Security
 
 We implement industry-standard security protocols to protect your data from unauthorized access or misuse.
 
-### 5. Your Consent
+## 5. Your Consent
 
 By using the Extension, you consent to the collection and use of telemetry data as outlined. You can opt-out of certain data collection features, where available, through the VS Code settings.
 
-### 6. Changes to This Policy
+## 6. Changes to This Policy
 
 We may update this Privacy Policy periodically. Any changes will be posted, and continued use of the Extension means acceptance of the updated policy.
 
-### 7. Contact Information
+## 7. Contact Information
 
 For questions or concerns, please contact vscode@sqliteviewer.app.
 

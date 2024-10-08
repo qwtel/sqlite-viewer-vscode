@@ -3,7 +3,7 @@
 Last updated: 5 Oct 2024
 
 ## 1. Acceptance of Terms
-By installing or using the SQLite Viewer for Visual Studio Code (VSCode) extension ("Extension"), you agree to comply with and be bound by these Terms of Use ("Terms"). If you do not agree to these Terms, do not install or use the Extension.
+By installing or using the SQLite Viewer for Visual Studio Code (VS Code) extension ("Extension"), you agree to comply with and be bound by these Terms of Use ("Terms"). If you do not agree to these Terms, do not install or use the Extension.
 
 ## 2. License to Use the Extension
 The publisher grants you a non-exclusive, worldwide, royalty-free license to use the Extension for any purpose, including commercial applications, subject to the terms and conditions set forth herein.
@@ -24,7 +24,7 @@ The Extension's source code is proprietary and owned by the publisher. You are n
 ## 5. Trademarks
 The term "SQLite" is a trademark of Hipp, Wyrick & Company, Inc. The use of "SQLite" in the name of this Extension is in accordance with the SQLite trademark usage guidelines. This Extension is an independent product and has not been authorized, sponsored, or otherwise approved by Hipp, Wyrick & Company, Inc.
 
-The term "Visual Studio Code" (VSCode) is a trademark of Microsoft Corporation. This Extension is an independent product and has not been authorized, sponsored, or otherwise approved by Microsoft Corporation.
+The term "Visual Studio Code" (VS Code) is a trademark of Microsoft Corporation. This Extension is an independent product and has not been authorized, sponsored, or otherwise approved by Microsoft Corporation.
 
 ## 6. No Warranty
 The Extension is provided "as is," without warranty of any kind. The publisher expressly disclaims all warranties, whether express, implied, or statutory, including, but not limited to, the implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
