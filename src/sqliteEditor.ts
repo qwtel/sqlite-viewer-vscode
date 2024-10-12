@@ -3,11 +3,12 @@ import { WebviewFns } from '../sqlite-viewer-core/src/file-system';
 import type { WorkerDb, SqlValue } from '../sqlite-viewer-core/src/worker-db';
 
 import * as vsc from 'vscode';
+import * as jose from 'jose';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
-import { ExtensionId, FullExtensionId } from './constants';
+import { AccessToken, ExtensionId, FullExtensionId, JWTPublicKey, LicenseKey } from './constants';
 import { Disposable, disposeAll } from './dispose';
 import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancellationTokenToAbortSignal, cspUtil, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
@@ -28,8 +29,6 @@ class UndoHistory<_T> {
 }
 //#endregion
 
-const pro__IsPro = !!import.meta.env.SQLITE_VIEWER_PRO;
-
 export type SQLiteEdit = {
   label: string,
   query: string,
@@ -38,35 +37,30 @@ export type SQLiteEdit = {
   undoValues: SqlValue[],
 };
 
-interface SQLiteDocumentDelegate {
-  extensionUri: vsc.Uri;
-}
-
 const Extension = vsc.extensions.getExtension(FullExtensionId);
 
 const LocalMode = !vsc.env.remoteName;
 const RemoteWorkspaceMode = !!vsc.env.remoteName && Extension?.extensionKind === vsc.ExtensionKind.Workspace;
 const ReadWriteMode = LocalMode || RemoteWorkspaceMode;
 
-const IsReadWrite = !import.meta.env.BROWSER_EXT && pro__IsPro && ReadWriteMode;
-
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   static async create(
     openContext: vsc.CustomDocumentOpenContext,
     uri: vsc.Uri,
-    delegate: SQLiteDocumentDelegate,
+    extensionUri: vsc.Uri,
+    isPro: boolean,
     token: vsc.CancellationToken,
   ): Promise<SQLiteDocument> {
 
-    const createWorkerBundle = !import.meta.env.BROWSER_EXT && pro__IsPro && ReadWriteMode // Do not change this line
+    const createWorkerBundle = !import.meta.env.BROWSER_EXT && isPro && ReadWriteMode // Do not change this line
       ? pro__createTxikiWorker
       : createWebWorker;
 
     // const readWriteMode = !import.meta.env.BROWSER_EXT && pro__IsPro && canUseNativeSqlite3;
 
     const { filename } = getUriParts(uri);
-    const { workerFns, createWorkerDb } = await createWorkerBundle(delegate.extensionUri, filename, uri);
-    const { promise } = await createWorkerDb(uri, filename, delegate.extensionUri);
+    const { workerFns, createWorkerDb } = await createWorkerBundle(extensionUri, filename, uri);
+    const { promise } = await createWorkerDb(uri, filename, extensionUri);
 
     let edits: SQLiteEdit[] = []
     if (typeof openContext.backupId === 'string') {
@@ -238,6 +232,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
 
   constructor(
     readonly context: vsc.ExtensionContext,
+    readonly isPro: boolean,
     readonly reporter: TelemetryReporter,
   ) {}
 
@@ -247,12 +242,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     token: vsc.CancellationToken
   ): Promise<SQLiteDocument> {
 
-    const document = await SQLiteDocument.create(openContext, uri, {
-      extensionUri: this.context.extensionUri,
-      // getFileData: async () => {
-      //   throw Error("Not implemented")
-      // }
-    }, token);
+    const document = await SQLiteDocument.create(openContext, uri, this.context.extensionUri, this.isPro, token);
 
     const listeners = this.setupListeners(document);
 
@@ -323,7 +313,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       [cspUtil.styleSrc]: [webview.cspSource, cspUtil.inlineStyle],
       [cspUtil.imgSrc]: [webview.cspSource, cspUtil.data],
       [cspUtil.fontSrc]: [webview.cspSource],
-      [cspUtil.frameSrc]: [this.context.extensionMode === vsc.ExtensionMode.Development ? '*' : 'vscode.sqliteviewer.app'],
+      [cspUtil.frameSrc]: [this.context.extensionMode === vsc.ExtensionMode.Development ? '*' : 'https://vscode.sqliteviewer.app'],
       [cspUtil.childSrc]: [cspUtil.blob],
     };
 
@@ -401,32 +391,136 @@ export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implement
   }
 }
 
-const registerOptions = {
-  webviewOptions: {
-    enableFindWidget: false,
-    retainContextWhenHidden: true, // TODO: serialize state!?
-  },
-  supportsMultipleEditorsPerDocument: true,
-} satisfies Parameters<typeof vsc.window.registerCustomEditorProvider>[2];
-
-export class SQLiteEditorDefaultProvider extends (IsReadWrite ? SQLiteEditorProvider : SQLiteReadonlyEditorProvider) {
-  static viewType = `${ExtensionId}.view`;
-
-  public static register(context: vsc.ExtensionContext, reporter: TelemetryReporter): vsc.Disposable {
-    return vsc.window.registerCustomEditorProvider(
-      SQLiteEditorDefaultProvider.viewType,
-      new SQLiteEditorDefaultProvider(context, reporter),
-      registerOptions);
-  }
+export function registerProvider(context: vsc.ExtensionContext, viewType: string, isPro: boolean, reporter: TelemetryReporter) {
+  const isReadWrite = !import.meta.env.BROWSER_EXT && isPro && ReadWriteMode;
+  console.log('registerProvider', { isReadWrite })
+  const sub = vsc.window.registerCustomEditorProvider(
+    viewType,
+    new class extends (isReadWrite ? SQLiteEditorProvider : SQLiteReadonlyEditorProvider) { static viewType = viewType }(context, isPro, reporter),
+    {
+      webviewOptions: {
+        enableFindWidget: false,
+        retainContextWhenHidden: true, // TODO: serialize state!?
+      },
+      supportsMultipleEditorsPerDocument: true,
+    }
+  );
+  return sub;
 }
 
-export class SQLiteEditorOptionProvider extends (IsReadWrite ? SQLiteEditorProvider : SQLiteReadonlyEditorProvider) {
-  static viewType = `${ExtensionId}.option`;
+export async function enterLicenseKeyCommand(context: vsc.ExtensionContext) {
+  const licenseKey = await vsc.window.showInputBox({
+    prompt: 'Enter License Key',
+    placeHolder: 'XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX',
+    password: false,
+    ignoreFocusOut: true,
+    validateInput: (value) => {
+      return /[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i.test(value) || context.extensionMode === vsc.ExtensionMode.Development
+        ? null 
+        : 'License key must be in the format XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX';
+    },
+  });
+  if (!licenseKey) {
+    if (context.extensionMode === vsc.ExtensionMode.Development) {
+      context.globalState.update(LicenseKey, '');
+      context.globalState.update(AccessToken, '');
+      return;
+    }
+    throw Error('No license key entered');
+  }
 
-  public static register(context: vsc.ExtensionContext, reporter: TelemetryReporter): vsc.Disposable {
-    return vsc.window.registerCustomEditorProvider(
-      SQLiteEditorOptionProvider.viewType,
-      new SQLiteEditorOptionProvider(context, reporter),
-      registerOptions);
+  let response;
+  try {
+    const baseURL = context.extensionMode === vsc.ExtensionMode.Development ? 'http://localhost:8788' : 'https://vscode.sqliteviewer.app';
+    response = await fetch(new URL('/api/register', baseURL), {
+      method: 'POST',
+      headers: [['Content-Type', 'application/x-www-form-urlencoded']],
+      body: new URLSearchParams({ 'license_key': licenseKey }),
+    });
+  } catch {
+    throw Error('No response from license validation service');
+  }
+
+  if (!response.ok || response.headers.get('Content-Type')?.includes('application/json') === false) {
+    response.text().then(console.error).catch();
+    throw Error(`License validation request failed: ${response.status}`);
+  }
+
+  let data;
+  try {
+    data = await response.json() as { token: string };
+  } catch {
+    throw Error('Failed to parse response');
+  }
+				
+  console.log(data);
+  return Promise.all([
+    context.globalState.update(LicenseKey, licenseKey),
+    context.globalState.update(AccessToken, data.token),
+  ]);
+
+  // TODO: how to update webviews??
+}
+
+function getDaysSinceIssued(token: string) {
+	const payload = jose.decodeJwt(token);
+  const issuedAt = payload.iat!;
+  const currentTime = Date.now() / 1000;
+  const diffSeconds = currentTime - issuedAt;
+  const diffDays = diffSeconds / (24 * 60 * 60);
+  console.log({ diffDays })
+  return diffDays;
+}
+
+export async function refreshAccessToken(context: vsc.ExtensionContext, accessToken: string) {
+  let response;
+  try {
+    const baseURL = context.extensionMode === vsc.ExtensionMode.Development ? 'http://localhost:8788' : 'https://vscode.sqliteviewer.app';
+    const daysSinceIssued = getDaysSinceIssued(accessToken);
+    if (daysSinceIssued > 14) {
+      const licenseKey = context.globalState.get<string>(LicenseKey);
+      if (!licenseKey) throw Error('No license key');
+      response = await fetch(new URL('/api/register', baseURL), {
+        method: 'POST',
+        headers: [['Content-Type', 'application/x-www-form-urlencoded']],
+        body: new URLSearchParams({ 'license_key': licenseKey }),
+      });
+    } else if (daysSinceIssued > 0.05) {
+      response = await fetch(new URL('/api/refresh', baseURL), {
+        method: 'POST',
+        headers: [['Content-Type', 'application/x-www-form-urlencoded']],
+        body: new URLSearchParams({ 'access_token': accessToken }),
+      });
+    } else {
+      return;
+    }
+  } catch {
+    return console.warn('No response from license validation service');
+  }
+
+  if (!response.ok || response.headers.get('Content-Type')?.includes('application/json') === false) {
+    response.text().then(console.error).catch();
+    return console.warn(`License validation request failed: ${response.status}`);
+  }
+
+  let data;
+  try {
+    data = await response.json() as { token: string };
+  } catch {
+    return console.warn('Failed to parse response');
+  }
+				
+  console.log(data);
+  return context.globalState.update(AccessToken, data.token);
+}
+
+const jwtKey = jose.importSPKI(JWTPublicKey, 'ES256');
+jwtKey.catch();
+export async function verifyToken(accessToken: string) {
+  try {
+    const { payload } = await jose.jwtVerify(accessToken, await jwtKey);
+    return !!payload;
+  } catch {
+    return false;
   }
 }

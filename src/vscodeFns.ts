@@ -1,7 +1,6 @@
 import * as vsc from 'vscode';
-import { SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
-import { FullExtensionId } from './constants';
-// import type { Credentials } from './credentials';
+import { refreshAccessToken, SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
+import { AccessToken, FullExtensionId } from './constants';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
 
@@ -11,6 +10,7 @@ export type UntitledInit = {
   editable?: boolean, 
   maxFileSize: number, 
 };
+
 export type RegularInit = {
   filename: string, 
   editable?: boolean, 
@@ -43,6 +43,15 @@ export class VscodeFns {
   get readOnly() {
     return this.provider instanceof SQLiteReadonlyEditorProvider;
   } 
+
+  get accessToken() {
+    return (async () => {
+      const accessToken = this.provider.context.globalState.get<string>(AccessToken);
+      if (!accessToken) return undefined;
+      refreshAccessToken(this.provider.context, accessToken).catch(console.error);
+      return accessToken;
+    })();
+  }
 
   async refreshFile() {
     const { document } = this;

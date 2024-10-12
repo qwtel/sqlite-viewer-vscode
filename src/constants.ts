@@ -8,9 +8,20 @@ export const TelemetryConnectionString = "InstrumentationKey=36072a93-f98f-4c93-
 export const NestingPattern = "${capture}.${extname}-*";
 export const FileNestingPatternsAdded = 'fileNestingPatternsAdded';
 
+export const LicenseKey = 'licenseKey';
+export const AccessToken = 'accessToken';
+
 export const SyncedKeys = [
   FullExtensionId,
-  FileNestingPatternsAdded
+  FileNestingPatternsAdded,
+  LicenseKey,
 ];
 
 export const ProcessTitle = 'SQLite Viewer Helper';
+
+export const JWTPublicKey = `
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFK3xjgL1y4OazahxzcvxUVcRPfYY
+hixfUOoecMEXQ2c2wy95T/JgmiRh9MxPTdRwoSO1Ub1nVFII2s1d8E2RCw==
+-----END PUBLIC KEY-----
+`.trim();
