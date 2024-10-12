@@ -1,6 +1,6 @@
 import * as vsc from 'vscode';
 import { refreshAccessToken, SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
-import { AccessToken, FullExtensionId } from './constants';
+import { AccessToken, ExtensionId, FullExtensionId } from './constants';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
 
@@ -73,6 +73,10 @@ export class VscodeFns {
   
   async openExtensionStorePage() {
     await vsc.commands.executeCommand('extension.open', FullExtensionId)
+  }
+
+  async enterLicenseKey() {
+    await vsc.commands.executeCommand(`${ExtensionId}.enterLicenseKey`);
   }
 
   async fireEditEvent(edit: SQLiteEdit) {

@@ -335,6 +335,10 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
 
       return preparedHtml;
   }
+
+  enterLicenseKey() {
+    return enterLicenseKeyCommand(this.context, this.reporter);
+  }
 }
 
 function themeToCss(theme: vsc.ColorTheme) {
@@ -435,7 +439,7 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
     ignoreFocusOut: true,
     validateInput: (value) => {
       return /[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i.test(value) || context.extensionMode === vsc.ExtensionMode.Development
-        ? null 
+        ? null
         : 'License key must be in the format XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX';
     },
   });
@@ -480,7 +484,12 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
     context.globalState.update(LicenseKey, licenseKey),
     context.globalState.update(AccessToken, data.token),
   ]);
-  return activateProviders(context, reporter);
+  await activateProviders(context, reporter);
+
+  vsc.window.showInformationMessage('Thank you for purchasing SQLite Viewer PRO!', {
+    modal: true, 
+    detail: 'SQLite Viewer PRO will be enabled once you open the next file.'
+  });
 }
 
 function getDaysSinceIssued(token: string) {
