@@ -1,6 +1,6 @@
 import * as vsc from 'vscode';
 import { refreshAccessToken, SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
-import { AccessToken, ExtensionId, FullExtensionId } from './constants';
+import { AccessToken, FullExtensionId } from './constants';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
 
@@ -75,12 +75,19 @@ export class VscodeFns {
     await vsc.commands.executeCommand('extension.open', FullExtensionId)
   }
 
-  async enterLicenseKey() {
-    await vsc.commands.executeCommand(`${ExtensionId}.enterLicenseKey`);
-  }
-
   async fireEditEvent(edit: SQLiteEdit) {
     this.document.makeEdit(edit);
+  }
+
+  async enterLicenseKey() {
+    try {
+      await this.provider.enterLicenseKey();
+    } catch (err) {
+      vsc.window.showErrorMessage(`'Enter License Key' resulted in an error`, { 
+        modal: true, 
+        detail: err instanceof Error ? err.message : String(err) 
+      });
+    }
   }
 
   async showInformationMessage<T extends string|vsc.MessageItem>(message: string, options?: vsc.MessageOptions, ...items: T[]): Promise<T | undefined> {

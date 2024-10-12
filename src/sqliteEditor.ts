@@ -397,8 +397,7 @@ export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implement
 
 function registerProvider(context: vsc.ExtensionContext, viewType: string, isPro: boolean, reporter: TelemetryReporter) {
   const isReadWrite = !import.meta.env.BROWSER_EXT && isPro && ReadWriteMode;
-  // console.log('registerProvider', { isReadWrite })
-  const sub = vsc.window.registerCustomEditorProvider(
+  return vsc.window.registerCustomEditorProvider(
     viewType,
     new class extends (isReadWrite ? SQLiteEditorProvider : SQLiteReadonlyEditorProvider) { static viewType = viewType }(context, isPro, reporter),
     {
@@ -409,7 +408,6 @@ function registerProvider(context: vsc.ExtensionContext, viewType: string, isPro
       supportsMultipleEditorsPerDocument: true,
     }
   );
-  return sub;
 }
 
 const providerSubscriptions = new WeakMap<vsc.ExtensionContext, vsc.Disposable[]>();
@@ -453,6 +451,7 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
     }
     throw Error('No license key entered');
   }
+  if (!/[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i.test(licenseKey)) throw Error('Invalid license key format');
 
   let response;
   try {
@@ -467,8 +466,8 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
   }
 
   if (!response.ok || response.headers.get('Content-Type')?.includes('application/json') === false) {
-    response.text().then(console.error).catch();
-    throw Error(`License validation request failed: ${response.status}`);
+    const message = await response.text();
+    throw Error(`License validation request failed: ${message}`);
   }
 
   let data;
