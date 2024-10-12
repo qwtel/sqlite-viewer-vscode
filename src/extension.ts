@@ -1,24 +1,20 @@
 import * as vsc from 'vscode';
-import {registerProvider, enterLicenseKeyCommand, verifyToken } from './sqliteEditor';
+import { activateProviders, enterLicenseKeyCommand } from './sqliteEditor';
 import TelemetryReporter from '@vscode/extension-telemetry';
 import { IS_VSCODE } from './util';
-import { AccessToken, ExtensionId, FileNestingPatternsAdded, FullExtensionId, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
+import { ExtensionId, FileNestingPatternsAdded, FullExtensionId, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
 
 export async function activate(context: vsc.ExtensionContext) {
   const reporter = new TelemetryReporter(TelemetryConnectionString);
   context.subscriptions.push(reporter);
 
-  const accessToken = context.globalState.get<string>(AccessToken);
-  const valid = !!accessToken && await verifyToken(accessToken);
-
-  context.subscriptions.push(registerProvider(context, `${ExtensionId}.view`, valid, reporter));
-  context.subscriptions.push(registerProvider(context, `${ExtensionId}.option`, valid, reporter));
+  await activateProviders(context, reporter);
 
   context.subscriptions.push(
     vsc.commands.registerCommand(`${ExtensionId}.addFileNestingPatterns`, addFileNestingPatternsCommand),
   );
   context.subscriptions.push(
-    vsc.commands.registerCommand(`${ExtensionId}.enterLicenseKey`, () => enterLicenseKeyCommand(context)),
+    vsc.commands.registerCommand(`${ExtensionId}.enterLicenseKey`, () => enterLicenseKeyCommand(context, reporter)),
   );
 
   context.globalState.setKeysForSync(SyncedKeys);

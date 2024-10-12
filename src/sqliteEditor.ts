@@ -391,9 +391,9 @@ export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implement
   }
 }
 
-export function registerProvider(context: vsc.ExtensionContext, viewType: string, isPro: boolean, reporter: TelemetryReporter) {
+function registerProvider(context: vsc.ExtensionContext, viewType: string, isPro: boolean, reporter: TelemetryReporter) {
   const isReadWrite = !import.meta.env.BROWSER_EXT && isPro && ReadWriteMode;
-  console.log('registerProvider', { isReadWrite })
+  // console.log('registerProvider', { isReadWrite })
   const sub = vsc.window.registerCustomEditorProvider(
     viewType,
     new class extends (isReadWrite ? SQLiteEditorProvider : SQLiteReadonlyEditorProvider) { static viewType = viewType }(context, isPro, reporter),
@@ -408,7 +408,26 @@ export function registerProvider(context: vsc.ExtensionContext, viewType: string
   return sub;
 }
 
-export async function enterLicenseKeyCommand(context: vsc.ExtensionContext) {
+const providerSubscriptions = new WeakMap<vsc.ExtensionContext, vsc.Disposable[]>();
+
+export async function activateProviders(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
+  const prevSubs = providerSubscriptions.get(context);
+  // console.log({ prevSubs });
+  prevSubs && disposeAll(prevSubs);
+
+  let subs;
+  providerSubscriptions.set(context, subs = []);
+
+  const accessToken = context.globalState.get<string>(AccessToken);
+  const valid = !!accessToken && await verifyToken(accessToken);
+
+  subs.push(registerProvider(context, `${ExtensionId}.view`, valid, reporter));
+  subs.push(registerProvider(context, `${ExtensionId}.option`, valid, reporter));
+
+  context.subscriptions.push(...subs);
+}
+
+export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
   const licenseKey = await vsc.window.showInputBox({
     prompt: 'Enter License Key',
     placeHolder: 'XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX',
@@ -422,9 +441,11 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext) {
   });
   if (!licenseKey) {
     if (context.extensionMode === vsc.ExtensionMode.Development) {
-      context.globalState.update(LicenseKey, '');
-      context.globalState.update(AccessToken, '');
-      return;
+      await Promise.all([
+        context.globalState.update(LicenseKey, ''),
+        context.globalState.update(AccessToken, ''),
+      ]);
+      return activateProviders(context, reporter);
     }
     throw Error('No license key entered');
   }
@@ -453,13 +474,13 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext) {
     throw Error('Failed to parse response');
   }
 				
-  console.log(data);
-  return Promise.all([
+  // console.log(data);
+
+  await Promise.all([
     context.globalState.update(LicenseKey, licenseKey),
     context.globalState.update(AccessToken, data.token),
   ]);
-
-  // TODO: how to update webviews??
+  return activateProviders(context, reporter);
 }
 
 function getDaysSinceIssued(token: string) {
@@ -468,7 +489,7 @@ function getDaysSinceIssued(token: string) {
   const currentTime = Date.now() / 1000;
   const diffSeconds = currentTime - issuedAt;
   const diffDays = diffSeconds / (24 * 60 * 60);
-  console.log({ diffDays })
+  // console.log({ diffDays })
   return diffDays;
 }
 
@@ -479,7 +500,7 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, accessTo
     const daysSinceIssued = getDaysSinceIssued(accessToken);
     if (daysSinceIssued > 14) {
       const licenseKey = context.globalState.get<string>(LicenseKey);
-      if (!licenseKey) throw Error('No license key');
+      if (!licenseKey) return console.warn('No license key');
       response = await fetch(new URL('/api/register', baseURL), {
         method: 'POST',
         headers: [['Content-Type', 'application/x-www-form-urlencoded']],
@@ -492,6 +513,7 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, accessTo
         body: new URLSearchParams({ 'access_token': accessToken }),
       });
     } else {
+      // console.log("OK")
       return;
     }
   } catch {
@@ -510,7 +532,7 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, accessTo
     return console.warn('Failed to parse response');
   }
 				
-  console.log(data);
+  // console.log(data);
   return context.globalState.update(AccessToken, data.token);
 }
 
