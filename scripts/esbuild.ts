@@ -7,7 +7,7 @@ import path from 'path'
 const __filename = URL.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const resolve = (...args: string[]) => path.resolve(__dirname, ...args);
+const resolve = (...args: string[]) => path.resolve(__dirname, '..', ...args);
 
 const DEV = !!import.meta.env.DEV;
 console.log({ DEV })
