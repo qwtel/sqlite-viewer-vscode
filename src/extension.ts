@@ -1,5 +1,5 @@
 import * as vsc from 'vscode';
-import { activateProviders, enterLicenseKeyCommand } from './sqliteEditor';
+import { activateProviders, deleteLicenseKeyCommand, enterLicenseKeyCommand } from './sqliteEditor';
 import TelemetryReporter from '@vscode/extension-telemetry';
 import { IS_VSCODE } from './util';
 import { ExtensionId, FileNestingPatternsAdded, FullExtensionId, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
@@ -15,6 +15,9 @@ export async function activate(context: vsc.ExtensionContext) {
   );
   context.subscriptions.push(
     vsc.commands.registerCommand(`${ExtensionId}.enterLicenseKey`, () => enterLicenseKeyCommand(context, reporter)),
+  );
+  context.subscriptions.push(
+    vsc.commands.registerCommand(`${ExtensionId}.removeLicenseKey`, () => deleteLicenseKeyCommand(context, reporter)),
   );
 
   context.globalState.setKeysForSync(SyncedKeys);

@@ -19,7 +19,7 @@ export const SyncedKeys = [
 
 export const ProcessTitle = 'SQLite Viewer Helper';
 
-export const JWTPublicKey = `
+export const JWTPublicKeySPKI = `
 -----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFK3xjgL1y4OazahxzcvxUVcRPfYY
 hixfUOoecMEXQ2c2wy95T/JgmiRh9MxPTdRwoSO1Ub1nVFII2s1d8E2RCw==

@@ -8,7 +8,7 @@ import * as jose from 'jose';
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
-import { AccessToken, ExtensionId, FullExtensionId, JWTPublicKey, LicenseKey } from './constants';
+import { AccessToken, ExtensionId, FullExtensionId, JWTPublicKeySPKI, LicenseKey } from './constants';
 import { Disposable, disposeAll } from './dispose';
 import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancellationTokenToAbortSignal, cspUtil, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
@@ -441,16 +441,7 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
         : 'License key must be in the format XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX';
     },
   });
-  if (!licenseKey) {
-    if (context.extensionMode === vsc.ExtensionMode.Development) {
-      await Promise.all([
-        context.globalState.update(LicenseKey, ''),
-        context.globalState.update(AccessToken, ''),
-      ]);
-      return activateProviders(context, reporter);
-    }
-    throw Error('No license key entered');
-  }
+  if (!licenseKey) return;
   if (!/[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i.test(licenseKey)) throw Error('Invalid license key format');
 
   let response;
@@ -488,6 +479,19 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
   vsc.window.showInformationMessage('Thank you for purchasing SQLite Viewer PRO!', {
     modal: true, 
     detail: 'SQLite Viewer PRO will be enabled once you open the next file.'
+  });
+}
+
+export async function deleteLicenseKeyCommand(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
+  await Promise.all([
+    context.globalState.update(LicenseKey, ''),
+    context.globalState.update(AccessToken, ''),
+  ]);
+  await activateProviders(context, reporter);
+
+  vsc.window.showInformationMessage('The license was deactivated for this device!', {
+    modal: true, 
+    detail: 'SQLite Viewer PRO will be deactivated once you open the next file.'
   });
 }
 
@@ -544,7 +548,7 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, accessTo
   return context.globalState.update(AccessToken, data.token);
 }
 
-const jwtKey = jose.importSPKI(JWTPublicKey, 'ES256');
+const jwtKey = jose.importSPKI(JWTPublicKeySPKI, 'ES256');
 jwtKey.catch();
 export async function verifyToken(accessToken: string) {
   try {

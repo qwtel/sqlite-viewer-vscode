@@ -95,7 +95,12 @@
       },
       {
         "command": "sqlite-viewer.enterLicenseKey",
-        "title": "Enter License Key",
+        "title": "Activate License Key",
+        "category": "SQLite Viewer"
+      },
+      {
+        "command": "sqlite-viewer.removeLicenseKey",
+        "title": "Deactivate License Key",
         "category": "SQLite Viewer"
       }
     ]
