@@ -25,7 +25,7 @@ export async function createWebWorker(
   _filename: string,
   _uri: vsc.Uri,
 ): Promise<WorkerBundle> {
-  const workerPath = import.meta.env.BROWSER_EXT
+  const workerPath = import.meta.env.VSCODE_BROWSER_EXT
     ? vsc.Uri.joinPath(extensionUri, 'out', 'worker-browser.js').toString()
     : path.resolve(__dirname, "./worker.js")
 

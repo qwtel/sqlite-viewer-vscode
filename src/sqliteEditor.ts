@@ -52,11 +52,11 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     token: vsc.CancellationToken,
   ): Promise<SQLiteDocument> {
 
-    const createWorkerBundle = !import.meta.env.BROWSER_EXT && isPro && ReadWriteMode // Do not change this line
+    const createWorkerBundle = !import.meta.env.VSCODE_BROWSER_EXT && isPro && ReadWriteMode // Do not change this line
       ? pro__createTxikiWorker
       : createWebWorker;
 
-    // const readWriteMode = !import.meta.env.BROWSER_EXT && pro__IsPro && canUseNativeSqlite3;
+    // const readWriteMode = !import.meta.env.VSCODE_BROWSER_EXT && pro__IsPro && canUseNativeSqlite3;
 
     const { filename } = getUriParts(uri);
     const { workerFns, createWorkerDb } = await createWorkerBundle(extensionUri, filename, uri);
@@ -396,7 +396,7 @@ export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implement
 }
 
 function registerProvider(context: vsc.ExtensionContext, viewType: string, isPro: boolean, reporter: TelemetryReporter) {
-  const isReadWrite = !import.meta.env.BROWSER_EXT && isPro && ReadWriteMode;
+  const isReadWrite = !import.meta.env.VSCODE_BROWSER_EXT && isPro && ReadWriteMode;
   return vsc.window.registerCustomEditorProvider(
     viewType,
     new class extends (isReadWrite ? SQLiteEditorProvider : SQLiteReadonlyEditorProvider) { static viewType = viewType }(context, isPro, reporter),

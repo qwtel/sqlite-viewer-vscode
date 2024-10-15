@@ -35,7 +35,6 @@ const baseConfig = {
     ...envToDefine({
       DEV,
       VITE_VSCODE: true,
-      SQLITE_VIEWER_PRO: import.meta.env.SQLITE_VIEWER_PRO,
     }),
   },
 } satisfies BuildOptions;
@@ -66,7 +65,7 @@ const compileNodeMain = () =>
       ...baseConfig.define,
       ...envToDefine({
         DEV,
-        BROWSER_EXT: false,
+        VSCODE_BROWSER_EXT: false,
       }),
     }
   });
@@ -96,7 +95,7 @@ const compileBrowserMain = () =>
       ...baseConfig.define,
       ...envToDefine({
         DEV,
-        BROWSER_EXT: true,
+        VSCODE_BROWSER_EXT: true,
       }),
     },
     plugins: [
@@ -120,7 +119,7 @@ const compileNodeWorker = () =>
       ...baseWorkerConfig.define,
       ...envToDefine({
         DEV,
-        BROWSER_EXT: false,
+        VSCODE_BROWSER_EXT: false,
       })
     },
   });
@@ -136,7 +135,7 @@ const compileBrowserWorker = () =>
       ...baseWorkerConfig.define,
       ...envToDefine({
         DEV,
-        BROWSER_EXT: true,
+        VSCODE_BROWSER_EXT: true,
       })
     },
     plugins: [
