@@ -1,6 +1,6 @@
 import * as vsc from 'vscode';
 import { refreshAccessToken, SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
-import { AccessToken, FullExtensionId } from './constants';
+import { AccessToken, FullExtensionId, LicenseKey } from './constants';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
 
@@ -47,9 +47,14 @@ export class VscodeFns {
   get accessToken() {
     return (async () => {
       const accessToken = this.provider.context.globalState.get<string>(AccessToken);
-      if (!accessToken) return undefined;
-      refreshAccessToken(this.provider.context, accessToken).catch(console.error);
-      return accessToken;
+      const licenseKey = this.provider.context.globalState.get<string>(LicenseKey);
+      if (!licenseKey) return undefined;
+      else {
+        const freshAccessToken = refreshAccessToken(this.provider.context, licenseKey, accessToken)
+          .catch(err => (console.warn(err), accessToken));
+        if (!accessToken) return await freshAccessToken;
+        return accessToken;
+      }
     })();
   }
 

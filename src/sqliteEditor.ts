@@ -10,7 +10,7 @@ import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-
 
 import { AccessToken, ExtensionId, FullExtensionId, JWTPublicKeySPKI, LicenseKey } from './constants';
 import { Disposable, disposeAll } from './dispose';
-import { IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancellationTokenToAbortSignal, cspUtil, getUriParts } from './util';
+import { IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancellationTokenToAbortSignal, cspUtil, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
 import { WorkerBundle } from './workerBundle';
 import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
@@ -322,6 +322,8 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       ? cspUtil.build(cspObj)
       : ''
 
+    const { uriScheme, appHost, appName } = vsc.env;
+
     const preparedHtml = html
       .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
         return `${attr}="${assetAsWebviewUri(url)}"`;
@@ -330,6 +332,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
         <meta http-equiv="Content-Security-Policy" content="${cspStr}">
         <meta name="color-scheme" content="${themeToCss(vsc.window.activeColorTheme)}">
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}" crossorigin/>
+        <meta id="__VSCODE_ENV__" name="vscode-env" ${toDatasetAttrs({ uriScheme, appHost, appName })}>
       `)
       .replace('<!--BODY-->', ``)
 
@@ -339,6 +342,12 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
   enterLicenseKey() {
     return enterLicenseKeyCommand(this.context, this.reporter);
   }
+}
+
+const toDashCase = (str: string) => str.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
+
+function toDatasetAttrs(obj: Record<string, string>) {
+  return Object.entries(obj).map(([k, v]) => `data-${toDashCase(k)}="${v}"`).join(' ');
 }
 
 function themeToCss(theme: vsc.ColorTheme) {
@@ -495,57 +504,55 @@ export async function deleteLicenseKeyCommand(context: vsc.ExtensionContext, rep
   });
 }
 
-function getDaysSinceIssued(token: string) {
+function calcDaysSinceIssued(token: string) {
 	const payload = jose.decodeJwt(token);
   const issuedAt = payload.iat!;
   const currentTime = Date.now() / 1000;
   const diffSeconds = currentTime - issuedAt;
   const diffDays = diffSeconds / (24 * 60 * 60);
-  // console.log({ diffDays })
   return diffDays;
 }
 
-export async function refreshAccessToken(context: vsc.ExtensionContext, accessToken: string) {
+export async function refreshAccessToken(context: vsc.ExtensionContext, licenseKey: string, accessToken?: string) {
   let response;
   try {
     const baseURL = context.extensionMode === vsc.ExtensionMode.Development ? 'http://localhost:8788' : 'https://vscode.sqliteviewer.app';
-    const daysSinceIssued = getDaysSinceIssued(accessToken);
-    if (daysSinceIssued > 14) {
-      const licenseKey = context.globalState.get<string>(LicenseKey);
-      if (!licenseKey) return console.warn('No license key');
+    const daysSinceIssued = accessToken && calcDaysSinceIssued(accessToken);
+    // console.log({ daysSinceIssued })
+    if (!daysSinceIssued || daysSinceIssued > 14) {
       response = await fetch(new URL('/api/register', baseURL), {
         method: 'POST',
         headers: [['Content-Type', 'application/x-www-form-urlencoded']],
         body: new URLSearchParams({ 'license_key': licenseKey }),
       });
-    } else if (daysSinceIssued > 0.05) {
+    } else if (daysSinceIssued > 1) {
       response = await fetch(new URL('/api/refresh', baseURL), {
         method: 'POST',
         headers: [['Content-Type', 'application/x-www-form-urlencoded']],
-        body: new URLSearchParams({ 'access_token': accessToken }),
+        body: new URLSearchParams({ 'license_key': licenseKey, 'access_token': accessToken }),
       });
     } else {
-      // console.log("OK")
-      return;
+      return accessToken;
     }
   } catch {
-    return console.warn('No response from license validation service');
+    throw new Error('No response from license validation service');
   }
 
   if (!response.ok || response.headers.get('Content-Type')?.includes('application/json') === false) {
     response.text().then(console.error).catch();
-    return console.warn(`License validation request failed: ${response.status}`);
+    throw new Error(`License validation request failed: ${response.status}`);
   }
 
   let data;
   try {
     data = await response.json() as { token: string };
   } catch {
-    return console.warn('Failed to parse response');
+    throw new Error('Failed to parse response');
   }
 				
   // console.log(data);
-  return context.globalState.update(AccessToken, data.token);
+  Promise.resolve(context.globalState.update(AccessToken, data.token)).catch(console.warn);
+  return data.token;
 }
 
 const jwtKey = jose.importSPKI(JWTPublicKeySPKI, 'ES256');

@@ -1,5 +1,6 @@
+export const Ns = 'qwtel';
 export const ExtensionId = 'sqlite-viewer';
-export const FullExtensionId = `qwtel.${ExtensionId}`
+export const FullExtensionId = `${Ns}.${ExtensionId}`
 
 export const ConfigurationSection = 'sqliteViewer';
 
