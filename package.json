@@ -21,6 +21,7 @@
   "main": "./out/extension.js",
   "browser": "./out/extension-browser.js",
   "extensionKind": [
+    "workspace",
     "ui"
   ],
   "contributes": {
