@@ -1,5 +1,5 @@
 import type TelemetryReporter from '@vscode/extension-telemetry';
-import { WebviewFns } from '../sqlite-viewer-core/src/file-system';
+import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
 import type { WorkerDb, SqlValue } from '../sqlite-viewer-core/src/worker-db';
 
 import * as vsc from 'vscode';
