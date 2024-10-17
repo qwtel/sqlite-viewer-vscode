@@ -1,8 +1,10 @@
 import * as vsc from 'vscode';
 import TelemetryReporter from '@vscode/extension-telemetry';
-import { activateProviders, deleteLicenseKeyCommand, enterLicenseKeyCommand } from './commands';
+import { deleteLicenseKeyCommand, enterLicenseKeyCommand, refreshAccessToken, verifyToken } from './commands';
 import { IS_VSCODE } from './util';
-import { ExtensionId, FileNestingPatternsAdded, FullExtensionId, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
+import { AccessToken, ExtensionId, FileNestingPatternsAdded, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
+import { disposeAll } from './dispose';
+import { registerProvider } from './sqliteEditor';
 
 export async function activate(context: vsc.ExtensionContext) {
   const reporter = new TelemetryReporter(TelemetryConnectionString);
@@ -24,6 +26,30 @@ export async function activate(context: vsc.ExtensionContext) {
 
   addFileNestingPatternsOnce(context);
   showWhatsNew(context, reporter);
+}
+
+const providerSubs = new WeakSet<vsc.Disposable>();
+export async function activateProviders(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
+  const prevSubs = context.subscriptions.filter(x => providerSubs.has(x));
+  for (const sub of prevSubs) context.subscriptions.splice(context.subscriptions.indexOf(sub), 1);
+  disposeAll(prevSubs);
+
+  const licenseKey = context.globalState.get<string>(LicenseKey);
+  let accessToken = context.globalState.get<string>(AccessToken);
+  if (licenseKey) {
+    const freshAccessToken = refreshAccessToken(context, licenseKey, accessToken).catch(err => (console.warn(err), accessToken));
+    if (!accessToken) {
+      accessToken = await freshAccessToken;
+    }
+  }
+  const verified = !!accessToken && await verifyToken(accessToken);
+
+  const subs = [];
+  subs.push(registerProvider(context, reporter, `${ExtensionId}.view`, verified, accessToken));
+  subs.push(registerProvider(context, reporter, `${ExtensionId}.option`, verified, accessToken));
+
+  for (const sub of subs) providerSubs.add(sub);
+  context.subscriptions.push(...subs);
 }
 
 // https://stackoverflow.com/a/66303259/3073272

@@ -7,13 +7,13 @@ import * as vsc from 'vscode';
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
-import { AccessToken, FullExtensionId } from './constants';
+import { AccessToken, ExtensionId, FullExtensionId, LicenseKey } from './constants';
 import { Disposable, disposeAll } from './dispose';
 import { IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancellationTokenToAbortSignal, cspUtil, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
 import { WorkerBundle } from './workerBundle';
 import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
-import { enterLicenseKeyCommand } from './commands';
+import { enterLicenseKeyCommand, refreshAccessToken, verifyToken } from './commands';
 
 //#region Pro
 const createProWorker: () => never = () => { throw new Error("Not implemented") }

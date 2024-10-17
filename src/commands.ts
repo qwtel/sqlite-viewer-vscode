@@ -2,33 +2,8 @@ import * as vsc from 'vscode';
 import * as jose from 'jose';
 import TelemetryReporter from '@vscode/extension-telemetry';
 
-import { AccessToken, ExtensionId, JWTPublicKeySPKI, LicenseKey } from './constants';
-import { disposeAll } from "./dispose";
-import { registerProvider } from './sqliteEditor';
-
-const providerSubscriptions = new WeakMap<vsc.ExtensionContext, vsc.Disposable[]>();
-
-export async function activateProviders(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
-  const prevSubs = providerSubscriptions.get(context);
-  // console.log({ prevSubs });
-  prevSubs && disposeAll(prevSubs);
-
-  let subs;
-  providerSubscriptions.set(context, subs = []);
-
-  const licenseKey = context.globalState.get<string>(LicenseKey);
-  let accessToken = context.globalState.get<string>(AccessToken);
-  if (!accessToken && licenseKey) {
-    const freshAccessToken = refreshAccessToken(context, licenseKey, accessToken).catch(err => (console.warn(err), accessToken));
-    accessToken = await freshAccessToken;
-  }
-  const verified = !!accessToken && !!licenseKey && await verifyToken(accessToken);
-
-  subs.push(registerProvider(context, reporter, `${ExtensionId}.view`, verified, accessToken));
-  subs.push(registerProvider(context, reporter, `${ExtensionId}.option`, verified, accessToken));
-
-  context.subscriptions.push(...subs);
-}
+import { AccessToken, JWTPublicKeySPKI, LicenseKey } from './constants';
+import { activateProviders } from './extension';
 
 export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
   const licenseKey = await vsc.window.showInputBox({
