@@ -16,11 +16,16 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
   let subs;
   providerSubscriptions.set(context, subs = []);
 
-  const accessToken = context.globalState.get<string>(AccessToken);
-  const valid = !!accessToken && await verifyToken(accessToken);
+  const licenseKey = context.globalState.get<string>(LicenseKey);
+  let accessToken = context.globalState.get<string>(AccessToken);
+  if (!accessToken && licenseKey) {
+    const freshAccessToken = refreshAccessToken(context, licenseKey, accessToken).catch(err => (console.warn(err), accessToken));
+    accessToken = await freshAccessToken;
+  }
+  const verified = !!accessToken && !!licenseKey && await verifyToken(accessToken);
 
-  subs.push(registerProvider(context, `${ExtensionId}.view`, valid, reporter));
-  subs.push(registerProvider(context, `${ExtensionId}.option`, valid, reporter));
+  subs.push(registerProvider(context, reporter, `${ExtensionId}.view`, verified, accessToken));
+  subs.push(registerProvider(context, reporter, `${ExtensionId}.option`, verified, accessToken));
 
   context.subscriptions.push(...subs);
 }

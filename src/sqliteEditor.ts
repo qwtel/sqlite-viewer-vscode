@@ -7,7 +7,7 @@ import * as vsc from 'vscode';
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
-import { FullExtensionId } from './constants';
+import { AccessToken, FullExtensionId } from './constants';
 import { Disposable, disposeAll } from './dispose';
 import { IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancellationTokenToAbortSignal, cspUtil, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
@@ -231,8 +231,9 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
 
   constructor(
     readonly context: vsc.ExtensionContext,
-    readonly isPro: boolean,
     readonly reporter: TelemetryReporter,
+    readonly verified: boolean,
+    readonly accessToken?: string,
   ) {}
 
   async openCustomDocument(
@@ -241,7 +242,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     token: vsc.CancellationToken
   ): Promise<SQLiteDocument> {
 
-    const document = await SQLiteDocument.create(openContext, uri, this.context.extensionUri, this.isPro, token);
+    const document = await SQLiteDocument.create(openContext, uri, this.context.extensionUri, this.verified, token);
 
     const listeners = this.setupListeners(document);
 
@@ -258,10 +259,10 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
   protected setupListeners(document: SQLiteDocument): vsc.Disposable[] {
     const listeners: vsc.Disposable[] = [];
 
-    listeners.push(vsc.window.onDidChangeActiveColorTheme(async (theme) => {
+    listeners.push(vsc.window.onDidChangeActiveColorTheme((theme) => {
       for (const panel of this.webviews.get(document.uri)) {
         const webviewRemote = this.webviewRemotes.get(panel);
-        await webviewRemote?.setColorScheme(themeToCss(theme));
+        webviewRemote?.updateColorScheme(themeToCss(theme)).catch(console.warn);
       }
     }));
 
@@ -322,6 +323,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       : ''
 
     const { uriScheme, appHost, appName } = vsc.env;
+    const vscodeEnv = { uriScheme, appHost, appName, accessToken: this.accessToken };
 
     const preparedHtml = html
       .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
@@ -330,8 +332,8 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       .replace('<!--HEAD-->', `
         <meta http-equiv="Content-Security-Policy" content="${cspStr}">
         <meta name="color-scheme" content="${themeToCss(vsc.window.activeColorTheme)}">
+        <meta id="__VSCODE_ENV__" ${toDatasetAttrs(vscodeEnv)}>
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}" crossorigin/>
-        <meta id="__VSCODE_ENV__" name="vscode-env" ${toDatasetAttrs({ uriScheme, appHost, appName })}>
       `)
       .replace('<!--BODY-->', ``)
 
@@ -344,9 +346,8 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
 }
 
 const toDashCase = (str: string) => str.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
-
-function toDatasetAttrs(obj: Record<string, string>) {
-  return Object.entries(obj).map(([k, v]) => `data-${toDashCase(k)}="${v}"`).join(' ');
+function toDatasetAttrs(obj: Record<string, string|undefined>) {
+  return Object.entries(obj).map(([k, v]) => v != null ? `data-${toDashCase(k)}="${v}"` : '').join(' ');
 }
 
 function themeToCss(theme: vsc.ColorTheme) {
@@ -403,11 +404,11 @@ export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implement
   }
 }
 
-export function registerProvider(context: vsc.ExtensionContext, viewType: string, isPro: boolean, reporter: TelemetryReporter) {
-  const isReadWrite = !import.meta.env.VSCODE_BROWSER_EXT && isPro && ReadWriteMode;
+export function registerProvider(context: vsc.ExtensionContext, reporter: TelemetryReporter, viewType: string, verified: boolean, accessToken?: string) {
+  const isReadWrite = !import.meta.env.VSCODE_BROWSER_EXT && verified && ReadWriteMode;
   return vsc.window.registerCustomEditorProvider(
     viewType,
-    new class extends (isReadWrite ? SQLiteEditorProvider : SQLiteReadonlyEditorProvider) { static viewType = viewType }(context, isPro, reporter),
+    new class extends (isReadWrite ? SQLiteEditorProvider : SQLiteReadonlyEditorProvider) { static viewType = viewType }(context, reporter, verified, accessToken),
     {
       webviewOptions: {
         enableFindWidget: false,

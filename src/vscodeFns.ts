@@ -45,20 +45,6 @@ export class VscodeFns {
     return this.provider instanceof SQLiteReadonlyEditorProvider;
   } 
 
-  get accessToken() {
-    return (async () => {
-      const accessToken = this.provider.context.globalState.get<string>(AccessToken);
-      const licenseKey = this.provider.context.globalState.get<string>(LicenseKey);
-      if (!licenseKey) return undefined;
-      else {
-        const freshAccessToken = refreshAccessToken(this.provider.context, licenseKey, accessToken)
-          .catch(err => (console.warn(err), accessToken));
-        if (!accessToken) return await freshAccessToken;
-        return accessToken;
-      }
-    })();
-  }
-
   async refreshFile() {
     const { document } = this;
     if (document.uri.scheme !== 'untitled') {
