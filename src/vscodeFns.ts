@@ -1,6 +1,7 @@
 import * as vsc from 'vscode';
-import { refreshAccessToken, SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
+import { SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
 import { AccessToken, FullExtensionId, LicenseKey } from './constants';
+import { refreshAccessToken } from './commands';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
 

@@ -1,6 +1,6 @@
 import * as vsc from 'vscode';
-import { activateProviders, deleteLicenseKeyCommand, enterLicenseKeyCommand } from './sqliteEditor';
 import TelemetryReporter from '@vscode/extension-telemetry';
+import { activateProviders, deleteLicenseKeyCommand, enterLicenseKeyCommand } from './commands';
 import { IS_VSCODE } from './util';
 import { ExtensionId, FileNestingPatternsAdded, FullExtensionId, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
 

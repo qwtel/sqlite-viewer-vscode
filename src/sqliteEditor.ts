@@ -3,18 +3,17 @@ import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
 import type { WorkerDb, SqlValue } from '../sqlite-viewer-core/src/worker-db';
 
 import * as vsc from 'vscode';
-import * as jose from 'jose';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
-import { AccessToken, ExtensionId, FullExtensionId, JWTPublicKeySPKI, LicenseKey } from './constants';
+import { FullExtensionId } from './constants';
 import { Disposable, disposeAll } from './dispose';
 import { IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancellationTokenToAbortSignal, cspUtil, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
 import { WorkerBundle } from './workerBundle';
 import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
-// import type { Credentials } from './credentials';
+import { enterLicenseKeyCommand } from './commands';
 
 //#region Pro
 const pro__createTxikiWorker: () => never = () => { throw new Error("Not implemented") }
@@ -404,7 +403,7 @@ export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implement
   }
 }
 
-function registerProvider(context: vsc.ExtensionContext, viewType: string, isPro: boolean, reporter: TelemetryReporter) {
+export function registerProvider(context: vsc.ExtensionContext, viewType: string, isPro: boolean, reporter: TelemetryReporter) {
   const isReadWrite = !import.meta.env.VSCODE_BROWSER_EXT && isPro && ReadWriteMode;
   return vsc.window.registerCustomEditorProvider(
     viewType,
@@ -417,151 +416,4 @@ function registerProvider(context: vsc.ExtensionContext, viewType: string, isPro
       supportsMultipleEditorsPerDocument: true,
     }
   );
-}
-
-const providerSubscriptions = new WeakMap<vsc.ExtensionContext, vsc.Disposable[]>();
-
-export async function activateProviders(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
-  const prevSubs = providerSubscriptions.get(context);
-  // console.log({ prevSubs });
-  prevSubs && disposeAll(prevSubs);
-
-  let subs;
-  providerSubscriptions.set(context, subs = []);
-
-  const accessToken = context.globalState.get<string>(AccessToken);
-  const valid = !!accessToken && await verifyToken(accessToken);
-
-  subs.push(registerProvider(context, `${ExtensionId}.view`, valid, reporter));
-  subs.push(registerProvider(context, `${ExtensionId}.option`, valid, reporter));
-
-  context.subscriptions.push(...subs);
-}
-
-export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
-  const licenseKey = await vsc.window.showInputBox({
-    prompt: 'Enter License Key',
-    placeHolder: 'XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX',
-    password: false,
-    ignoreFocusOut: true,
-    validateInput: (value) => {
-      return /[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i.test(value) || context.extensionMode === vsc.ExtensionMode.Development
-        ? null
-        : 'License key must be in the format XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX';
-    },
-  });
-  if (!licenseKey) return;
-  if (!/[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i.test(licenseKey)) throw Error('Invalid license key format');
-
-  let response;
-  try {
-    const baseURL = context.extensionMode === vsc.ExtensionMode.Development ? 'http://localhost:8788' : 'https://vscode.sqliteviewer.app';
-    response = await fetch(new URL('/api/register', baseURL), {
-      method: 'POST',
-      headers: [['Content-Type', 'application/x-www-form-urlencoded']],
-      body: new URLSearchParams({ 'license_key': licenseKey }),
-    });
-  } catch {
-    throw Error('No response from license validation service');
-  }
-
-  if (!response.ok || response.headers.get('Content-Type')?.includes('application/json') === false) {
-    const message = await response.text();
-    throw Error(`License validation request failed: ${message}`);
-  }
-
-  let data;
-  try {
-    data = await response.json() as { token: string };
-  } catch {
-    throw Error('Failed to parse response');
-  }
-				
-  // console.log(data);
-
-  await Promise.all([
-    context.globalState.update(LicenseKey, licenseKey),
-    context.globalState.update(AccessToken, data.token),
-  ]);
-  await activateProviders(context, reporter);
-
-  vsc.window.showInformationMessage('Thank you for purchasing SQLite Viewer PRO!', {
-    modal: true, 
-    detail: 'SQLite Viewer PRO will be enabled once you open the next file.'
-  });
-}
-
-export async function deleteLicenseKeyCommand(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
-  await Promise.all([
-    context.globalState.update(LicenseKey, ''),
-    context.globalState.update(AccessToken, ''),
-  ]);
-  await activateProviders(context, reporter);
-
-  vsc.window.showInformationMessage('The license was deactivated for this device!', {
-    modal: true, 
-    detail: 'SQLite Viewer PRO will be deactivated once you open the next file.'
-  });
-}
-
-function calcDaysSinceIssued(token: string) {
-	const payload = jose.decodeJwt(token);
-  const issuedAt = payload.iat!;
-  const currentTime = Date.now() / 1000;
-  const diffSeconds = currentTime - issuedAt;
-  const diffDays = diffSeconds / (24 * 60 * 60);
-  return diffDays;
-}
-
-export async function refreshAccessToken(context: vsc.ExtensionContext, licenseKey: string, accessToken?: string) {
-  let response;
-  try {
-    const baseURL = context.extensionMode === vsc.ExtensionMode.Development ? 'http://localhost:8788' : 'https://vscode.sqliteviewer.app';
-    const daysSinceIssued = accessToken && calcDaysSinceIssued(accessToken);
-    // console.log({ daysSinceIssued })
-    if (!daysSinceIssued || daysSinceIssued > 14) {
-      response = await fetch(new URL('/api/register', baseURL), {
-        method: 'POST',
-        headers: [['Content-Type', 'application/x-www-form-urlencoded']],
-        body: new URLSearchParams({ 'license_key': licenseKey }),
-      });
-    } else if (daysSinceIssued > 1) {
-      response = await fetch(new URL('/api/refresh', baseURL), {
-        method: 'POST',
-        headers: [['Content-Type', 'application/x-www-form-urlencoded']],
-        body: new URLSearchParams({ 'license_key': licenseKey, 'access_token': accessToken }),
-      });
-    } else {
-      return accessToken;
-    }
-  } catch {
-    throw new Error('No response from license validation service');
-  }
-
-  if (!response.ok || response.headers.get('Content-Type')?.includes('application/json') === false) {
-    response.text().then(console.error).catch();
-    throw new Error(`License validation request failed: ${response.status}`);
-  }
-
-  let data;
-  try {
-    data = await response.json() as { token: string };
-  } catch {
-    throw new Error('Failed to parse response');
-  }
-				
-  // console.log(data);
-  Promise.resolve(context.globalState.update(AccessToken, data.token)).catch(console.warn);
-  return data.token;
-}
-
-const jwtKey = jose.importSPKI(JWTPublicKeySPKI, 'ES256');
-jwtKey.catch();
-export async function verifyToken(accessToken: string) {
-  try {
-    const { payload } = await jose.jwtVerify(accessToken, await jwtKey);
-    return !!payload;
-  } catch {
-    return false;
-  }
 }
