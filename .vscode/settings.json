@@ -2,6 +2,7 @@
     "editor.tabSize": 2,
     "cmake.configureOnOpen": false,
     "cSpell.words": [
+        "codicons",
         "groupper",
         "RESTOREPOINT",
         "ROWID",

@@ -16,7 +16,7 @@ import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
 import { enterLicenseKeyCommand } from './commands';
 
 //#region Pro
-const pro__createTxikiWorker: () => never = () => { throw new Error("Not implemented") }
+const createProWorker: () => never = () => { throw new Error("Not implemented") }
 class UndoHistory<_T> {
   static restore(_buffer: Uint8Array): never { throw new Error("Not implemented") }
   constructor(_max: number) {}
@@ -52,7 +52,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   ): Promise<SQLiteDocument> {
 
     const createWorkerBundle = !import.meta.env.VSCODE_BROWSER_EXT && isPro && ReadWriteMode // Do not change this line
-      ? pro__createTxikiWorker
+      ? createProWorker
       : createWebWorker;
 
     // const readWriteMode = !import.meta.env.VSCODE_BROWSER_EXT && pro__IsPro && canUseNativeSqlite3;
