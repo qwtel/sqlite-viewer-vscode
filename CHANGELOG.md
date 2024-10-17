@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v0.8.0 (Pre-Release)
+### [SQLite Viewer PRO](https://vscode.sqliteviewer.app)
+You can now upgrade SQLite Viewer to a fully-fledged database editor by upgrading to SQLite Viewer PRO. 
+Like the base version, it's designed to "just work", even in remote workspaces like WSL, SSH, and containers. For more information check out [vscode.sqliteviewer.app](https://vscode.sqliteviewer.app) or the info popup inside the viewer. 
+Users of the free version are not affected by this change.
+
+### Secondary Sidebar
+SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
+
+
 ## v0.7.3
 - The initial size of the sidebar is now based on available space
 - Resizing the sidebar and columns should now work when using the extension with a web-based version of VSCode on and iPad or other touch device
