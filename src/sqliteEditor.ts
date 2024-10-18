@@ -7,7 +7,7 @@ import * as vsc from 'vscode';
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
-import { AccessToken, ExtensionId, FullExtensionId, LicenseKey } from './constants';
+import { AccessToken, ExtensionId, FullExtensionId, LicenseKey, Ns } from './constants';
 import { Disposable, disposeAll } from './dispose';
 import { IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancellationTokenToAbortSignal, cspUtil, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
@@ -323,7 +323,10 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       : ''
 
     const { uriScheme, appHost, appName, uiKind } = vsc.env;
-    const vscodeEnv = { uriScheme, appHost, appName, accessToken: this.accessToken, uiKind: uiKindToString(uiKind) };
+    const extensionUrl = uriScheme.includes('vscode')
+      ? `https://marketplace.visualstudio.com/items?itemName=${FullExtensionId}&ref=vscode`
+      : `https://open-vsx.org/extension/${Ns}/${ExtensionId}&ref=vscode`;
+    const vscodeEnv = { uriScheme, appHost, appName, extensionUrl, accessToken: this.accessToken, uiKind: uiKindToString(uiKind) };
 
     const preparedHtml = html
       .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
