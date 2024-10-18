@@ -322,8 +322,8 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       ? cspUtil.build(cspObj)
       : ''
 
-    const { uriScheme, appHost, appName } = vsc.env;
-    const vscodeEnv = { uriScheme, appHost, appName, accessToken: this.accessToken };
+    const { uriScheme, appHost, appName, uiKind } = vsc.env;
+    const vscodeEnv = { uriScheme, appHost, appName, accessToken: this.accessToken, uiKind: uiKindToString(uiKind) };
 
     const preparedHtml = html
       .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
@@ -352,14 +352,17 @@ function toDatasetAttrs(obj: Record<string, string|undefined>) {
 
 function themeToCss(theme: vsc.ColorTheme) {
   switch (theme.kind) {
-    case vsc.ColorThemeKind.Dark:
-      return 'dark';
-    case vsc.ColorThemeKind.Light:
-      return 'light';
-    case vsc.ColorThemeKind.HighContrast:
-      return 'dark';
-    case vsc.ColorThemeKind.HighContrastLight:
-      return 'light';
+    case vsc.ColorThemeKind.Dark: return 'dark';
+    case vsc.ColorThemeKind.Light: return 'light';
+    case vsc.ColorThemeKind.HighContrast: return 'dark';
+    case vsc.ColorThemeKind.HighContrastLight: return 'light';
+  }
+}
+
+function uiKindToString(uiKind: vsc.UIKind) {
+  switch (uiKind) {
+    case vsc.UIKind.Web: return 'web';
+    case vsc.UIKind.Desktop: return 'desktop';
   }
 }
 
