@@ -1,3 +1,6 @@
 [submodule "sqlite-viewer-core"]
 	path = sqlite-viewer-core
 	url = git@github.com:qwtel/sqlite-viewer-app.git
+[submodule "zig-build-txiki"]
+	path = zig-build-txiki
+	url = git@github.com:qwtel/zig-build-txiki.git
