@@ -4,3 +4,6 @@
 [submodule "zig-build-txiki"]
 	path = zig-build-txiki
 	url = git@github.com:qwtel/zig-build-txiki.git
+[submodule "sqlite-viewer-vscode-page"]
+	path = sqlite-viewer-vscode-page
+	url = git@github.com:qwtel/sqlite-viewer-vscode-page.git

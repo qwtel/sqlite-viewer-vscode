@@ -8,6 +8,7 @@ exampleFiles
 *.local
 sqlite-viewer-*
 !sqlite-viewer-core
+!sqlite-viewer-vscode-page
 _sqlite-viewer-app
 sqlite-viewer-app
 mySolidTest
