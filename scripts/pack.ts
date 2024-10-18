@@ -1,8 +1,13 @@
 /// <reference types="bun-types" />
 
 import { parseArgs } from "node:util";
-import os from "node:os";
-import path from "node:path";
+import URL from 'node:url';
+import path from 'node:path'
+
+const __filename = URL.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const resolve = (...args: string[]) => path.resolve(__dirname, '..', ...args);
 
 const kinds = ["package", "publish"] as const
 
@@ -53,7 +58,7 @@ export const packageExt = async (opts: {
   const proc = Bun.spawn(cmd, {
     env: { 
       ...env, 
-      TJS_ZIG_OUT: path.resolve(os.homedir(), "./GitHub/txiki.js/zig-out"), 
+      TJS_ZIG_OUT: resolve("zig-build-txiki/zig-out"), 
       VSCODE_EXT_TARGET: target,
     },
     stdout: "inherit",

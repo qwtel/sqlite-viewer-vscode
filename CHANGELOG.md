@@ -9,6 +9,9 @@ Users of the free version are not affected by this change.
 ### Secondary Sidebar
 SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
 
+## v0.8.2 (Pre-Release)
+No outside visible changes
+
 ## v0.8.1 (Pre-Release)
 Performance improvements for PRO version
 

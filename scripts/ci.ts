@@ -45,7 +45,7 @@ if (import.meta.main) {
   for (const [i, target] of matrix.entries()) {
     const env = i === 0 
       ? { ...Bun.env, VSCODE_EXT_TOOL: tool, VSCODE_EXT_TARGET: target, } 
-      : { ...Bun.env, VSCODE_EXT_TOOL: tool, VSCODE_EXT_TARGET: target, VSCODE_EXT_SKIP_COMPILE: "1" }
+      : { ...Bun.env, VSCODE_EXT_TOOL: tool, VSCODE_EXT_TARGET: target, VSCODE_EXT_SKIP_BUILD: "1" }
     await packageExt({ tool, kind, target, 'pre-release': preRelease }, env);
   }
 }
