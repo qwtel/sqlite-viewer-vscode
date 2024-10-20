@@ -9,6 +9,12 @@ Users of the free version are not affected by this change.
 ### Secondary Sidebar
 SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
 
+## v0.8.4
+- [PRO] Made error messages more descriptive
+- [PRO] Added a confirmation dialog before committing a transaction that contains too many changes to keep in the undo history. This usually occurs when deleting large numbers of rows.
+- Fixed a bug that reset range selection when using pagination buttons or the scrollbar
+- Other minor fixes
+
 ## v0.8.3
 Minor fixes. Bumped to main release channel.
 
@@ -16,10 +22,10 @@ Minor fixes. Bumped to main release channel.
 No outside visible changes
 
 ## v0.8.1 (Pre-Release)
-Performance improvements for PRO version
+[PRO] Performance improvements
 
 ## v0.8.0 (Pre-Release)
-Initial 0.8 release
+Initial 0.8 release.
 
 ## v0.7.3
 - The initial size of the sidebar is now based on available space
