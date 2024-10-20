@@ -1,6 +1,6 @@
-import { Uri } from "vscode"
-import { Remote } from "../sqlite-viewer-core/src/caplink"
-import { WorkerDb, WorkerFns } from "../sqlite-viewer-core/src/worker-db"
+import type { Remote } from "../sqlite-viewer-core/src/caplink"
+import type { WorkerDb, WorkerFns } from "../sqlite-viewer-core/src/worker-db"
+import type { Uri } from "vscode"
 
 export type Awaitable<T> = T | PromiseLike<T>
 export type WorkerLike = { terminate(): void }

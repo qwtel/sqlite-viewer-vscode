@@ -7,7 +7,7 @@ import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import nodeEndpoint from "../sqlite-viewer-core/src/vendor/comlink/src/node-adapter";
 
 import { Worker } from './o/worker_threads';
-import { WorkerBundle } from './workerBundle';
+import type { WorkerBundle } from './workerBundle';
 import { ConfigurationSection } from './constants';
 // import type { Credentials } from './credentials';
 
