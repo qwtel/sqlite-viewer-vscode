@@ -9,7 +9,7 @@ import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-
 
 import { AccessToken, ExtensionId, FullExtensionId, LicenseKey, Ns } from './constants';
 import { Disposable, disposeAll } from './dispose';
-import { IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancellationTokenToAbortSignal, cspUtil, getUriParts } from './util';
+import { IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
 import { WorkerBundle } from './workerBundle';
 import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
@@ -69,7 +69,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     }
 
     const workerDbPromise = promise
-      .then(dbRemote => dbRemote.applyEdits(edits, cancellationTokenToAbortSignal(token)))
+      .then(dbRemote => dbRemote.applyEdits(edits, cancelTokenToAbortSignal(token)))
       .then(() => promise);
 
     return new SQLiteDocument(uri, workerFns, createWorkerDb, workerDbPromise);
@@ -161,9 +161,9 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * Called by VS Code when the user saves the document.
    */
   async save(token: vsc.CancellationToken): Promise<void> {
+    await this.#history.save();
     const dbRemote = await this.getDb();
-    await dbRemote.commit(cancellationTokenToAbortSignal(token));
-    this.#history.save();
+    await dbRemote.commit(cancelTokenToAbortSignal(token));
   }
 
   /**
@@ -176,7 +176,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       throw new Error("File too large to save");
     }
     const { filename } = this.uriParts;
-    const data = await dbRemote.exportDb(filename, cancellationTokenToAbortSignal(token));
+    const data = await dbRemote.exportDb(filename, cancelTokenToAbortSignal(token));
     await vsc.workspace.fs.writeFile(targetResource, data);
   }
 
@@ -185,7 +185,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    */
   async revert(token: vsc.CancellationToken): Promise<void> {
     const dbRemote = await this.getDb();
-    await dbRemote.rollback(cancellationTokenToAbortSignal(token));
+    await dbRemote.rollback(cancelTokenToAbortSignal(token));
     // XXX: how to handle savedEdits in this case?
   }
 

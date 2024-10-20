@@ -11,15 +11,6 @@ export const IS_GOOGLE_IDX = vsc.env.appName.includes("IDX") || (vsc.env.appHost
 
 export const IS_DESKTOP = vsc.env.appHost === "desktop";
 
-export function getNonce() {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-}
-
 export class WebviewCollection {
   private readonly _webviews = new Set<{
     readonly resource: string;
@@ -51,9 +42,9 @@ export class WebviewCollection {
 
 /**
  * Wraps a VSCode webview and returns a readable and writable stream pair.
- * This can be used to overlay another binary protocol on top of the webview's message passing, such as "post-message-over-wire".
- * This is especially useful considering how badly implemented object support in webview's `postMessage` is (no structured clone, no message channels, 
- * randomly emptied buffers...).
+ * This can be used to overlay another binary protocol on top of the webview's message passing, such as my own `postmessage-over-wire`.
+ * This is especially useful considering how badly implemented object support in vscode's `postMessage` is: No structured clone, no message channels, 
+ * and randomly dropped `Uint8Array`s if there's too many in one message.
  */
 export class WebviewStream extends Disposable {
   #readable;
@@ -155,7 +146,7 @@ export function getUriParts(uri: vsc.Uri) {
   return { dirname, filename, basename, extname };
 }
 
-export function cancellationTokenToAbortSignal(token: vsc.CancellationToken): AbortSignal {
+export function cancelTokenToAbortSignal(token: vsc.CancellationToken): AbortSignal {
   const ctrl = new AbortController();
   if (token.isCancellationRequested) ctrl.abort(); 
   else token.onCancellationRequested(() => ctrl.abort());

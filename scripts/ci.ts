@@ -8,16 +8,16 @@ console.log({ DEV })
 
 const kinds = ["package", "publish"] as const
 
-const matrix = [
-  "win32-x64",
+const targets = [
+  "darwin-arm64",
+  "darwin-x64",
   "win32-arm64",
-  "linux-x64",
+  "win32-x64",
   "linux-arm64",
   "linux-armhf",
-  "alpine-x64",
+  "linux-x64",
   "alpine-arm64",
-  "darwin-x64",
-  "darwin-arm64",
+  "alpine-x64",
   "web",
 ] as const;
 
@@ -42,7 +42,7 @@ if (import.meta.main) {
   }
   kind ||= "package";
 
-  for (const [i, target] of matrix.entries()) {
+  for (const [i, target] of targets.entries()) {
     const env = i === 0 
       ? { ...Bun.env, VSCODE_EXT_TOOL: tool, VSCODE_EXT_TARGET: target, } 
       : { ...Bun.env, VSCODE_EXT_TOOL: tool, VSCODE_EXT_TARGET: target, VSCODE_EXT_SKIP_BUILD: "1" }

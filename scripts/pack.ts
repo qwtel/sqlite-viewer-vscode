@@ -12,15 +12,15 @@ const resolve = (...args: string[]) => path.resolve(__dirname, '..', ...args);
 const kinds = ["package", "publish"] as const
 
 const targets = [
-  "win32-x64",
+  "darwin-arm64",
+  "darwin-x64",
   "win32-arm64",
-  "linux-x64",
+  "win32-x64",
   "linux-arm64",
   "linux-armhf",
-  "alpine-x64",
+  "linux-x64",
   "alpine-arm64",
-  "darwin-x64",
-  "darwin-arm64",
+  "alpine-x64",
   "web",
 ] as const;
 
