@@ -103,6 +103,11 @@
         "command": "sqlite-viewer.removeLicenseKey",
         "title": "Deactivate License Key",
         "category": "SQLite Viewer"
+      },
+      {
+        "command": "sqlite-viewer.enterAccessToken",
+        "title": "Enter Access Token (Offline, Experimental)",
+        "category": "SQLite Viewer"
       }
     ]
   },

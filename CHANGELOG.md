@@ -9,14 +9,21 @@ Users of the free version are not affected by this change.
 ### Secondary Sidebar
 SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
 
+## v0.8.6
+Added "Enter Access Token" command that allows activating the PRO version while offline or behind a firewall. 
+
+Note that this is stop-gap solution and still requires _some_ communication to get the token (JWT) on the machine.
+
+To generate the Access Token, go to <https://vscode.sqliteviewer.app/api/register> and enter your license key. Currently, the token will be valid for 3 months.
+
 ## v0.8.5
 ### Features
-- [PRO] Added a basic logging to the sidebar for better insight into what SQLite Viewer is doing behind the scenes.
+- [PRO] Added basic logging to the sidebar for better insight into what SQLite Viewer is doing behind the scenes.
 
 ### Fixes
 - [PRO] Fixed a bug that caused a SQLite transaction to be started before making any changes
 - [PRO] Fixed a bug that caused unsaved edits to be lost when closing and reopening VSCode 2+ times
-- Fixes a few unnecessary queries being run 
+- Fixed some unnecessary queries being run 
 
 ## v0.8.4
 - [PRO] Made error messages more descriptive

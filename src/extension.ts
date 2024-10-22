@@ -1,6 +1,6 @@
 import * as vsc from 'vscode';
 import TelemetryReporter from '@vscode/extension-telemetry';
-import { deleteLicenseKeyCommand, enterLicenseKeyCommand, refreshAccessToken, verifyToken } from './commands';
+import { deleteLicenseKeyCommand, enterAccessTokenCommand, enterLicenseKeyCommand, refreshAccessToken, verifyToken } from './commands';
 import { IS_VSCODE } from './util';
 import { AccessToken, ExtensionId, FileNestingPatternsAdded, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
 import { disposeAll } from './dispose';
@@ -20,6 +20,9 @@ export async function activate(context: vsc.ExtensionContext) {
   );
   context.subscriptions.push(
     vsc.commands.registerCommand(`${ExtensionId}.removeLicenseKey`, () => deleteLicenseKeyCommand(context, reporter)),
+  );
+  context.subscriptions.push(
+    vsc.commands.registerCommand(`${ExtensionId}.enterAccessToken`, () => enterAccessTokenCommand(context, reporter)),
   );
 
   context.globalState.setKeysForSync(SyncedKeys);
@@ -42,7 +45,7 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
       accessToken = await freshAccessToken;
     }
   }
-  const verified = !!accessToken && await verifyToken(accessToken);
+  const verified = !!accessToken && !!(await verifyToken(accessToken));
 
   const subs = [];
   subs.push(registerProvider(context, reporter, `${ExtensionId}.view`, verified, accessToken));

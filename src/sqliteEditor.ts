@@ -13,7 +13,7 @@ import { IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, c
 import { VscodeFns } from './vscodeFns';
 import { WorkerBundle } from './workerBundle';
 import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
-import { enterLicenseKeyCommand, refreshAccessToken, verifyToken } from './commands';
+import { enterLicenseKeyCommand } from './commands';
 
 //#region Pro
 const createProWorker: () => never = () => { throw new Error("Not implemented") }
