@@ -9,6 +9,15 @@ Users of the free version are not affected by this change.
 ### Secondary Sidebar
 SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
 
+## v0.8.5
+### Features
+- [PRO] Added a basic logging to the sidebar for better insight into what SQLite Viewer is doing behind the scenes.
+
+### Fixes
+- [PRO] Fixed a bug that caused a SQLite transaction to be started before making any changes
+- [PRO] Fixed a bug that caused unsaved edits to be lost when closing and reopening VSCode 2+ times
+- Fixes a few unnecessary queries being run 
+
 ## v0.8.4
 - [PRO] Made error messages more descriptive
 - [PRO] Added a confirmation dialog before committing a transaction that contains too many changes to keep in the undo history. This usually occurs when deleting large numbers of rows.

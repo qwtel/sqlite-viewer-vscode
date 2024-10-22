@@ -18,8 +18,9 @@ import { enterLicenseKeyCommand, refreshAccessToken, verifyToken } from './comma
 //#region Pro
 const createProWorker: () => never = () => { throw new Error("Not implemented") }
 class UndoHistory<_T> {
-  static restore(_buffer: Uint8Array): never { throw new Error("Not implemented") }
+  static restore<T>(_buffer: Uint8Array, max: number) { return new UndoHistory<T>(max) }
   constructor(_max: number) {}
+  getUnsavedEdits(): never { throw new Error("Not implemented") }
   push(_edit: SQLiteEdit): never { throw new Error("Not implemented") }
   undo(): never { throw new Error("Not implemented") }
   redo(): never { throw new Error("Not implemented") }
@@ -42,6 +43,8 @@ const LocalMode = !vsc.env.remoteName;
 const RemoteWorkspaceMode = !!vsc.env.remoteName && Extension?.extensionKind === vsc.ExtensionKind.Workspace;
 const ReadWriteMode = LocalMode || RemoteWorkspaceMode;
 
+const MaxHistory = 100;
+
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   static async create(
     openContext: vsc.CustomDocumentOpenContext,
@@ -61,34 +64,36 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     const { workerFns, createWorkerDb } = await createWorkerBundle(extensionUri, filename, uri);
     const { promise } = await createWorkerDb(uri, filename, extensionUri);
 
-    let edits: SQLiteEdit[] = []
+    let history: UndoHistory<SQLiteEdit>|null = null;
+    let workerDbPromise = promise;
     if (typeof openContext.backupId === 'string') {
       const editsUri = vsc.Uri.parse(openContext.backupId);
       const editsBuffer = await vsc.workspace.fs.readFile(editsUri);
-      edits = UndoHistory.restore(editsBuffer);
+      const h = history = UndoHistory.restore(editsBuffer, MaxHistory);
+      workerDbPromise = promise
+        .then(dbRemote => dbRemote.applyEdits(h.getUnsavedEdits(), cancelTokenToAbortSignal(token)))
+        .then(() => promise);
     }
 
-    const workerDbPromise = promise
-      .then(dbRemote => dbRemote.applyEdits(edits, cancelTokenToAbortSignal(token)))
-      .then(() => promise);
-
-    return new SQLiteDocument(uri, workerFns, createWorkerDb, workerDbPromise);
+    return new SQLiteDocument(uri, history, workerFns, createWorkerDb, workerDbPromise);
   }
 
   getConfiguredMaxFileSize() { return getConfiguredMaxFileSize() }
 
   readonly #uri: vsc.Uri;
 
-  #history = new UndoHistory<SQLiteEdit>(100);
+  #history: UndoHistory<SQLiteEdit>;
 
   private constructor(
     uri: vsc.Uri,
+    history: UndoHistory<SQLiteEdit>|null,
     private readonly workerFns: WorkerBundle["workerFns"],
     private readonly createWorkerDb: WorkerBundle["createWorkerDb"],
     private workerDbPromise: Promise<Caplink.Remote<WorkerDb>>,
   ) {
     super();
     this.#uri = uri;
+    this.#history = history ?? new UndoHistory<SQLiteEdit>(MaxHistory);
   }
 
   public get uri() { return this.#uri; }
