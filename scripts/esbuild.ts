@@ -146,12 +146,11 @@ const compileBrowserWorker = () =>
   });
 
 const compileExt = async (target?: string) => {
-  const isWeb = target === 'web';
   await Promise.all([
-    ...isWeb ? [] : [compileNodeMain()],
-    ...[compileBrowserMain()],
-    ...isWeb ? [] : [compileNodeWorker()],
-    ...[compileBrowserWorker()],
+    compileNodeMain(),
+    compileBrowserMain(),
+    compileNodeWorker(),
+    compileBrowserWorker(),
   ]);
 };
 

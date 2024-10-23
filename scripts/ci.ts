@@ -6,6 +6,7 @@ import { packageExt } from "./pack";
 const DEV = !!Bun.env.DEV;
 console.log({ DEV })
 
+const tools = ["vsce", "ovsx"] as const;
 const kinds = ["package", "publish"] as const
 
 const targets = [
@@ -36,6 +37,9 @@ if (import.meta.main) {
   let { tool, kind, 'pre-release': preRelease } = args.values;
 
   tool ||= "vsce";
+  if (!tools.includes(tool as any)) {
+    throw new Error(`Invalid tool: ${tool}. Must be one of: ${tools.join(', ')}`);
+  }
 
   if (kind && !kinds.includes(kind as any)) {
     throw new Error(`Invalid kind: ${kind}. Must be one of: ${kinds.join(', ')}`);

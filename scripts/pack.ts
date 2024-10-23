@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename);
 
 const resolve = (...args: string[]) => path.resolve(__dirname, '..', ...args);
 
+const tools = ["vsce", "ovsx"] as const;
 const kinds = ["package", "publish"] as const
 
 const targets = [
@@ -33,6 +34,9 @@ export const packageExt = async (opts: {
   let { tool, kind, target, 'pre-release': preRelease } = opts;
 
   tool ||= "vsce";
+  if (!tools.includes(tool as any)) {
+    throw new Error(`Invalid tool: ${tool}. Must be one of: ${tools.join(', ')}`);
+  }
 
   if (kind && !kinds.includes(kind as any)) {
     throw new Error(`Invalid kind: ${kind}. Must be one of: ${kinds.join(', ')}`);
