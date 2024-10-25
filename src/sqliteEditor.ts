@@ -16,17 +16,8 @@ import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
 import { enterLicenseKeyCommand } from './commands';
 
 //#region Pro
-const createProWorker: () => never = () => { throw new Error("Not implemented") }
-class UndoHistory<_T> {
-  static restore<T>(_buffer: Uint8Array, max: number) { return new UndoHistory<T>(max) }
-  constructor(_max: number) {}
-  getUnsavedEdits(): never { throw new Error("Not implemented") }
-  push(_edit: SQLiteEdit): never { throw new Error("Not implemented") }
-  undo(): never { throw new Error("Not implemented") }
-  redo(): never { throw new Error("Not implemented") }
-  save(): never { throw new Error("Not implemented") }
-  backup(): never { throw new Error("Not implemented") }
-}
+import { createProWorker } from '../sqlite-viewer-core/pro/src/proWorker';
+import { UndoHistory } from '../sqlite-viewer-core/pro/src/undoHistory';
 //#endregion
 
 export type SQLiteEdit = {
