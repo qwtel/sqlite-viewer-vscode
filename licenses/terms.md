@@ -25,7 +25,6 @@ Upon purchasing a valid license for SQLite Viewer PRO, the publisher grants you 
 - __License Activation__: A valid activation key is required for unlocking and using the PRO version. The activation key is tied to your account and device usage.
 - __License Transfer__: You may transfer your license to different devices, provided that you deauthorize any previously authorized devices. Such transfers may be subject to a maximum number of authorized device changes within a certain time period.
 
-
 ## 5. Intellectual Property Rights
 The Extension's source code is proprietary and owned by the publisher. You are not granted any rights to the source code. All rights are reserved by the publisher. The Extension may include components that are licensed separately and are the property of their respective copyright holders. These components are used in compliance with their respective open-source licenses. Detailed information on specific licenses and attributions is provided in the Appendix: Third-Party Licenses.
 
