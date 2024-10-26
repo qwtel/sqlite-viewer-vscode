@@ -1,24 +1,25 @@
 import * as vsc from 'vscode';
 import * as jose from 'jose';
 import TelemetryReporter from '@vscode/extension-telemetry';
-
 import { AccessToken, JWTPublicKeySPKI, LicenseKey } from './constants';
 import { activateProviders } from './extension';
+import { getShortMachineId } from './util';
 
 export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
+  const licenseKeyRegex = /[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i;
   const licenseKey = await vsc.window.showInputBox({
     prompt: 'Enter License Key',
     placeHolder: 'XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX',
     password: false,
     ignoreFocusOut: true,
     validateInput: (value) => {
-      return /[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i.test(value) || context.extensionMode === vsc.ExtensionMode.Development
-        ? null
-        : 'License key must be in the format XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX';
+      return licenseKeyRegex.test(value) ? null : 'License key must be in the format XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX';
     },
   });
   if (!licenseKey) return;
-  if (!/[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i.test(licenseKey)) throw Error('Invalid license key format');
+  if (!licenseKeyRegex.test(licenseKey)) throw Error('Invalid license key format');
+
+  const shortMachineId = await getShortMachineId();
 
   let response;
   try {
@@ -26,7 +27,7 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
     response = await fetch(new URL('/api/register', baseURL), {
       method: 'POST',
       headers: [['Content-Type', 'application/x-www-form-urlencoded']],
-      body: new URLSearchParams({ 'license_key': licenseKey }),
+      body: new URLSearchParams({ 'machine_id': shortMachineId, 'license_key': licenseKey }),
     });
   } catch {
     throw Error('No response from license validation service');
@@ -45,7 +46,11 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
     throw Error('Failed to parse response');
   }
 				
-  // console.log(data);
+  const payload = jose.decodeJwt(data.token);
+  // if (!payload) throw Error('Invalid access token');
+  // if (payload.mid !== shortMachineId) {
+  //   throw Error('Machine ID in token does not match this device, this should never happen!');
+  // }
 
   await Promise.all([
     context.globalState.update(LicenseKey, licenseKey),
@@ -53,45 +58,68 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
   ]);
   await activateProviders(context, reporter);
 
-  vsc.window.showInformationMessage('Thank you for purchasing SQLite Viewer PRO!', {
+  vsc.window.showInformationMessage(`Thank you for purchasing SQLite Viewer ${payload.ent ? 'Business Edition' : 'PRO'}!`, {
     modal: true, 
-    detail: 'SQLite Viewer PRO will be enabled once you open the next file.'
+    detail: 'Exclusive PRO features will be unlocked once you open the next file.'
   });
 }
 
 export async function enterAccessTokenCommand(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
-  const accessToken = await vsc.window.showInputBox({
-    prompt: 'Enter access token (obtained from https://vscode.sqliteviewer.app/api/register) ',
+  const baseURL = context.extensionMode === vsc.ExtensionMode.Development ? 'http://localhost:8788' : 'https://vscode.sqliteviewer.app';
+
+  const answer1 = await vsc.window.showInformationMessage('SQLite Viewer PRO Offline Activation', {
+    modal: true, 
+    detail: `This setup will activate the PRO version of SQLite Viewer without connecting to the license server directly.\nA PRO license must be reactivated every 14 days. An Enterprise license is unlocked permanently.`
+  }, ...[{ title: 'Continue', value: true }]);
+  if (answer1?.value !== true) return;
+
+  const shortMachineId = await getShortMachineId();
+  const registerHref = new URL(`/api/register?id=${shortMachineId}`, baseURL).href;
+
+  const answer2 = await vsc.window.showInformationMessage('Out-of-Band Activation', {
+    modal: true, 
+    detail: `On any device with an active internet connection, open\n\n${registerHref}\n\nDo you want to open it on this device?`
+  }, ...[{ title: 'Open', value: true }, { title: 'Continue', value: false }]);
+
+  if (answer2?.value === true)
+    await vsc.env.openExternal(vsc.Uri.parse(registerHref));
+
+  const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
+  const accessToken = await Promise.resolve(vsc.window.showInputBox({
+    prompt: 'Enter access token generated on the website',
     placeHolder: 'eyJhbGciOiJFUzI1NiJ9.eyJ…',
     password: false,
     ignoreFocusOut: true,
     validateInput: (value) => {
-      const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
-      return jwtRegex.test(value) || context.extensionMode === vsc.ExtensionMode.Development
-        ? null
-        : 'Access token must be a JWT';
+      return jwtRegex.test(value) ? null : 'Access token must be a JWT';
     },
-  });
-  if (!accessToken) return;
+  }));
+  if (!accessToken) throw Error('No access token');
+  if (!jwtRegex.test(accessToken)) throw Error('Invalid access token format');
 
   let payload;
   try {
-    payload = await verifyToken<{ licenseKey?: string }>(accessToken);
+    payload = await verifyToken<Payload>(accessToken);
   } catch (err) {
     throw Error('Invalid access token', { cause: err });
   }
   if (!payload) throw Error('Invalid access token');
-  if (!payload.licenseKey) throw Error('Token does not contain license key. Was it generated by https://vscode.sqliteviewer.app/api/register?');
+  // if (payload.mid !== shortMachineId) {
+  //   throw Error('Machine ID in token does not match this device. Was the token generated by <https://vscode.sqliteviewer.app/api/register>?');
+  // }
+  if (!payload.ent && (!payload.key && !payload.licenseKey)) {
+    throw Error('Token does not contain license key. Was it generated by <https://vscode.sqliteviewer.app/api/register>?'); 
+  }
 
   await Promise.all([
-    context.globalState.update(LicenseKey, payload.licenseKey),
+    !payload.ent ? context.globalState.update(LicenseKey, payload.key || payload.licenseKey) : null,
     context.globalState.update(AccessToken, accessToken),
   ]);
   await activateProviders(context, reporter);
 
-  vsc.window.showInformationMessage('Access Token Verified!', {
+  vsc.window.showInformationMessage(`Thank you for purchasing SQLite Viewer ${payload.ent ? 'Business Edition' : 'PRO'}!`, {
     modal: true, 
-    detail: 'SQLite Viewer PRO will be enabled once you open the next file.\n\nPlease note that offline activation is an experimental feature and must be repeated every 3 months.'
+    detail: 'Exclusive PRO features will be unlocked once you open the next file.'
   });
 }
 
@@ -108,9 +136,7 @@ export async function deleteLicenseKeyCommand(context: vsc.ExtensionContext, rep
   });
 }
 
-function calcDaysSinceIssued(token: string) {
-	const payload = jose.decodeJwt(token);
-  const issuedAt = payload.iat!;
+function calcDaysSinceIssued(issuedAt: number) {
   const currentTime = Date.now() / 1000;
   const diffSeconds = currentTime - issuedAt;
   const diffDays = diffSeconds / (24 * 60 * 60);
@@ -121,19 +147,23 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, licenseK
   let response;
   try {
     const baseURL = context.extensionMode === vsc.ExtensionMode.Development ? 'http://localhost:8788' : 'https://vscode.sqliteviewer.app';
-    const daysSinceIssued = accessToken && calcDaysSinceIssued(accessToken);
+
+    const payload = accessToken != null ? jose.decodeJwt(accessToken) : null;
+    if (payload && 'ent' in payload) return accessToken;
+
+    const daysSinceIssued = accessToken && payload?.iat && calcDaysSinceIssued(payload.iat);
     // console.log({ daysSinceIssued })
     if (!daysSinceIssued || daysSinceIssued > 14) {
       response = await fetch(new URL('/api/register', baseURL), {
         method: 'POST',
         headers: [['Content-Type', 'application/x-www-form-urlencoded']],
-        body: new URLSearchParams({ 'license_key': licenseKey }),
+        body: new URLSearchParams({ 'machine_id': await getShortMachineId(), 'license_key': licenseKey }),
       });
     } else if (daysSinceIssued > 1) {
       response = await fetch(new URL('/api/refresh', baseURL), {
         method: 'POST',
         headers: [['Content-Type', 'application/x-www-form-urlencoded']],
-        body: new URLSearchParams({ 'license_key': licenseKey, 'access_token': accessToken }),
+        body: new URLSearchParams({ 'machine_id': await getShortMachineId(), 'license_key': licenseKey, 'access_token': accessToken }),
       });
     } else {
       return accessToken;
@@ -153,19 +183,26 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, licenseK
   } catch {
     throw new Error('Failed to parse response');
   }
-				
+
+  // const freshPayload = jose.decodeJwt(data.token);
+  // if (!freshPayload) throw Error('Invalid access token');
+  // if (freshPayload.mid !== await getShortMachineId()) {
+  //   throw Error('Machine ID in token does not match this device, this should never happen!');
+  // }
+
   // console.log(data);
   Promise.resolve(context.globalState.update(AccessToken, data.token)).catch(console.warn);
   return data.token;
 }
 
-const jwtKey = jose.importSPKI(JWTPublicKeySPKI, 'ES256');
-jwtKey.catch();
-export async function verifyToken<PayloadType = jose.JWTPayload>(accessToken: string) {
+export async function verifyToken<PayloadType = jose.JWTPayload>(accessToken: string): Promise<PayloadType & jose.JWTPayload|null> {
   try {
-    const { payload } = await jose.jwtVerify<PayloadType>(accessToken, await jwtKey);
+    const jwtKey = await jose.importSPKI(JWTPublicKeySPKI, 'ES256');
+    const { payload } = await jose.jwtVerify<PayloadType>(accessToken, jwtKey);
     return payload;
   } catch {
     return null;
   }
 }
+
+type Payload = { mid: string, key?: string, licenseKey?: string, ent?: 1 }

@@ -1,6 +1,8 @@
 import * as vsc from 'vscode';
+import { encodeBase58 } from '@std/encoding';
 import { Disposable } from './dispose';
 import { ReadableStream, WritableStream } from './o/stream/web';
+import { crypto } from './o/crypto';
 
 // A bunch of tests to figure out where we're running. Some more reliable than others.
 export const IS_VSCODE = vsc.env.uriScheme.includes("vscode");
@@ -152,3 +154,7 @@ export function cancelTokenToAbortSignal(token: vsc.CancellationToken): AbortSig
   else token.onCancellationRequested(() => ctrl.abort());
   return ctrl.signal;
 }
+
+export const encodeUtf8 = TextEncoder.prototype.encode.bind(new TextEncoder());
+export const decodeUtf8 = TextDecoder.prototype.decode.bind(new TextDecoder());
+export const getShortMachineId = async () => encodeBase58(new Uint8Array(await crypto.subtle.digest('SHA-256', encodeUtf8(vsc.env.machineId))).subarray(0, 6));

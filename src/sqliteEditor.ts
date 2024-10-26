@@ -9,7 +9,7 @@ import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-
 
 import { AccessToken, ExtensionId, FullExtensionId, LicenseKey, Ns } from './constants';
 import { Disposable, disposeAll } from './dispose';
-import { IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getUriParts } from './util';
+import { IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
 import { WorkerBundle } from './workerBundle';
 import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
@@ -322,7 +322,13 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     const extensionUrl = uriScheme.includes('vscode')
       ? `https://marketplace.visualstudio.com/items?itemName=${FullExtensionId}&ref=vscode`
       : `https://open-vsx.org/extension/${Ns}/${ExtensionId}&ref=vscode`;
-    const vscodeEnv = { uriScheme, appHost, appName, extensionUrl, accessToken: this.accessToken, uiKind: uiKindToString(uiKind) };
+
+    const vscodeEnv = { 
+      uriScheme, appHost, appName, extensionUrl, 
+      accessToken: this.accessToken, 
+      uiKind: uiKindToString(uiKind),
+      machineId: vsc.env.machineId,
+    };
 
     const preparedHtml = html
       .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {

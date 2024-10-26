@@ -106,7 +106,7 @@
       },
       {
         "command": "sqlite-viewer.enterAccessToken",
-        "title": "Enter Access Token (Offline, Experimental)",
+        "title": "Offline License Activation",
         "category": "SQLite Viewer"
       }
     ]
