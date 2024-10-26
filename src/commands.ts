@@ -69,7 +69,7 @@ export async function enterAccessTokenCommand(context: vsc.ExtensionContext, rep
 
   const answer1 = await vsc.window.showInformationMessage('SQLite Viewer PRO Offline Activation', {
     modal: true, 
-    detail: `This setup will activate the PRO version of SQLite Viewer without connecting to the license server directly.\nA PRO license must be reactivated every 14 days. An Enterprise license is unlocked permanently.`
+    detail: `This setup will activate the PRO version of SQLite Viewer without connecting to the license service directly.\nThis is intended for Business Edition customers who have purchased a license for offline use. PRO customers can use it to gain 14 days of offline use (same as regular activation).`,
   }, ...[{ title: 'Continue', value: true }]);
   if (answer1?.value !== true) return;
 
