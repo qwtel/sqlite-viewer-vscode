@@ -46,7 +46,8 @@ if (import.meta.main) {
   }
   kind ||= "package";
 
-  for (const [i, target] of targets.entries()) {
+  for (const [i, t] of [...targets.entries()]) {
+    const target = (tool === "ovsx" && t === "web") ? undefined : t;
     const env = i === 0 
       ? { ...Bun.env, VSCODE_EXT_TOOL: tool, VSCODE_EXT_TARGET: target, } 
       : { ...Bun.env, VSCODE_EXT_TOOL: tool, VSCODE_EXT_TARGET: target, VSCODE_EXT_SKIP_BUILD: "1" }
