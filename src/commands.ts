@@ -5,19 +5,21 @@ import { AccessToken, JWTPublicKeySPKI, LicenseKey } from './constants';
 import { activateProviders } from './extension';
 import { getShortMachineId } from './util';
 
+const licenseKeyRegex = /[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}/i;
+const legacyLicenseKeyRegex = /[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i;
+
 export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
-  const licenseKeyRegex = /[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i;
   const licenseKey = await vsc.window.showInputBox({
     prompt: 'Enter License Key',
-    placeHolder: 'XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX',
+    placeHolder: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
     password: false,
     ignoreFocusOut: true,
     validateInput: (value) => {
-      return licenseKeyRegex.test(value) ? null : 'License key must be in the format XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX';
+      return licenseKeyRegex.test(value) || legacyLicenseKeyRegex.test(value) ? null : 'License key must be in the format XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
     },
   });
   if (!licenseKey) return;
-  if (!licenseKeyRegex.test(licenseKey)) throw Error('Invalid license key format');
+  if (!licenseKeyRegex.test(licenseKey) && !legacyLicenseKeyRegex.test(licenseKey)) throw Error('Invalid license key format');
 
   const shortMachineId = await getShortMachineId();
 
@@ -58,7 +60,7 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
   ]);
   await activateProviders(context, reporter);
 
-  vsc.window.showInformationMessage(`Thank you for purchasing SQLite Viewer ${payload.ent ? 'Business Edition' : 'PRO'}!`, {
+  vsc.window.showInformationMessage(`Thank you for purchasing SQLite Viewer PRO${payload.ent ? ' Business Edition' : ''}!`, {
     modal: true, 
     detail: 'Exclusive PRO features will be unlocked once you open the next file.'
   });
@@ -117,7 +119,7 @@ export async function enterAccessTokenCommand(context: vsc.ExtensionContext, rep
   ]);
   await activateProviders(context, reporter);
 
-  vsc.window.showInformationMessage(`Thank you for purchasing SQLite Viewer ${payload.ent ? 'Business Edition' : 'PRO'}!`, {
+  vsc.window.showInformationMessage(`Thank you for purchasing SQLite Viewer PRO${payload.ent ? ' Business Edition' : ''}!`, {
     modal: true, 
     detail: 'Exclusive PRO features will be unlocked once you open the next file.'
   });

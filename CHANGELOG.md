@@ -9,9 +9,11 @@ Users of the free version are not affected by this change.
 ### Secondary Sidebar
 SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
 
+## v0.8.8
+[PRO] Changed license key validation to support keys from new payment provider
+
 ## v0.8.7
 Renamed "Enter Access Token" command to "Offline License Activation" and changed workflow to a guided wizard with additional instructions.
-
 
 ## v0.8.6
 Added "Enter Access Token" command that allows activating the PRO version while offline or behind a firewall. 
