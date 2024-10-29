@@ -1,24 +1,24 @@
-# SQLite Viewer for VSCode
+# SQLite Viewer for VS Code
 
-A quick and easy SQLite viewer for VSCode, inspired by DB Browser for SQLite and Airtable.
+A quick and easy SQLite viewer for VS Code, inspired by DB Browser for SQLite and Airtable.
 
 ![Sqlite Viewer Demo](documentation/demo.gif)
 
 <br/>
 
 ## Features
-- Platform-independent, no native dependencies — it even works in VSCode for Web
+- Platform-independent, no native dependencies — it even works in VS Code for Web
 - File extension association: Just click on a `.sqlite` or `.db` file and the custom viewer opens
 - Fast UI with virtualized scrolling, sorting, filtering, etc.
-- Seamlessly integrates with VSCode and matches your color theme
+- Seamlessly integrates with VS Code and matches your color theme
 
 ## Caveats
-- Cached and Readonly
-- Only works for files that fit in system memory
-- No query runner
-- Requires uncorrupted files, i.e. `-journal` files are ignored
+- __Cached__ and __Readonly__!
+- Files must be __less than 2GB__ and are loaded into __system memory__
+- __No query runner__
 
-<br/>
+## Includes Paid Upgrade
+This extension includes an optional paid upgrade that lifts some of the restrictions above.
 
 ## [Try Out the Standalone Web App][ref]
 
