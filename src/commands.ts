@@ -80,11 +80,13 @@ export async function enterAccessTokenCommand(context: vsc.ExtensionContext, rep
 
   const answer2 = await vsc.window.showInformationMessage('Out-of-Band Activation', {
     modal: true, 
-    detail: `On any device with an active internet connection, open\n\n${registerHref}\n\nDo you want to open it on this device?`
-  }, ...[{ title: 'Open', value: true }, { title: 'Continue', value: false }]);
+    detail: `On any device with an active internet connection, open\n\n${registerHref}\n\nDo you want to open it on this device or copy it to the clipboard?`
+  }, ...[{ title: 'Open', value: 'open' }, { title: 'Copy', value: 'copy' }] as const);
 
-  if (answer2?.value === true)
+  if (answer2?.value === 'open')
     await vsc.env.openExternal(vsc.Uri.parse(registerHref));
+  else if (answer2?.value === 'copy')
+    await vsc.env.clipboard.writeText(registerHref);
 
   const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
   const accessToken = await Promise.resolve(vsc.window.showInputBox({
