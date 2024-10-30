@@ -10,6 +10,7 @@ const legacyLicenseKeyRegex = /[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i
 
 export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
   const licenseKey = await vsc.window.showInputBox({
+    title: 'SQLite Viewer PRO License Activation',
     prompt: 'Enter License Key',
     placeHolder: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
     password: false,
@@ -90,6 +91,7 @@ export async function enterAccessTokenCommand(context: vsc.ExtensionContext, rep
 
   const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
   const accessToken = await Promise.resolve(vsc.window.showInputBox({
+    title: 'SQLite Viewer PRO Offline Activation',
     prompt: 'Enter access token generated on the website',
     placeHolder: 'eyJhbGciOiJFUzI1NiJ9.eyJ…',
     password: false,
