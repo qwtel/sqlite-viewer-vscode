@@ -9,6 +9,10 @@ Users of the free version are not affected by this.
 ### Secondary Sidebar
 SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
 
+## v0.8.9
+- Improved experience for first-time users of the extension
+- Fixed a bug that caused files without extensions to not open when placed inside an invisible folder
+
 ## v0.8.8
 - [PRO] Changed license key validation to support keys from different payment providers
 - [PRO] Added copy to clipboard option to offline activation wizard

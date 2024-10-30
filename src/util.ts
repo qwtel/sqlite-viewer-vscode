@@ -142,7 +142,7 @@ export const cspUtil = {
   }
 } as const;
 
-const PathRegExp = /(?<dirname>.*)\/(?<filename>(?<basename>.*)(?<extname>\.[^.]+))$/
+const PathRegExp = /(?<dirname>.*)\/(?<filename>(?<basename>.*)(?<extname>\.[^.]+)?)$/
 export function getUriParts(uri: vsc.Uri) {
   const { dirname, filename, basename, extname } = decodeURI(uri.toString()).match(PathRegExp)?.groups ?? {}
   return { dirname, filename, basename, extname };
