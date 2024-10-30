@@ -7,7 +7,7 @@ import * as vsc from 'vscode';
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
-import { AccessToken, ExtensionId, FullExtensionId, LicenseKey, Ns } from './constants';
+import { AccessToken, ExtensionId, FistInstallMs, FullExtensionId, LicenseKey, Ns } from './constants';
 import { Disposable, disposeAll } from './dispose';
 import { IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
@@ -328,6 +328,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       accessToken: this.accessToken, 
       uiKind: uiKindToString(uiKind),
       machineId: vsc.env.machineId,
+      firstInstall: new Date(this.context.globalState.get<number>(FistInstallMs) ?? Date.now()).toISOString(),
     };
 
     const preparedHtml = html

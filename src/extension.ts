@@ -2,13 +2,15 @@ import * as vsc from 'vscode';
 import TelemetryReporter from '@vscode/extension-telemetry';
 import { deleteLicenseKeyCommand, enterAccessTokenCommand, enterLicenseKeyCommand, refreshAccessToken, verifyToken } from './commands';
 import { IS_VSCODE } from './util';
-import { AccessToken, ExtensionId, FileNestingPatternsAdded, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
+import { AccessToken, ExtensionId, FileNestingPatternsAdded, FistInstallMs, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
 import { disposeAll } from './dispose';
 import { registerProvider } from './sqliteEditor';
 
 export async function activate(context: vsc.ExtensionContext) {
   const reporter = new TelemetryReporter(TelemetryConnectionString);
   context.subscriptions.push(reporter);
+
+  showWhatsNew(context, reporter);
 
   await activateProviders(context, reporter);
 
@@ -28,7 +30,6 @@ export async function activate(context: vsc.ExtensionContext) {
   context.globalState.setKeysForSync(SyncedKeys);
 
   addFileNestingPatternsOnce(context);
-  showWhatsNew(context, reporter);
 }
 
 const providerSubs = new WeakSet<vsc.Disposable>();
@@ -113,6 +114,14 @@ const openChangelog = (frag?: `#${string}`) => vsc.env.openExternal(
 async function showWhatsNew(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
   const prevVersion = context.globalState.get<string>(FullExtensionId);
   const currVersion = vsc.extensions.getExtension(FullExtensionId)!.packageJSON.version as string;
+
+  const firstInstall = context.globalState.get<number>(FistInstallMs);
+  if (firstInstall === undefined) {
+    if (prevVersion)
+      context.globalState.update(FistInstallMs, 0);
+    else
+      context.globalState.update(FistInstallMs, Date.now());
+  }
 
   // store latest version
   context.globalState.update(FullExtensionId, currVersion);

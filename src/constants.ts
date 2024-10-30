@@ -11,11 +11,13 @@ export const FileNestingPatternsAdded = 'fileNestingPatternsAdded';
 
 export const LicenseKey = 'licenseKey';
 export const AccessToken = 'accessToken';
+export const FistInstallMs = `fistInstallMs`
 
 export const SyncedKeys = [
   FullExtensionId,
   FileNestingPatternsAdded,
   LicenseKey,
+  FistInstallMs,
 ];
 
 export const ProcessTitle = 'SQLite Viewer Helper';
