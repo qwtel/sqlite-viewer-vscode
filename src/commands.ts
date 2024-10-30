@@ -89,7 +89,7 @@ export async function enterAccessTokenCommand(context: vsc.ExtensionContext, rep
     await vsc.env.clipboard.writeText(registerHref);
 
   const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
-  const accessTokenPromise = Promise.resolve(vsc.window.showInputBox({
+  const accessToken = await Promise.resolve(vsc.window.showInputBox({
     prompt: 'Enter access token generated on the website',
     placeHolder: 'eyJhbGciOiJFUzI1NiJ9.eyJ…',
     password: false,
@@ -98,15 +98,6 @@ export async function enterAccessTokenCommand(context: vsc.ExtensionContext, rep
       return jwtRegex.test(value) ? null : 'Access token must be a JWT';
     },
   }));
-  accessTokenPromise.catch();
-
-  await new Promise(r => setTimeout(r, 1000));
-  await vsc.window.showInformationMessage('Enter Access Token', {
-    modal: true,
-    detail: `A input box will appear at the top of the window. Paste the token generated on the website and hit enter. The activation will be confirmed instantly.`,
-  });
-
-  const accessToken = await accessTokenPromise;
   if (!accessToken) throw Error('No access token');
   if (!jwtRegex.test(accessToken)) throw Error('Invalid access token format');
 
