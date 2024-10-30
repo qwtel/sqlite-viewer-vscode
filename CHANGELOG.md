@@ -2,23 +2,22 @@
 
 ## v0.8
 ### [SQLite Viewer PRO](https://vscode.sqliteviewer.app)
-You can now upgrade SQLite Viewer to a fully-fledged database editor by upgrading to SQLite Viewer PRO. 
-Like the base version, it's designed to "just work", even in remote workspaces like WSL, SSH, and containers. For more information check out [vscode.sqliteviewer.app](https://vscode.sqliteviewer.app) or the info popup inside the viewer. 
-Users of the free version are not affected by this change.
+You can now upgrade SQLite Viewer to a read-write database editor by upgrading to SQLite Viewer PRO. 
+Like the base version, it's designed to *just work*, even in remote workspaces like WSL, SSH, and containers. For more information check out [vscode.sqliteviewer.app](https://vscode.sqliteviewer.app) or the info popup inside the viewer. 
+Users of the free version are not affected by this.
 
 ### Secondary Sidebar
 SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
 
 ## v0.8.8
-[PRO] Changed license key validation to support keys from new payment provider
+- [PRO] Changed license key validation to support keys from different payment providers
+- [PRO] Added copy to clipboard option to offline activation wizard
 
 ## v0.8.7
-Renamed "Enter Access Token" command to "Offline License Activation" and changed workflow to a guided wizard with additional instructions.
+- [PRO] Renamed "Enter Access Token" command to "Offline License Activation" and changed workflow to a guided wizard with additional instructions.
 
 ## v0.8.6
-Added "Enter Access Token" command that allows activating the PRO version while offline or behind a firewall. 
-
-~~To generate the Access Token, go to https://vscode.sqliteviewer.app/api/register and enter your license key. Currently, the token will be valid for 3 months.~~
+- [PRO] Added "Enter Access Token" command that allows activating the PRO version while offline or behind a firewall. 
 
 ## v0.8.5
 ### Features
