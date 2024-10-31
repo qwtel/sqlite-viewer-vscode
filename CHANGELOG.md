@@ -9,6 +9,14 @@ Users of the free version are not affected by this.
 ### Secondary Sidebar
 SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
 
+## v0.8.10
+- [PRO] Added file input for `BLOB` columns to the modal/sidebar. 
+- [PRO] Added button to set a `BLOB` colum to `NULL`
+- Fixed an bug that caused image previews to not update when refreshing the table
+- Disabled row count caching, which could cause incorrect row numbers to be displayed in combination with undo/redo
+- Using Ctrl+C in the free version when a single row is selected will no longer show the PRO version popup
+- Using Ctrl+C in the free version will now copy a single row in TSV format to the clipboard
+
 ## v0.8.9
 - Improved experience for first-time users of the extension
 - Fixed a bug that caused files without extensions to not open when placed inside an invisible folder
