@@ -25,6 +25,7 @@ SQLite Viewer now features a second sidebar 🎉. It shows either the current ro
 - Disabled row count caching, which could cause incorrect row numbers to be displayed in some cases.
 - Fixed a bug that prevented input fields in the modal from being auto-focused and scrolled into view in the sidebar if the cell value was empty
 - [PRO] Should now call `sqlite3_close` correctly when closing a tab
+- Fixed drop effect being shown incorrectly when dragging a column
 
 ## v0.8.9
 - Improved experience for first-time users of the extension
