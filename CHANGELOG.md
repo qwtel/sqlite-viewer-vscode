@@ -1,15 +1,6 @@
 # CHANGELOG
 
-## v0.8
-### [SQLite Viewer PRO](https://vscode.sqliteviewer.app)
-You can now upgrade SQLite Viewer to a read-write database editor by upgrading to SQLite Viewer PRO. 
-Like the base version, it's designed to *just work*, even in remote workspaces like WSL, SSH, and containers. For more information check out [vscode.sqliteviewer.app](https://vscode.sqliteviewer.app) or the info popup inside the viewer. 
-Users of the free version are not affected by this.
-
-### Secondary Sidebar
-SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
-
-## v0.9.0
+## v0.9
 ### Features
 - [PRO] You can now change values in `BLOB` columns through a new file input field in the modal and sidebar
 - [PRO] Added a button to set a `BLOB` value to `NULL` in the modal and sidebar
@@ -27,6 +18,20 @@ SQLite Viewer now features a second sidebar 🎉. It shows either the current ro
 - [PRO] Should now call `sqlite3_close` correctly when closing a tab
 - Fixed drop effect being shown incorrectly when dragging a column
 - Fixed "exact" filter modifier not working
+
+## v0.9.1
+- Bumped SQLite to 3.47.0
+- Bumped SQLite WASM to 3.47.0
+- Reverted Ctrl+C change
+
+## v0.8
+### [SQLite Viewer PRO](https://vscode.sqliteviewer.app)
+You can now upgrade SQLite Viewer to a read-write database editor by upgrading to SQLite Viewer PRO. 
+Like the base version, it's designed to *just work*, even in remote workspaces like WSL, SSH, and containers. For more information check out [vscode.sqliteviewer.app](https://vscode.sqliteviewer.app) or the info popup inside the viewer. 
+Users of the free version are not affected by this.
+
+### Secondary Sidebar
+SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
 
 ## v0.8.9
 - Improved experience for first-time users of the extension
