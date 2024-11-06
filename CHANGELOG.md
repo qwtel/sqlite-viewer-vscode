@@ -23,6 +23,7 @@
 - Bumped SQLite to 3.47.0
 - Bumped SQLite WASM to 3.47.0
 - Reverted Ctrl+C change
+- Mixed up ad placement
 
 ## v0.8
 ### [SQLite Viewer PRO](https://vscode.sqliteviewer.app)
