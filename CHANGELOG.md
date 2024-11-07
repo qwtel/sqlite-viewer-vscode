@@ -19,11 +19,19 @@
 - Fixed drop effect being shown incorrectly when dragging a column
 - Fixed "exact" filter modifier not working
 
+## v0.9.2
+- [PRO] Added Markdown export
+- [PRO] Adding `<br>` for newlines when exporting as HTML or Markdown
+- [PRO] JSON columns are rendered as code blocks when exporting as HTML or Markdown
+
 ## v0.9.1
 - Bumped SQLite to 3.47.0
 - Bumped SQLite WASM to 3.47.0
 - Reverted Ctrl+C change
 - Mixed up ad placement
+
+## v0.9.0
+Initial v0.9 release
 
 ## v0.8
 ### [SQLite Viewer PRO](https://vscode.sqliteviewer.app)
