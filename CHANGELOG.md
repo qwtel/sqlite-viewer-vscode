@@ -19,6 +19,10 @@
 - Fixed drop effect being shown incorrectly when dragging a column
 - Fixed "exact" filter modifier not working
 
+## v0.9.3
+- Fixed column drag and drop using the sidebar
+- Fixed height of pinned rows
+
 ## v0.9.2
 - [PRO] Added Markdown export
 - [PRO] Adding `<br>` for newlines when exporting as HTML or Markdown
