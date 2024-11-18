@@ -19,6 +19,12 @@
 - Fixed drop effect being shown incorrectly when dragging a column
 - Fixed "exact" filter modifier not working
 
+## v0.9.4
+- Fixed Table Info tab missing horizontal scroll overflow
+- Added formatting to Table Info table creation SQL  
+- Changed table creation SQL to use textarea instead of inline text
+- Updated dependencies
+
 ## v0.9.3
 - Fixed column drag and drop using the sidebar
 - Fixed height of pinned rows

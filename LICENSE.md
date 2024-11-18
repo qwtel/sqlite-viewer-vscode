@@ -58,6 +58,8 @@ By installing or using the Extension, you acknowledge that you have read, unders
 ## Appendix: Third-Party Licenses
 This distribution also includes software licensed under the following terms:
 
+SQLite : [Public Domain](https://sqlite.org/copyright.html)
+
 `solid-js` : [MIT]
 > Copyright (c) 2016-2023 Ryan Carniato
 
@@ -101,7 +103,10 @@ This distribution also includes software licensed under the following terms:
 `tabster`: [MIT]
 > Copyright (c) Microsoft Corporation.
 
-SQLite : [Public Domain](https://sqlite.org/copyright.html)
+`sql-formatter`: [MIT]
+> Copyright (c) 2016-2020 ZeroTurnaround LLC
+> Copyright (c) 2020-2021 George Leslie-Waksman and other contributors
+> Copyright (c) 2021-Present inferrinizzard and other contributors
 
 [MIT]: https://mit-license.org
 [Apache-2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
