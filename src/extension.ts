@@ -1,6 +1,6 @@
 import * as vsc from 'vscode';
 import TelemetryReporter from '@vscode/extension-telemetry';
-import { deleteLicenseKeyCommand, enterAccessTokenCommand, enterLicenseKeyCommand, refreshAccessToken, verifyToken } from './commands';
+import { deleteLicenseKeyCommand, enterAccessTokenCommand, enterLicenseKeyCommand, getDaysSinceIssued, refreshAccessToken, verifyToken } from './commands';
 import { IS_VSCODE } from './util';
 import { AccessToken, ExtensionId, FileNestingPatternsAdded, FistInstallMs, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
 import { disposeAll } from './dispose';
@@ -41,12 +41,14 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
   const licenseKey = context.globalState.get<string>(LicenseKey);
   let accessToken = context.globalState.get<string>(AccessToken);
   if (licenseKey) {
-    const freshAccessToken = refreshAccessToken(context, licenseKey, accessToken).catch(err => (console.warn(err), accessToken));
-    if (!accessToken) {
+    const daysSinceIssued = getDaysSinceIssued(accessToken)
+    console.log({ daysSinceIssued })
+    const freshAccessToken = refreshAccessToken(context, daysSinceIssued, licenseKey, accessToken).catch(err => (console.warn(err), accessToken));
+    if (!accessToken || daysSinceIssued > 14) {
       accessToken = await freshAccessToken;
     }
   }
-  const verified = !!accessToken && !!(await verifyToken(accessToken));
+  const verified = !!accessToken && !!await verifyToken(accessToken);
 
   const subs = [];
   subs.push(registerProvider(context, reporter, `${ExtensionId}.view`, verified, accessToken));

@@ -19,6 +19,10 @@
 - Fixed drop effect being shown incorrectly when dragging a column
 - Fixed "exact" filter modifier not working
 
+## v0.9.5
+- [PRO] Fixed token auto-renewal after 14 days
+- [PRO] Added timeout to token auto-renewal
+
 ## v0.9.4
 - Fixed Table Info tab missing horizontal scroll overflow
 - Added formatting to Table Info table creation SQL  
