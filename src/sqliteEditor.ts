@@ -41,15 +41,13 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     openContext: vsc.CustomDocumentOpenContext,
     uri: vsc.Uri,
     extensionUri: vsc.Uri,
-    isPro: boolean,
+    verified: boolean,
     token: vsc.CancellationToken,
   ): Promise<SQLiteDocument> {
 
-    const createWorkerBundle = !import.meta.env.VSCODE_BROWSER_EXT && isPro && ReadWriteMode // Do not change this line
+    const createWorkerBundle = !import.meta.env.VSCODE_BROWSER_EXT && verified && ReadWriteMode // Do not change this line
       ? createProWorker
       : createWebWorker;
-
-    // const readWriteMode = !import.meta.env.VSCODE_BROWSER_EXT && pro__IsPro && canUseNativeSqlite3;
 
     const { filename } = getUriParts(uri);
     const { workerFns, createWorkerDb } = await createWorkerBundle(extensionUri, filename, uri);

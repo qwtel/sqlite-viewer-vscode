@@ -142,11 +142,21 @@ export async function deleteLicenseKeyCommand(context: vsc.ExtensionContext, rep
   });
 }
 
-function calcDaysSinceIssued(issuedAt: number) {
+export function calcDaysSinceIssued(issuedAt: number) {
   const currentTime = Date.now() / 1000;
   const diffSeconds = currentTime - issuedAt;
   const diffDays = diffSeconds / (24 * 60 * 60);
   return diffDays;
+}
+
+export function getPayload(accessToken?: string) {
+  return accessToken != null ? jose.decodeJwt(accessToken) : null;
+}
+
+function abortControllerTimeout(n: number) {
+  const ctrl = new AbortController();
+  setTimeout(() => ctrl.abort(), n);
+  return ctrl.signal;
 }
 
 export async function refreshAccessToken(context: vsc.ExtensionContext, licenseKey: string, accessToken?: string) {
@@ -154,16 +164,16 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, licenseK
   try {
     const baseURL = context.extensionMode === vsc.ExtensionMode.Development ? 'http://localhost:8788' : 'https://vscode.sqliteviewer.app';
 
-    const payload = accessToken != null ? jose.decodeJwt(accessToken) : null;
+    const payload = getPayload(accessToken);
     if (payload && 'ent' in payload) return accessToken;
 
     const daysSinceIssued = accessToken && payload?.iat && calcDaysSinceIssued(payload.iat);
-    // console.log({ daysSinceIssued })
     if (!daysSinceIssued || daysSinceIssued > 14) {
       response = await fetch(new URL('/api/register', baseURL), {
         method: 'POST',
         headers: [['Content-Type', 'application/x-www-form-urlencoded']],
         body: new URLSearchParams({ 'machine_id': await getShortMachineId(), 'license_key': licenseKey }),
+        signal: abortControllerTimeout(5000),
       });
     } else if (daysSinceIssued > 1) {
       response = await fetch(new URL('/api/refresh', baseURL), {
@@ -174,7 +184,8 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, licenseK
     } else {
       return accessToken;
     }
-  } catch {
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') throw Error('License validation request timed out');
     throw new Error('No response from license validation service');
   }
 
