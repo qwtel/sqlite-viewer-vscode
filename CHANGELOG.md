@@ -20,8 +20,6 @@
 - Fixed "exact" filter modifier not working
 
 ## v0.9.5
-- [PRO] Fixed token auto-renewal after 14 days
-- [PRO] Added timeout to token auto-renewal
 - Fixed insert row number appearing in wrong position when pinning columns
 - Improved scrollbar placement for Table Info table creation SQL textarea
 
