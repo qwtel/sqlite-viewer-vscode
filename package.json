@@ -126,6 +126,7 @@
     "postinstall": "npm run build:tjs",
     "package": "bun run scripts/pack.ts",
     "package-all": "bun run scripts/ci.ts",
+    "version": "bun run scripts/changelog.ts && git add CHANGELOG.md",
     "postversion": "cd sqlite-viewer-core && git tag -a \"vscode/v$(jq -r '.version' ../package.json)\" -m ''",
     "publish-all": "bun run scripts/ci.ts --kind publish",
     "pre-publish-all": "bun run scripts/ci.ts --kind publish --pre-release",

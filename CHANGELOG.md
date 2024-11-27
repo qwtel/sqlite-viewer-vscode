@@ -20,33 +20,45 @@
 - Fixed "exact" filter modifier not working
 
 ## v0.9.5
+_Released on November 22, 2024_
+
 - [PRO] Fixed token auto-renewal after 14 days
 - [PRO] Added timeout to token auto-renewal
 - Fixed insert row number appearing in wrong position when pinning columns
 - Improved scrollbar placement for Table Info table creation SQL textarea
 
 ## v0.9.4
+_Released on November 18, 2024_
+
 - Fixed Table Info tab missing horizontal scroll overflow
 - Added formatting to Table Info table creation SQL  
 - Changed table creation SQL to use textarea instead of inline text
 - Updated dependencies
 
 ## v0.9.3
+_Released on November 10, 2024_
+
 - Fixed column drag and drop using the sidebar
 - Fixed height of pinned rows
 
 ## v0.9.2
+_Released on November 7, 2024_
+
 - [PRO] Added Markdown export
 - [PRO] Adding `<br>` for newlines when exporting as HTML or Markdown
 - [PRO] JSON columns are rendered as code blocks when exporting as HTML or Markdown
 
 ## v0.9.1
+_Released on November 6, 2024_
+
 - Bumped SQLite to 3.47.0
 - Bumped SQLite WASM to 3.47.0
 - Reverted Ctrl+C change
 - Mixed up ad placement
 
 ## v0.9.0
+_Released on November 1, 2024_
+
 Initial v0.9 release
 
 ## v0.8
@@ -63,16 +75,24 @@ SQLite Viewer now features a second sidebar 🎉. It shows either the current ro
 - Fixed a bug that caused files without extensions to not open when placed inside an invisible folder
 
 ## v0.8.8
+_Released on October 30, 2024_
+
 - [PRO] Changed license key validation to support keys from different payment providers
 - [PRO] Added copy to clipboard option to offline activation wizard
 
 ## v0.8.7
+_Released on October 26, 2024_
+
 - [PRO] Renamed "Enter Access Token" command to "Offline License Activation" and changed workflow to a guided wizard with additional instructions.
 
 ## v0.8.6
+_Released on October 22, 2024_
+
 - [PRO] Added "Enter Access Token" command that allows activating the PRO version while offline or behind a firewall. 
 
 ## v0.8.5
+_Released on October 22, 2024_
+
 ### Features
 - [PRO] Added basic logging to the sidebar for better insight into what SQLite Viewer is doing behind the scenes.
 
@@ -82,36 +102,54 @@ SQLite Viewer now features a second sidebar 🎉. It shows either the current ro
 - Fixed some unnecessary queries being run 
 
 ## v0.8.4
+_Released on October 20, 2024_
+
 - [PRO] Made error messages more descriptive
 - [PRO] Added a confirmation dialog before committing a transaction that contains too many changes to keep in the undo history. This usually occurs when deleting large numbers of rows.
 - Fixed a bug that reset range selection when using pagination buttons or the scrollbar
 - Other minor fixes
 
 ## v0.8.3
+_Released on October 18, 2024_
+
 Minor fixes. Bumped to main release channel.
 
 ## v0.8.2 (Pre-Release)
+_Released on October 18, 2024_
+
 No outside visible changes
 
 ## v0.8.1 (Pre-Release)
+_Released on October 17, 2024_
+
 [PRO] Performance improvements
 
 ## v0.8.0 (Pre-Release)
+_Released on October 17, 2024_
+
 Initial 0.8 release.
 
 ## v0.7.3
+_Released on September 29, 2024_
+
 - The initial size of the sidebar is now based on available space
 - Resizing the sidebar and columns should now work when using the extension with a web-based version of VSCode on and iPad or other touch device
 - Row buttons no longer take up space while the row is not in the hovered state
 - Various bug fixes and improvements
 
 ## v0.7.2
+_Released on September 28, 2024_
+
 Fixed telemetry connection string error
 
 ## v0.7.1
+_Released on September 28, 2024_
+
 Fixed version update banner from being shown again
 
 ## v0.7.0
+_Released on September 28, 2024_
+
 - Added basic keyboard navigation support. It is still quite easy to lose the focus, especially when using Page Up/Page Down keys.
 - Added button to collapse the sidebar
 - Various minor fixes and improvements
@@ -128,27 +166,41 @@ Please [report](https://github.com/qwtel/sqlite-viewer-vscode/issues) any issues
 This has been shelved for now, please remain on the pre-release channel if you need the sidebar.
 
 ## v0.6.7 (Pre-Release)
+_Released on September 24, 2024_
+
 Code refactoring, no externally visible changes 
 
 ## v0.6.6 (Pre-Release)
+_Released on September 9, 2024_
+
 Replaced 3rd party ad with 1st party ad: Check out [Hydejack](https://hydejack.com/?ref=vscode), a Jekyll theme for hackers, nerds, and academics, made by yours truly.
 
 ## v0.6.5 (Pre-Release)
+_Released on August 28, 2024_
+
 Code refactoring, no externally visible changes 
 
 ## v0.6.4 (Pre-Release)
+_Released on July 10, 2024_
+
 It is now possible to __open more than one SQLite Viewer instance per file__. 
 Additionally, opening large files (~1GB) is now much faster, and opening additional tabs of the same file carries no additional cost beyond the webview itself. 
 
 ## v0.6.3 (Pre-Release)
+_Released on July 1, 2024_
+
 Included latest changes from 0.5 branch
  
 ## v0.6.2 (Pre-Release)
+_Released on June 18, 2024_
+
 - Improved keyboard support. Page Up/Page Down should now work in most cases
 - Added expand/collapse all button to tables sidebar
 - Fixed a performance regression when rendering a table for the first time
 
 ## v0.6.1 (Pre-Release)
+_Released on June 17, 2024_
+
 Added basic keyboard support to table explorer and main view
 
 ## v0.5
@@ -163,19 +215,29 @@ While this update removes the need for the above workarounds, it does not change
 Note that making this work required significant restructuring of the extension, which may cause (unrelated) issues. Please report any you may encounter. 
 
 ## v0.5.13
+_Released on May 19, 2024_
+
 - Replaced 3rd party ad with 1st party ad: Check out [Hydejack](https://hydejack.com/?ref=vscode), a Jekyll theme for hackers, nerds, and academics, made by yours truly.
 
 ## v0.5.12
+_Released on May 19, 2024_
+
 - Fixed an issue related to square brackets in column names
 
 ## v0.5.11
+_Released on May 19, 2024_
+
 - Fixed an issue that caused the update notification to re-appear each time VSCode was restarted
 
 ## v0.5.10
+_Released on May 19, 2024_
+
 - Fixed an issue that caused an entire file to crash when some tables/views are using custom functions
 - Fixed an issue that caused rendering artifacts and column resizing issues in empty tables
 
 ## v0.5.9
+_Released on July 1, 2024_
+
 Improved column filtering:
 - Added a button to invert a colum filter
 - Added a button to filter a column non-nullish (`NULL` or empty string) values. You can combine it with the invert button to filter for nullish values instead.
@@ -188,12 +250,16 @@ Experimental support for Views:
 - Added button to expand/collapse all tables and view in the sidebar
 
 ## v0.5.8
+_Released on June 11, 2024_
+
 - Limiting webview Content Security Policy to environments that are known to work.
 This should (finally) make this extension work with GitPod and Google IDX.
 - Fixed download button height in detail view 
 - Reduced bundle size (< 1MB)
 
 ## v0.5.7
+_Released on June 10, 2024_
+
 The extension now adds configuration settings for nesting SQLite-related files:
 
 ![File nesting screenshot](documentation/nesting.png)
@@ -210,9 +276,13 @@ This version also changes the file name of downloaded blobs to be prefixed with 
 - Fixed an error when setting max file size to 0
 
 ## v0.5.6
+_Released on June 1, 2024_
+
 Fixed a potential memory issue by limiting memory usage to configured file size limit
 
 ## v0.5.5
+_Released on June 1, 2024_
+
 Bumped WAL Mode support to main channel.
 
 ### Changes
@@ -221,19 +291,29 @@ Bumped WAL Mode support to main channel.
 - Minor performance improvement for detail view query
 
 ## v0.5.4 (Pre-Release)
+_Released on May 23, 2024_
+
 - Generated columns are now shown
 - Fixed showing `ROWID` column for tables that were created without row ids
 
 ## v0.5.3 (Pre-Release)
+_Released on May 22, 2024_
+
 Fixed an issue that prevented the extension from loading on github.dev in Safari
 
 ## v0.5.2 (Pre-Release)
+_Released on May 21, 2024_
+
 Added Content-Security-Policy to extension webview
 
 ## v0.5.1 (Pre-Release)
+_Released on May 19, 2024_
+
 No publicly visible changes
 
 ## v0.5.0 (Pre-Release)
+_Released on May 18, 2024_
+
 Initial v0.5 pre-release
 
 ## v0.4
@@ -265,51 +345,71 @@ Additionally, version 0.4 ships many quality of life improvements:
 
 
 ## v0.4.14
+_Released on April 30, 2024_
+
 - Generated columns are now shown
 - Fixed showing `ROWID` column for tables that are created without a `ROWID`
 - Fixed an issue that prevented the extension from loading on github.dev in Safari
 
 
 ## v0.4.12 – v0.4.13
+_Released on April 30, 2024_
+
 Fixed an issue that prevented text selection when using the extension on the web in the latest version of Chrome
 
 
 ## v0.4.11
+_Released on April 30, 2024_
+
 - Tables in sidebar are now sorted alphabetically 
 - Fixed foreign key icon not being shown, or being shown on wrong column 
 - Fixed text in foreign key tooltip referencing wrong column names 
 
 
 ## v0.4.10
+_Released on April 30, 2024_
+
 - SQLite updated to 3.45.3
 - Fixed an issue that sometimes caused text selection to be slow
 
 
 ## v0.4.9
+_Released on May 6, 2024_
+
 Fixed an issue that prevented files from loading correctly when connected to a workspace via SSH
 
 
 ## v0.4.8
+_Released on May 6, 2024_
+
 - The detail view has a new, cleaner look that closer matches similar components in VSCode
 - Added extension name and version number to the bottom left
 
 
 ## v0.4.7
+_Released on May 4, 2024_
+
 - Fixed visible cells updating to new values immediately after refreshing a file
 - Fixed an issue that caused the UI to become non-interactive when showing an error message
 
 
 ## v0.4.6
+_Released on May 4, 2024_
+
 - Added button to filter columns by exact search term
 - Removed "Not Allowed" cursor from readonly fields in detail view
 - Improved startup time by avoiding unnecessary copying when opening a file
 
 
 ## v0.4.5
+_Released on May 3, 2024_
+
 Fixed an issue that caused the extension to go blank when opening an external link
 
 
 ## v0.4.4
+_Released on May 3, 2024_
+
 ### Features
 Improved JSON column support
 - JSON columns are now shown as textarea instead of a one-line input in detail view
@@ -326,6 +426,8 @@ Improved JSON column support
 
 
 ## v0.4.3
+_Released on May 2, 2024_
+
 ### Fixes
 - Added back search functionality for tables
 - Fixed ROWID column sizing
@@ -333,6 +435,8 @@ Improved JSON column support
 
 
 ## v0.4.2
+_Released on May 1, 2024_
+
 ### Fixes
 - Fixed column widths resetting when refreshing a file
 - Fixed column order resetting when refreshing a file
@@ -343,46 +447,70 @@ Improved JSON column support
 
 
 ## v0.4.1
+_Released on April 30, 2024_
+
 Added essential application reporting
 
 ## v0.4.0
+_Released on April 30, 2024_
+
 Initial v0.4 release
 
 ## v0.3.0 – v3.0.24
+_Released on May 25, 2023_
+
 Minor bug fixes and previews 
 
 ## v0.2.4
+_Released on April 11, 2023_
+
 - Added max file size setting
 
 ## v0.2.3
+_Released on March 4, 2023_
+
 - Fixed opening FTS4 & FTS5 files
 - Fixed showing large integers
 - Fixed showing booleans
 - Fixed opening files exported by pandas `.to_sql`
 
 ## v0.2.2
+_Released on March 3, 2023_
+
 Prerelease version
 
 ## v0.2.1
+_Released on March 2, 2023_
+
 Prerelease version
 
 ## v0.2.0
+_Released on March 21, 2022_
+
 Prerelease version
 
 ## v0.1.5
+_Released on February 23, 2022_
+
 * Fixed a bug that caused the SQLite WebWorker to be initialized twice
 * Updated dependencies
   * Updated SQLite to 3.38.0
 
 ## v0.1.4
+_Released on January 24, 2022_
+
 * Updated dependencies
   * Updated SQLite to 3.37.2
   * Updated React v18 to latest Release Candidate
 
 ## v0.1.3
+_Released on December 16, 2021_
+
 * Added ref to external link
 
 ## v0.1.2
+_Released on December 15, 2021_
+
 ### Fixes
 * Opening files with the R*Tree extension will no longer produce an error
 * Binary values are now always rendered as download buttons, even when not specified as `BLOB` type
@@ -392,10 +520,14 @@ Prerelease version
   * Updated React to v18 Release Candidate
 
 ## v0.1.1
+_Released on December 13, 2021_
+
 ### Fixes
 * Show error message when trying to open SQLite file using extensions
 
 ## v0.1.0
+_Released on November 28, 2021_
+
 You can now open any file with SQLite Viewer and set SQLite Viewer as default for any file extension:
 
 ![Open With](documentation/new.gif)
