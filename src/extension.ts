@@ -4,7 +4,7 @@ import { calcDaysSinceIssued, deleteLicenseKeyCommand, enterAccessTokenCommand, 
 import { IS_VSCODE } from './util';
 import { AccessToken, ExtensionId, FileNestingPatternsAdded, FistInstallMs, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
 import { disposeAll } from './dispose';
-import { registerProvider } from './sqliteEditor';
+import { registerFileProvider, registerProvider, SQLiteDocument } from './sqliteEditor';
 
 export async function activate(context: vsc.ExtensionContext) {
   const reporter = new TelemetryReporter(TelemetryConnectionString);
@@ -32,9 +32,9 @@ export async function activate(context: vsc.ExtensionContext) {
   addFileNestingPatternsOnce(context);
 }
 
-const providerSubs = new WeakSet<vsc.Disposable>();
+const globalProviderSubs = new WeakSet<vsc.Disposable>();
 export async function activateProviders(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
-  const prevSubs = context.subscriptions.filter(x => providerSubs.has(x));
+  const prevSubs = context.subscriptions.filter(x => globalProviderSubs.has(x));
   for (const sub of prevSubs) context.subscriptions.splice(context.subscriptions.indexOf(sub), 1);
   disposeAll(prevSubs);
 
@@ -56,8 +56,9 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
   const subs = [];
   subs.push(registerProvider(context, reporter, `${ExtensionId}.view`, verified, accessToken));
   subs.push(registerProvider(context, reporter, `${ExtensionId}.option`, verified, accessToken));
+  subs.push(registerFileProvider(context));
 
-  for (const sub of subs) providerSubs.add(sub);
+  for (const sub of subs) globalProviderSubs.add(sub);
   context.subscriptions.push(...subs);
 }
 

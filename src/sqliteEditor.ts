@@ -36,6 +36,8 @@ const ReadWriteMode = LocalMode || RemoteWorkspaceMode;
 
 const MaxHistory = 100;
 
+export const globalSQLiteDocuments = new Map<string, SQLiteDocument>();
+
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   static async create(
     openContext: vsc.CustomDocumentOpenContext,
@@ -83,6 +85,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     super();
     this.#uri = uri;
     this.#history = history ?? new UndoHistory<SQLiteEdit>(MaxHistory);
+    globalSQLiteDocuments.set(this.uri.path, this);
   }
 
   public get uri() { return this.#uri; }
@@ -119,6 +122,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * This happens when all editors for it have been closed.
    */
   dispose() {
+    globalSQLiteDocuments.delete(this.uri.path);
     this.workerFns[Symbol.dispose]();
     this.#onDidDispose.fire();
     super.dispose();
@@ -424,4 +428,29 @@ export function registerProvider(context: vsc.ExtensionContext, reporter: Teleme
       supportsMultipleEditorsPerDocument: true,
     }
   );
+}
+
+export function registerFileProvider(context: vsc.ExtensionContext) {
+  const sqliteFileProvider = new (class implements vsc.TextDocumentContentProvider {
+    async provideTextDocumentContent(cellUri: vsc.Uri, token: vsc.CancellationToken): Promise<string> {
+      const [cellFilename, modalId, name, table] = cellUri.path.split('/').reverse().map(decodeURIComponent)
+      const documentUri = vsc.Uri.joinPath(cellUri, '../../../..');
+      const document = globalSQLiteDocuments.get(documentUri.path)
+      if (document) {
+        const workerDb = await document.getDb()
+        if (workerDb) {
+          // console.log("workerDb", await workerDb.filename, 'readonly?', await workerDb.readOnly, 'type', await workerDb.type)
+          const filename = document.uriParts.filename;
+          const row = await workerDb.getByRowId({ filename, table, name }, modalId)
+          const colName = cellFilename.endsWith('.json') ? cellFilename.slice(0, -5) : cellFilename.slice(0, -4)
+          console.log({ colName, cellFilename })
+          return row[colName] as string;
+        }
+      }
+      throw new Error('Document not found');
+    }
+    // onDidChangeEmitter = new vsc.EventEmitter<vsc.Uri>();
+    // onDidChange = this.onDidChangeEmitter.event;
+  })();
+  return vsc.workspace.registerTextDocumentContentProvider('sqlite-file', sqliteFileProvider);
 }

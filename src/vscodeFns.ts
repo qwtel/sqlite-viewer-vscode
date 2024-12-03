@@ -1,6 +1,8 @@
 import * as vsc from 'vscode';
 import { SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
 import { FullExtensionId } from './constants';
+import type { DbParams } from '../sqlite-viewer-core/src/signals';
+import type { TypeAffinity } from '../sqlite-viewer-core/src/worker-db-utils';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
 
@@ -91,5 +93,20 @@ export class VscodeFns {
 
   async showErrorMessage<T extends string|vsc.MessageItem>(message: string, options?: vsc.MessageOptions, ...items: T[]): Promise<T | undefined> {
     return await vsc.window.showErrorMessage(message, options, ...items as any[]);
+  }
+
+  async openCellEditor(params: DbParams, rowId: string|number, colName: string, typeAffinity?: TypeAffinity) {
+    const { document } = this;
+    if (document.uri.scheme !== 'untitled') {
+      const cellFilename = colName + (typeAffinity === 'JSON' ? '.json' : '.txt');
+      const cellParts = [params.table, params.name, String(rowId), cellFilename].map(x => x.replaceAll('/', '%2F').replaceAll('\\', '%5C'));
+      const cellUri = vsc.Uri.joinPath(document.uri, ...cellParts).with({ scheme: 'sqlite-file' })
+      console.log('Opening cell editor:', cellUri.toString());
+      await vsc.window.showTextDocument(cellUri, { 
+        // viewColumn: vsc.ViewColumn.Beside,
+        // preserveFocus: false,
+        preview: true,
+      });
+    }
   }
 }
