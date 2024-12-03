@@ -430,7 +430,7 @@ export function registerProvider(context: vsc.ExtensionContext, reporter: Teleme
   );
 }
 
-export function registerFileProvider(context: vsc.ExtensionContext) {
+export function registerFileProvider(_context: vsc.ExtensionContext) {
   const sqliteFileProvider = new (class implements vsc.TextDocumentContentProvider {
     async provideTextDocumentContent(cellUri: vsc.Uri, token: vsc.CancellationToken): Promise<string> {
       const [cellFilename, modalId, name, table] = cellUri.path.split('/').reverse().map(decodeURIComponent)
@@ -441,10 +441,18 @@ export function registerFileProvider(context: vsc.ExtensionContext) {
         if (workerDb) {
           // console.log("workerDb", await workerDb.filename, 'readonly?', await workerDb.readOnly, 'type', await workerDb.type)
           const filename = document.uriParts.filename;
-          const row = await workerDb.getByRowId({ filename, table, name }, modalId)
+          const row = await workerDb.getByRowId({ filename, table, name }, modalId, {}, cancelTokenToAbortSignal(token));
           const colName = cellFilename.endsWith('.json') ? cellFilename.slice(0, -5) : cellFilename.slice(0, -4)
-          console.log({ colName, cellFilename })
-          return row[colName] as string;
+          const value = row[colName];
+          if (typeof value === 'string') {
+            if (cellFilename.endsWith('.json')) {
+              try { return value && JSON.stringify(JSON.parse(value), null, 2) } catch { return value }
+            } else {
+              return value;
+            }
+          } else if (typeof value == 'number' || typeof value == 'bigint') {
+            return value.toString();
+          }
         }
       }
       throw new Error('Document not found');

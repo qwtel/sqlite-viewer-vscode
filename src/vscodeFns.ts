@@ -103,7 +103,7 @@ export class VscodeFns {
       const cellUri = vsc.Uri.joinPath(document.uri, ...cellParts).with({ scheme: 'sqlite-file' })
       console.log('Opening cell editor:', cellUri.toString());
       await vsc.window.showTextDocument(cellUri, { 
-        // viewColumn: vsc.ViewColumn.Beside,
+        viewColumn: vsc.ViewColumn.Beside,
         // preserveFocus: false,
         preview: true,
       });
