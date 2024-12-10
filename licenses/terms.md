@@ -1,6 +1,6 @@
 # Publisher Terms of Use for SQLite Viewer PRO
 
-Last updated: 5 Oct 2024
+_Last updated: 5 Oct 2024_
 
 ## 1. Acceptance of Terms
 By installing or using the SQLite Viewer PRO for Visual Studio Code (VS Code) extension ("Extension"), you agree to comply with and be bound by these Terms of Use ("Terms"). If you do not agree to these Terms, do not install or use the Extension.

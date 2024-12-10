@@ -1,6 +1,6 @@
 # Privacy Policy for SQLite Viewer PRO
 
-Last updated: 5 Oct 2024
+_Last updated: 5 Oct 2024_
 
 This Privacy Policy outlines how we collect and use data when you use SQLite Viewer for Visual Studio Code (VS Code) extension ("Extension"). By using the Extension, you agree to the terms described below.
 
