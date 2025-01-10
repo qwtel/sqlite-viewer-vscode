@@ -20,6 +20,8 @@
 - Fixed "exact" filter modifier not working
 
 ## v0.9.6
+_Released on January 10, 2025_
+
 
 - SQLite Viewer now remembers the last sidebar position
 - Fixed row selection background color when explorer panel loses focus
