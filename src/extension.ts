@@ -33,6 +33,7 @@ export async function activate(context: vsc.ExtensionContext) {
 }
 
 const globalProviderSubs = new WeakSet<vsc.Disposable>();
+
 export async function activateProviders(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
   const prevSubs = context.subscriptions.filter(x => globalProviderSubs.has(x));
   for (const sub of prevSubs) context.subscriptions.splice(context.subscriptions.indexOf(sub), 1);

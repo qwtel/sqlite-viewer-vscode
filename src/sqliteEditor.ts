@@ -7,7 +7,7 @@ import * as vsc from 'vscode';
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
-import { AccessToken, ExtensionId, FistInstallMs, FullExtensionId, LicenseKey, Ns } from './constants';
+import { AccessToken, ExtensionId, FistInstallMs, FullExtensionId, LicenseKey, Ns, SidebarLeft, SidebarRight } from './constants';
 import { Disposable, disposeAll } from './dispose';
 import { IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
@@ -26,6 +26,19 @@ export type SQLiteEdit = {
   values: SqlValue[],
   undoQuery?: string,
   undoValues: SqlValue[],
+};
+
+export type VSCODE_ENV = {
+    appName: string, 
+    appHost: string,
+    uriScheme: string, 
+    extensionUrl: string,
+    accessToken?: string,
+    uiKind?: 'desktop'|'web',
+    machineId: string,
+    firstInstall: string,
+    sidebarLeft?: string
+    sidebarRight?: string
 };
 
 const Extension = vsc.extensions.getExtension(FullExtensionId);
@@ -331,7 +344,9 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       uiKind: uiKindToString(uiKind),
       machineId: vsc.env.machineId,
       firstInstall: new Date(this.context.globalState.get<number>(FistInstallMs) ?? Date.now()).toISOString(),
-    };
+      sidebarLeft: this.context.globalState.get<number>(SidebarLeft)?.toString(),
+      sidebarRight: this.context.globalState.get<number>(SidebarRight)?.toString(),
+    } satisfies VSCODE_ENV;
 
     const preparedHtml = html
       .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
@@ -354,7 +369,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
 }
 
 const toDashCase = (str: string) => str.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
-function toDatasetAttrs(obj: Record<string, string|undefined>) {
+function toDatasetAttrs(obj: Record<string, string|boolean|undefined>) {
   return Object.entries(obj).map(([k, v]) => v != null ? `data-${toDashCase(k)}="${v}"` : '').join(' ');
 }
 

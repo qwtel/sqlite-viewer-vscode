@@ -12,6 +12,8 @@ export const FileNestingPatternsAdded = 'fileNestingPatternsAdded';
 export const LicenseKey = 'licenseKey';
 export const AccessToken = 'accessToken';
 export const FistInstallMs = `fistInstallMs`
+export const SidebarLeft = 'sidebarLeft';
+export const SidebarRight = 'sidebarRight';
 
 export const SyncedKeys = [
   FullExtensionId,

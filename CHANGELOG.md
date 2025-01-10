@@ -19,6 +19,11 @@
 - Fixed drop effect being shown incorrectly when dragging a column
 - Fixed "exact" filter modifier not working
 
+## v0.9.6
+
+- SQLite Viewer now remembers the last sidebar position
+- Fixed row selection background color when explorer panel loses focus
+
 ## v0.9.5
 _Released on November 22, 2024_
 

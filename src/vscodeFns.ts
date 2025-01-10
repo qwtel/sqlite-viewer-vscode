@@ -32,6 +32,7 @@ export class VscodeFns {
 
   private get webviews() { return this.provider.webviews }
   private get reporter() { return this.provider.reporter }
+  private get context() { return this.provider.context }
 
   async initialize() {
     const { document } = this;
@@ -83,6 +84,11 @@ export class VscodeFns {
     }
   }
 
+  saveSidebarState(side: 'left'|'right', position: number) {
+    const key = side === 'left' ? 'sidebarLeft' : 'sidebarRight';
+    return Promise.resolve(this.context.globalState.update(key, position));
+  }
+
   async showInformationMessage<T extends string|vsc.MessageItem>(message: string, options?: vsc.MessageOptions, ...items: T[]): Promise<T | undefined> {
     return await vsc.window.showInformationMessage(message, options, ...items as any[]);
   }
@@ -101,7 +107,7 @@ export class VscodeFns {
       const cellFilename = colName + (typeAffinity === 'JSON' ? '.json' : '.txt');
       const cellParts = [params.table, params.name, String(rowId), cellFilename].map(x => x.replaceAll('/', '%2F').replaceAll('\\', '%5C'));
       const cellUri = vsc.Uri.joinPath(document.uri, ...cellParts).with({ scheme: 'sqlite-file' })
-      console.log('Opening cell editor:', cellUri.toString());
+      // console.log('Opening cell editor:', cellUri.toString());
       await vsc.window.showTextDocument(cellUri, { 
         viewColumn: vsc.ViewColumn.Beside,
         // preserveFocus: false,
