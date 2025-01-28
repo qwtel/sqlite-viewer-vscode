@@ -65,23 +65,23 @@ export const compileBin = async (targetArg?: string) => {
   const outBinDir = path.resolve(outDir, 'bin');
   const outBinFile = path.resolve(outBinDir, filename);
 
-  await fs.rmdir(outBinDir, { recursive: true });
+  await fs.rmdir(outBinDir, { recursive: true }).catch(console.warn);
   await fs.mkdir(outBinDir, { recursive: true });
 
   if (!Bun.env.TJS_ZIG_OUT) throw new Error('TJS_ZIG_OUT not set');
 
-  if (target !== 'web') {
-    const tjsPath = path.join(Bun.env.TJS_ZIG_OUT, DEV ? 'bin' : 'aarch64-macos', 'tjs'); // XXX: hardcoded macOS for now
-    const exePath = path.join(Bun.env.TJS_ZIG_OUT, DEV ? 'bin' : targetToZigTriple[target], 'tjs' + ext)
-       
-    console.log({
-      exePath, 
-      inFile, 
-      outFile: outBinFile
-    });
-    await $`${tjsPath} compile -x ${exePath} ${inFile} ${outBinFile}`;
-    console.log(`Compiled binary for target: ${target}`);
-  }
+  if (target === 'web') return;
+
+  const tjsPath = path.join(Bun.env.TJS_ZIG_OUT, DEV ? 'bin' : 'aarch64-macos', 'tjs'); // XXX: hardcoded macOS for now
+  const exePath = path.join(Bun.env.TJS_ZIG_OUT, DEV ? 'bin' : targetToZigTriple[target], 'tjs' + ext)
+      
+  console.log({
+    exePath, 
+    inFile, 
+    outFile: outBinFile
+  });
+  await $`${tjsPath} compile -x ${exePath} ${inFile} ${outBinFile}`;
+  console.log(`Compiled binary for target: ${target}`);
 };
 
 if (import.meta.main) {
