@@ -1,0 +1,7 @@
+{
+  "extension.config.sqliteViewer.maxFileSize.markdownDescription": "La taille maximale du fichier en Mo que l'extension tentera de charger. Réglez sur 0 pour désactiver la limite. La limite interne est de 4 Go, mais des limites de plateforme peuvent s'appliquer plus tôt.\n\n__Avertissement__: L'ouverture de fichiers volumineux peut entraîner de mauvaises performances, des blocages et une pression sur la mémoire système.",
+  "extension.commands.addFileNestingPatterns.title": "Ajouter des modèles d'imbrication de fichiers SQLite",
+  "extension.commands.enterLicenseKey.title": "Activer la clé de licence",
+  "extension.commands.removeLicenseKey.title": "Désactiver la clé de licence",
+  "extension.commands.enterAccessToken.title": "Activation de licence hors ligne"
+}

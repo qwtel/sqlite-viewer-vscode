@@ -470,7 +470,7 @@ export function registerFileProvider(_context: vsc.ExtensionContext) {
           }
         }
       }
-      throw new Error('Document not found');
+      throw new Error(vsc.l10n.t('Document not found'));
     }
     // onDidChangeEmitter = new vsc.EventEmitter<vsc.Uri>();
     // onDidChange = this.onDidChangeEmitter.event;

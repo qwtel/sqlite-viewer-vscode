@@ -24,6 +24,7 @@
     "workspace",
     "ui"
   ],
+  "l10n": "./l10n",
   "contributes": {
     "languages": [
       {
@@ -84,29 +85,29 @@
           "maximum": 4000,
           "exclusiveMinimum": false,
           "default": 200,
-          "markdownDescription": "The maximum file size in MB the extension will attempt to load. Set to 0 to disable the limit. The internal limit is 4GB, but platform limits may apply earlier.\n\n__Warning__: Opening large files may cause poor performance, freezes, and system-wide memory pressure."
+          "markdownDescription": "%extension.config.sqliteViewer.maxFileSize.markdownDescription%"
         }
       }
     },
     "commands": [
       {
         "command": "sqlite-viewer.addFileNestingPatterns",
-        "title": "Add SQLite File Nesting Patterns",
+        "title": "%extension.commands.addFileNestingPatterns.title%",
         "category": "SQLite Viewer"
       },
       {
         "command": "sqlite-viewer.enterLicenseKey",
-        "title": "Activate License Key",
+        "title": "%extension.commands.enterLicenseKey.title%",
         "category": "SQLite Viewer"
       },
       {
         "command": "sqlite-viewer.removeLicenseKey",
-        "title": "Deactivate License Key",
+        "title": "%extension.commands.removeLicenseKey.title%",
         "category": "SQLite Viewer"
       },
       {
         "command": "sqlite-viewer.enterAccessToken",
-        "title": "Offline License Activation",
+        "title": "%extension.commands.enterAccessToken.title%",
         "category": "SQLite Viewer"
       }
     ]

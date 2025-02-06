@@ -11,7 +11,7 @@ import type { WorkerBundle } from './workerBundle';
 import { ConfigurationSection } from './constants';
 // import type { Credentials } from './credentials';
 
-export const TooLargeErrorMsg = "File too large. You can increase this limit in the settings under 'Sqlite Viewer: Max File Size'."
+export const TooLargeErrorMsg = vsc.l10n.t("File too large. You can increase this limit in the settings under 'Sqlite Viewer: Max File Size'.");
 
 export function getConfiguredMaxFileSize() {
   const config = vsc.workspace.getConfiguration(ConfigurationSection);

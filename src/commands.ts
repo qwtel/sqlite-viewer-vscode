@@ -8,19 +8,21 @@ import { getShortMachineId } from './util';
 const licenseKeyRegex = /[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}/i;
 const legacyLicenseKeyRegex = /[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i;
 
+const { l10n } = vsc;
+
 export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
   const licenseKey = await vsc.window.showInputBox({
-    title: 'SQLite Viewer PRO License Activation',
-    prompt: 'Enter License Key',
+    title: l10n.t('SQLite Viewer PRO License Activation'),
+    prompt: l10n.t('Enter License Key'),
     placeHolder: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
     password: false,
     ignoreFocusOut: true,
     validateInput: (value) => {
-      return licenseKeyRegex.test(value) || legacyLicenseKeyRegex.test(value) ? null : 'License key must be in the format XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
+      return licenseKeyRegex.test(value) || legacyLicenseKeyRegex.test(value) ? null : l10n.t('License key must be in the format {0}', 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
     },
   });
   if (!licenseKey) return;
-  if (!licenseKeyRegex.test(licenseKey) && !legacyLicenseKeyRegex.test(licenseKey)) throw Error('Invalid license key format');
+  if (!licenseKeyRegex.test(licenseKey) && !legacyLicenseKeyRegex.test(licenseKey)) throw Error(l10n.t('Invalid license key format'));
 
   const shortMachineId = await getShortMachineId();
 
@@ -33,26 +35,26 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
       body: new URLSearchParams({ 'machine_id': shortMachineId, 'license_key': licenseKey }),
     });
   } catch {
-    throw Error('No response from license validation service');
+    throw Error(l10n.t('No response from license validation service'));
   }
 
   const contentType = response.headers.get('Content-Type');
   if (!response.ok || contentType?.includes('application/json') === false) {
     const message = contentType?.includes('text/plain') ? await response.text() : response.status.toString();
-    throw Error(`License validation request failed: ${message}`);
+    throw Error(l10n.t(`License validation request failed: {0}`, message));
   }
 
   let data;
   try {
     data = await response.json() as { token: string };
   } catch {
-    throw Error('Failed to parse response');
+    throw Error(l10n.t('Failed to parse response'));
   }
 				
   const payload = jose.decodeJwt(data.token);
-  // if (!payload) throw Error('Invalid access token');
+  // if (!payload) throw Error(l10n.t('Invalid access token'));
   // if (payload.mid !== shortMachineId) {
-  //   throw Error('Machine ID in token does not match this device, this should never happen!');
+  //   throw Error(l10n.t('Machine ID in token does not match this device, this should never happen!'));
   // }
 
   await Promise.all([
@@ -61,28 +63,28 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
   ]);
   await activateProviders(context, reporter);
 
-  vsc.window.showInformationMessage(`Thank you for purchasing SQLite Viewer PRO${payload.ent ? ' Business Edition' : ''}!`, {
+  vsc.window.showInformationMessage(l10n.t('Thank you for purchasing {0}!', `SQLite Viewer PRO${payload.ent ? ' Business Edition' : ''}`), {
     modal: true, 
-    detail: 'Exclusive PRO features will be unlocked once you open the next file.'
+    detail: l10n.t('Exclusive PRO features will be unlocked once you open the next file.')
   });
 }
 
 export async function enterAccessTokenCommand(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
   const baseURL = context.extensionMode === vsc.ExtensionMode.Development ? 'http://localhost:8788' : 'https://vscode.sqliteviewer.app';
 
-  const answer1 = await vsc.window.showInformationMessage('SQLite Viewer PRO Offline Activation', {
+  const answer1 = await vsc.window.showInformationMessage(l10n.t('SQLite Viewer PRO Offline Activation'), {
     modal: true, 
-    detail: `This setup will activate the PRO version of SQLite Viewer without connecting to the license service directly.\nThis is intended for Business Edition customers who have purchased a license for offline use. PRO customers can use it to gain 14 days of offline use (same as regular activation).`,
-  }, ...[{ title: 'Continue', value: true }]);
+    detail: l10n.t(`This wizard will activate the PRO version of SQLite Viewer without connecting to the license service directly. It is intended for Business Edition customers who have purchased a license for offline use. PRO customers can use it to gain 14 days of offline use (same as regular activation).`),
+  }, ...[{ title: l10n.t('Continue'), value: true }]);
   if (answer1?.value !== true) return;
 
   const shortMachineId = await getShortMachineId();
   const registerHref = new URL(`/api/register?id=${shortMachineId}`, baseURL).href;
 
-  const answer2 = await vsc.window.showInformationMessage('Out-of-Band Activation', {
+  const answer2 = await vsc.window.showInformationMessage(l10n.t('Out-of-Band Activation'), {
     modal: true, 
-    detail: `On any device with an active internet connection, open\n\n${registerHref}\n\nDo you want to open it on this device or copy it to the clipboard?`
-  }, ...[{ title: 'Open', value: 'open' }, { title: 'Copy', value: 'copy' }] as const);
+    detail: l10n.t(`On any device with an active internet connection, open\n\n{0}\n\nDo you want to open it on this device or copy it to the clipboard?`, registerHref)
+  }, ...[{ title: l10n.t('Open'), value: 'open' }, { title: l10n.t('Copy'), value: 'copy' }] as const);
 
   if (answer2?.value === 'open')
     await vsc.env.openExternal(vsc.Uri.parse(registerHref));
@@ -91,30 +93,30 @@ export async function enterAccessTokenCommand(context: vsc.ExtensionContext, rep
 
   const jwtRegex = /^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/;
   const accessToken = await Promise.resolve(vsc.window.showInputBox({
-    title: 'SQLite Viewer PRO Offline Activation',
-    prompt: 'Enter access token generated on the website',
+    title: l10n.t('SQLite Viewer PRO Offline Activation'),
+    prompt: l10n.t('Enter access token generated on the website'),
     placeHolder: 'eyJhbGciOiJFUzI1NiJ9.eyJ…',
     password: false,
     ignoreFocusOut: true,
     validateInput: (value) => {
-      return jwtRegex.test(value) ? null : 'Access token must be a JWT';
+      return jwtRegex.test(value) ? null : l10n.t('Access token must be a JWT');
     },
   }));
-  if (!accessToken) throw Error('No access token');
-  if (!jwtRegex.test(accessToken)) throw Error('Invalid access token format');
+  if (!accessToken) throw Error(l10n.t('No access token'));
+  if (!jwtRegex.test(accessToken)) throw Error(l10n.t('Invalid access token format'));
 
   let payload;
   try {
     payload = await verifyToken<Payload>(accessToken);
   } catch (err) {
-    throw Error('Invalid access token', { cause: err });
+    throw Error(l10n.t('Invalid access token', { cause: err }));
   }
-  if (!payload) throw Error('Invalid access token');
+  if (!payload) throw Error(l10n.t('Invalid access token'));
   // if (payload.mid !== shortMachineId) {
-  //   throw Error('Machine ID in token does not match this device. Was the token generated by <https://vscode.sqliteviewer.app/api/register>?');
+  //   throw Error(l10n.t('Machine ID in token does not match this device. Was the token generated by <https://vscode.sqliteviewer.app/api/register>?'));
   // }
   if (!payload.ent && (!payload.key && !payload.licenseKey)) {
-    throw Error('Token does not contain license key. Was it generated by <https://vscode.sqliteviewer.app/api/register>?'); 
+    throw Error(l10n.t('Token does not contain license key. Was it generated by <https://vscode.sqliteviewer.app/api/register>?')); 
   }
 
   await Promise.all([
@@ -123,9 +125,9 @@ export async function enterAccessTokenCommand(context: vsc.ExtensionContext, rep
   ]);
   await activateProviders(context, reporter);
 
-  vsc.window.showInformationMessage(`Thank you for purchasing SQLite Viewer PRO${payload.ent ? ' Business Edition' : ''}!`, {
+  vsc.window.showInformationMessage(l10n.t('Thank you for purchasing {0}!', `SQLite Viewer PRO${payload.ent ? ' Business Edition' : ''}`), {
     modal: true, 
-    detail: 'Exclusive PRO features will be unlocked once you open the next file.'
+    detail: l10n.t('Exclusive PRO features will be unlocked once you open the next file.')
   });
 }
 
@@ -136,9 +138,9 @@ export async function deleteLicenseKeyCommand(context: vsc.ExtensionContext, rep
   ]);
   await activateProviders(context, reporter);
 
-  vsc.window.showInformationMessage('The license was deactivated for this device!', {
+  vsc.window.showInformationMessage(l10n.t('The license was deactivated for this device!'), {
     modal: true, 
-    detail: 'SQLite Viewer PRO will be deactivated once you open the next file.'
+    detail: l10n.t('SQLite Viewer PRO will be deactivated once you open the next file.')
   });
 }
 
@@ -185,26 +187,26 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, licenseK
       return accessToken;
     }
   } catch (err) {
-    if (err instanceof Error && err.name === 'AbortError') throw Error('License validation request timed out');
-    throw new Error('No response from license validation service');
+    if (err instanceof Error && err.name === 'AbortError') throw Error(l10n.t('License validation request timed out'));
+    throw new Error(l10n.t('No response from license validation service'));
   }
 
   if (!response.ok || response.headers.get('Content-Type')?.includes('application/json') === false) {
     response.text().then(console.error).catch();
-    throw new Error(`License validation request failed: ${response.status}`);
+    throw new Error(l10n.t(`License validation request failed: {0}`, response.status));
   }
 
   let data;
   try {
     data = await response.json() as { token: string };
   } catch {
-    throw new Error('Failed to parse response');
+    throw new Error(l10n.t('Failed to parse response'));
   }
 
   // const freshPayload = jose.decodeJwt(data.token);
-  // if (!freshPayload) throw Error('Invalid access token');
+  // if (!freshPayload) throw Error(l10n.t('Invalid access token'));
   // if (freshPayload.mid !== await getShortMachineId()) {
-  //   throw Error('Machine ID in token does not match this device, this should never happen!');
+  //   throw Error(l10n.t('Machine ID in token does not match this device, this should never happen!'));
   // }
 
   // console.log(data);
