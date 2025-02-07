@@ -65,7 +65,7 @@ export const compileBin = async (targetArg?: string) => {
   const outBinDir = path.resolve(outDir, 'bin');
   const outBinFile = path.resolve(outBinDir, filename);
 
-  await fs.rmdir(outBinDir, { recursive: true }).catch(console.warn);
+  await fs.rmdir(outBinDir, { recursive: true }).catch(() => {});
   await fs.mkdir(outBinDir, { recursive: true });
 
   if (!Bun.env.TJS_ZIG_OUT) throw new Error('TJS_ZIG_OUT not set');

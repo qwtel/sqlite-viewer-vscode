@@ -52,7 +52,7 @@ export async function createWebWorker(
         ...walData ? [walData.buffer as ArrayBuffer] : [],
       ];
       const workerDbPromise = workerFns.importDb(filename, Caplink.transfer(args, transfer));
-      workerDbPromise.catch() // prevent unhandled rejection warning (caught elsewhere)
+      workerDbPromise.catch(() => {}) // prevent unhandled rejection warning (caught elsewhere)
       return { promise: workerDbPromise }
     }
   }

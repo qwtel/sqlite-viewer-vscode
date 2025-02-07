@@ -192,7 +192,7 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, licenseK
   }
 
   if (!response.ok || response.headers.get('Content-Type')?.includes('application/json') === false) {
-    response.text().then(console.error).catch();
+    response.text().then(console.error).catch(() => {});
     throw new Error(l10n.t(`License validation request failed: {0}`, response.status));
   }
 
