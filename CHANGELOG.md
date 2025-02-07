@@ -2,9 +2,12 @@
 
 ## v0.10
 ### Localization 🇩🇪 🇫🇷 🇧🇷
-The the extension now includes translations for German, French and Brazilian Portuguese with more translations to follow.
-If your VS Code instance is set to one of these languages, the extension will adjust automatically. 
-You can change your VS Code display language from the Command Pallette under "Configure Display Language".
+The extension now includes translations for German, French and Brazilian Portuguese with more translations to follow.
+If your VS Code display language is set to one of these, the extension will adjust automatically. 
+You can change your VS Code display language from the Command Pallette using "Configure Display Language".
+
+## v0.10.0
+Initial 0.10 release
 
 ## v0.9
 ### Features
@@ -140,7 +143,7 @@ _Released on October 17, 2024_
 ## v0.8.0 (Pre-Release)
 _Released on October 17, 2024_
 
-Initial 0.8 release.
+Initial 0.8 release
 
 ## v0.7.3
 _Released on September 29, 2024_
