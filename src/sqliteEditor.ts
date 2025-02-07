@@ -3,6 +3,8 @@ import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
 import type { WorkerDb, SqlValue } from '../sqlite-viewer-core/src/worker-db';
 
 import * as vsc from 'vscode';
+import * as v8 from '@workers/v8-value-serializer/v8';
+import { encodeBase64 } from '@std/encoding';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
@@ -39,6 +41,7 @@ export type VSCODE_ENV = {
     firstInstall: string,
     sidebarLeft?: string
     sidebarRight?: string
+    vscodeLocale?: string,
 };
 
 const Extension = vsc.extensions.getExtension(FullExtensionId);
@@ -346,6 +349,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       firstInstall: new Date(this.context.globalState.get<number>(FistInstallMs) ?? Date.now()).toISOString(),
       sidebarLeft: this.context.globalState.get<number>(SidebarLeft)?.toString(),
       sidebarRight: this.context.globalState.get<number>(SidebarRight)?.toString(),
+      vscodeLocale: encodeBase64(v8.serialize(vsc.l10n.bundle)),
     } satisfies VSCODE_ENV;
 
     const preparedHtml = html

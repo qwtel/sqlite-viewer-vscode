@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.10
+### Localization 🇩🇪 🇫🇷 🇧🇷
+The the extension now includes translations for German, French and Brazilian Portuguese with more translations to follow.
+If your VS Code instance is set to one of these languages, the extension will adjust automatically. 
+You can change your VS Code display language from the Command Pallette under "Configure Display Language".
+
 ## v0.9
 ### Features
 - [PRO] You can now change values in `BLOB` columns through a new file input field in the modal and sidebar

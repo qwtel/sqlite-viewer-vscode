@@ -1,5 +1,5 @@
 node_modules
-bun.lockb
+bun.lock*
 out
 tmp
 exampleFiles
