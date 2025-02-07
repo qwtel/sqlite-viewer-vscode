@@ -41,7 +41,7 @@ export type VSCODE_ENV = {
     firstInstall: string,
     sidebarLeft?: string
     sidebarRight?: string
-    vscodeLocale?: string,
+    l10nBundle?: string,
 };
 
 const Extension = vsc.extensions.getExtension(FullExtensionId);
@@ -349,7 +349,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       firstInstall: new Date(this.context.globalState.get<number>(FistInstallMs) ?? Date.now()).toISOString(),
       sidebarLeft: this.context.globalState.get<number>(SidebarLeft)?.toString(),
       sidebarRight: this.context.globalState.get<number>(SidebarRight)?.toString(),
-      vscodeLocale: encodeBase64(v8.serialize(vsc.l10n.bundle)),
+      l10nBundle: encodeBase64(v8.serialize(vsc.l10n.bundle)),
     } satisfies VSCODE_ENV;
 
     const lang = vsc.env.language.split('.')[0]?.replace('_', '-') ?? 'en';
