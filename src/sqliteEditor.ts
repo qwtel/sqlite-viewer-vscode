@@ -352,7 +352,10 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       vscodeLocale: encodeBase64(v8.serialize(vsc.l10n.bundle)),
     } satisfies VSCODE_ENV;
 
+    const lang = vsc.env.language.split('.')[0]?.replace('_', '-') ?? 'en';
+
     const preparedHtml = html
+      .replace('<html lang="en"', `<html lang="${lang}"`)
       .replace(/(href|src)="(\/[^"]*)"/g, (_, attr, url) => {
         return `${attr}="${assetAsWebviewUri(url)}"`;
       })
