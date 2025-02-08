@@ -1,5 +1,6 @@
 **/*
 !out
+!l10n
 !sqlite-viewer-core/vscode/build/assets
 !sqlite-viewer-core/vscode/build/index.html
 !documentation/icon.png
@@ -8,3 +9,4 @@
 !LICENSE.md
 !README.md
 !package.json
+!package.nls.*
