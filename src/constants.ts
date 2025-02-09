@@ -2,7 +2,7 @@ export const Ns = 'qwtel';
 export const ExtensionId = 'sqlite-viewer';
 export const FullExtensionId = `${Ns}.${ExtensionId}`
 
-export const LANGS: ('en'|'de'|'fr'|'pt-br'|'ja')[] = ['en', 'de', 'fr', 'pt-br', 'ja'];
+export const LANGS: ('en'|'de'|'fr'|'pt-br'|'ja'|'es')[] = ['en', 'de', 'fr', 'pt-br', 'ja', 'es'];
 
 export const ConfigurationSection = 'sqliteViewer';
 
