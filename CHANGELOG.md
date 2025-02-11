@@ -7,6 +7,8 @@ If your VS Code display language is set to one of these, the extension will adju
 You can change your VS Code display language from the Command Pallette using "Configure Display Language".
 
 ## v0.10.1
+_Released on February 11, 2025_
+
 Added Japanese, Spanish and Korean translations.
 
 ## v0.10.0
