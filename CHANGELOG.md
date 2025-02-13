@@ -266,7 +266,7 @@ _Released on May 19, 2024_
 _Released on July 1, 2024_
 
 Improved column filtering:
-- Added a button to invert a colum filter
+- Added a button to invert a column filter
 - Added a button to filter a column non-nullish (`NULL` or empty string) values. You can combine it with the invert button to filter for nullish values instead.
 - Typing `NULL` or `''` into the column filter will now filter by null or empty string values respectively.
 - Changed representation of empty strings from `""` to `''`. This is to match the filter values above and to distinguish it from the legitimate search target `""`, which can come up in combination with JSON(B) columns. If you need to search for the exact string sequence `''`, use escape characters: `\'\'`.
