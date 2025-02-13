@@ -46,7 +46,7 @@
   "This column is readonly because it belongs to a view": "Diese Spalte ist schreibgeschützt, weil sie zu einer Ansicht gehört",
   "Cannot write in current environment. If you are connected to remote host, make sure SQLite Viewer is installed in the workspace.": "Kann in der aktuellen Umgebung nicht schreiben. Wenn Sie mit einem Remote-Host verbunden sind, stellen Sie sicher, dass SQLite Viewer im Arbeitsbereich installiert ist.",
   "Writable using journal mode: {0}": "Beschreibbar im Journalmodus: {0}",
-  "Delete blob": "BLOB löschen",
+  "Delete BLOB": "BLOB löschen",
   "Download": "Herunterladen",
   "ReadOnly": "Schreibgeschützt",
   "Writable": "Beschreibbar",

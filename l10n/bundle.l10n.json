@@ -46,7 +46,7 @@
   "This column is readonly because it belongs to a view": "This column is readonly because it belongs to a view",
   "Cannot write in current environment. If you are connected to remote host, make sure SQLite Viewer is installed in the workspace.": "Cannot write in current environment. If you are connected to remote host, make sure SQLite Viewer is installed in the workspace.",
   "Writable using journal mode: {0}": "Writable using journal mode: {0}",
-  "Delete blob": "Delete blob",
+  "Delete BLOB": "Delete BLOB",
   "Download": "Download",
   "ReadOnly": "ReadOnly",
   "Writable": "Writable",

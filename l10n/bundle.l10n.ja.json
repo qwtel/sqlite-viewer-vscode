@@ -46,7 +46,7 @@
   "This column is readonly because it belongs to a view": "この列はビューに属しているため読み取り専用です",
   "Cannot write in current environment. If you are connected to remote host, make sure SQLite Viewer is installed in the workspace.": "現在の環境では書き込みできません。リモートホストに接続している場合は、SQLite Viewerがワークスペースにインストールされていることを確認してください。",
   "Writable using journal mode: {0}": "ジャーナルモードを使用して書き込み可能: {0}",
-  "Delete blob": "BLOBを削除",
+  "Delete BLOB": "BLOBを削除",
   "Download": "ダウンロード",
   "ReadOnly": "読み取り専用",
   "Writable": "書き込み可能",

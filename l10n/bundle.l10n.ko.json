@@ -46,7 +46,7 @@
   "This column is readonly because it belongs to a view": "이 열은 뷰에 속하기 때문에 읽기 전용입니다",
   "Cannot write in current environment. If you are connected to remote host, make sure SQLite Viewer is installed in the workspace.": "현재 환경에서 쓸 수 없습니다. 원격 호스트에 연결된 경우 SQLite Viewer가 작업 공간에 설치되어 있는지 확인하십시오.",
   "Writable using journal mode: {0}": "저널 모드를 사용하여 쓰기 가능: {0}",
-  "Delete blob": "BLOB 삭제",
+  "Delete BLOB": "BLOB 삭제",
   "Download": "다운로드",
   "ReadOnly": "읽기전용",
   "Writable": "쓰기가능",
