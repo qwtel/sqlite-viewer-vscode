@@ -61,6 +61,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     extensionUri: vsc.Uri,
     verified: boolean,
     token: vsc.CancellationToken,
+    reporter: TelemetryReporter,
   ): Promise<SQLiteDocument> {
 
     const createWorkerBundle = !import.meta.env.VSCODE_BROWSER_EXT && verified && ReadWriteMode // Do not change this line
@@ -68,21 +69,23 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       : createWebWorker;
 
     const { filename } = getUriParts(uri);
-    const { workerFns, createWorkerDb } = await createWorkerBundle(extensionUri, filename, uri);
+    const { workerFns, createWorkerDb } = await createWorkerBundle(extensionUri, filename, uri, reporter);
     const { promise } = await createWorkerDb(uri, filename, extensionUri);
 
     let history: UndoHistory<SQLiteEdit>|null = null;
     let workerDbPromise = promise;
+
     if (typeof openContext.backupId === 'string') {
       const editsUri = vsc.Uri.parse(openContext.backupId);
       const editsBuffer = await vsc.workspace.fs.readFile(editsUri);
       const h = history = UndoHistory.restore(editsBuffer, MaxHistory);
+
       workerDbPromise = promise
         .then(dbRemote => dbRemote.applyEdits(h.getUnsavedEdits(), cancelTokenToAbortSignal(token)))
         .then(() => promise);
     }
 
-    return new SQLiteDocument(uri, history, workerFns, createWorkerDb, workerDbPromise);
+    return new SQLiteDocument(uri, history, workerFns, createWorkerDb, workerDbPromise, reporter);
   }
 
   getConfiguredMaxFileSize() { return getConfiguredMaxFileSize() }
@@ -97,6 +100,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     private readonly workerFns: WorkerBundle["workerFns"],
     private readonly createWorkerDb: WorkerBundle["createWorkerDb"],
     private workerDbPromise: Promise<Caplink.Remote<WorkerDb>>,
+    private readonly reporter: TelemetryReporter,
   ) {
     super();
     this.#uri = uri;
@@ -256,7 +260,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     token: vsc.CancellationToken
   ): Promise<SQLiteDocument> {
 
-    const document = await SQLiteDocument.create(openContext, uri, this.context.extensionUri, this.verified, token);
+    const document = await SQLiteDocument.create(openContext, uri, this.context.extensionUri, this.verified, token, this.reporter);
 
     const listeners = this.setupListeners(document);
 
