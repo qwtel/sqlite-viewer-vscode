@@ -6,6 +6,10 @@ This extension now includes translations for German, French, Portuguese (Brazil)
 If your VS Code display language is set to one of these, the extension will adjust automatically. 
 You can change your VS Code display language from the Command Pallette using "Configure Display Language".
 
+## v0.10.2
+- Added missing labels to some UI elements
+- Changed wording of some labels
+
 ## v0.10.1
 _Released on February 11, 2025_
 
