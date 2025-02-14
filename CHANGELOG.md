@@ -9,6 +9,7 @@ You can change your VS Code display language from the Command Pallette using "Co
 ## v0.10.2
 - Added missing labels to some UI elements
 - Changed wording of some labels
+- Fixed an issue that caused minor layout shift when hiding columns
 
 ## v0.10.1
 _Released on February 11, 2025_
