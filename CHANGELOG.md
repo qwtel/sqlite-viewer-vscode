@@ -7,6 +7,8 @@ If your VS Code display language is set to one of these, the extension will adju
 You can change your VS Code display language from the Command Pallette using "Configure Display Language".
 
 ## v0.10.2
+_Released on February 14, 2025_
+
 - Added missing labels to some UI elements
 - Changed wording of some labels
 - Fixed an issue that caused minor layout shift when hiding columns
