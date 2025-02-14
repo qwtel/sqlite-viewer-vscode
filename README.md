@@ -1,6 +1,6 @@
 # SQLite Viewer for VS Code
 
-<a href="#deutsch">Deutsch</a> | <a href="#français">Français</a> | <a href="#português">Português</a> | <a href="#日本語">日本語</a> | <a href="#español">Español</a> | <a href="#한국어">한국어</a>
+<a href="#de">Deutsch</a> | <a href="#fr">Français</a> | <a href="#pt-br">Português</a> | <a href="#ja">日本語</a> | <a href="#es">Español</a> | <a href="#kr">한국어</a>
 
 A quick and easy SQLite viewer for VS Code, inspired by DB Browser for SQLite and Airtable.
 
@@ -29,7 +29,9 @@ Inspect `.sqlite` files from any machine, no installation or file upload require
 
 [ref]: https://sqliteviewer.app
 
-# Deutsch
+<br>
+
+<h1 id="de">Deutsch</h1>
 
 Ein schneller und einfacher SQLite-Viewer für VS Code, inspiriert von DB Browser for SQLite und Airtable.
 
@@ -51,7 +53,7 @@ Ein schneller und einfacher SQLite-Viewer für VS Code, inspiriert von DB Browse
 
 <br>
 
-# Français
+<h1 id="fr">Français</h1>
 
 Un visualiseur SQLite rapide et facile pour VS Code, inspiré par DB Browser for SQLite et Airtable.
 
@@ -73,7 +75,7 @@ Un visualiseur SQLite rapide et facile pour VS Code, inspiré par DB Browser for
 
 <br>
 
-# Português
+<h1 id="pt-br">Português</h1>
 
 Um visualizador SQLite rápido e fácil para VS Code, inspirado no DB Browser for SQLite e Airtable.
 
@@ -95,7 +97,7 @@ Um visualizador SQLite rápido e fácil para VS Code, inspirado no DB Browser fo
 
 <br>
 
-# 日本語
+<h1 id="ja">日本語</h1>
 
 VS Code用の迅速かつ簡単なSQLiteビューアーで、DB Browser for SQLiteやAirtableに触発されました。
 
@@ -117,7 +119,7 @@ VS Code用の迅速かつ簡単なSQLiteビューアーで、DB Browser for SQLi
 
 <br>
 
-# Español
+<h1 id="es">Español</h1>
 
 Un visor de SQLite rápido y fácil para VS Code, inspirado en DB Browser for SQLite y Airtable.
 
@@ -139,7 +141,7 @@ Un visor de SQLite rápido y fácil para VS Code, inspirado en DB Browser for SQ
 
 <br>
 
-# 한국어
+<h1 id="kr">한국어</h1>
 
 VS Code를 위한 빠르고 쉬운 SQLite 뷰어로, DB Browser for SQLite 및 Airtable에서 영감을 받았습니다.
 
