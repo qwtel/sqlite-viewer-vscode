@@ -30,8 +30,10 @@ Inspect `.sqlite` files from any machine, no installation or file upload require
 [ref]: https://sqliteviewer.app
 
 <br>
+<p align="center">❖</p>
+<br>
 
-<h1 id="de">Deutsch</h1>
+<h1 id="de">SQLite Viewer für VS Code</h1>
 
 Ein schneller und einfacher SQLite-Viewer für VS Code, inspiriert von DB Browser for SQLite und Airtable.
 
@@ -52,8 +54,10 @@ Ein schneller und einfacher SQLite-Viewer für VS Code, inspiriert von DB Browse
 - Beinhaltet kostenpflichtige Upgrades und gesponserte Inhalte
 
 <br>
+<p align="center">❖</p>
+<br>
 
-<h1 id="fr">Français</h1>
+<h1 id="fr">SQLite Viewer pour VS Code</h1>
 
 Un visualiseur SQLite rapide et facile pour VS Code, inspiré par DB Browser for SQLite et Airtable.
 
@@ -74,8 +78,10 @@ Un visualiseur SQLite rapide et facile pour VS Code, inspiré par DB Browser for
 - Comprend des mises à niveau payantes et du contenu sponsorisé
 
 <br>
+<p align="center">❖</p>
+<br>
 
-<h1 id="pt-br">Português</h1>
+<h1 id="pt-br">SQLite Viewer para VS Code</h1>
 
 Um visualizador SQLite rápido e fácil para VS Code, inspirado no DB Browser for SQLite e Airtable.
 
@@ -96,8 +102,10 @@ Um visualizador SQLite rápido e fácil para VS Code, inspirado no DB Browser fo
 - Inclui atualizações pagas e conteúdo patrocinado
 
 <br>
+<p align="center">❖</p>
+<br>
 
-<h1 id="ja">日本語</h1>
+<h1 id="ja">VS Code用SQLite Viewer</h1>
 
 VS Code用の迅速かつ簡単なSQLiteビューアーで、DB Browser for SQLiteやAirtableに触発されました。
 
@@ -118,8 +126,10 @@ VS Code用の迅速かつ簡単なSQLiteビューアーで、DB Browser for SQLi
 - 有料アップグレードとスポンサーコンテンツが含まれています
 
 <br>
+<p align="center">❖</p>
+<br>
 
-<h1 id="es">Español</h1>
+<h1 id="es">SQLite Viewer para VS Code</h1>
 
 Un visor de SQLite rápido y fácil para VS Code, inspirado en DB Browser for SQLite y Airtable.
 
@@ -140,8 +150,10 @@ Un visor de SQLite rápido y fácil para VS Code, inspirado en DB Browser for SQ
 - Incluye actualizaciones pagas y contenido patrocinado
 
 <br>
+<p align="center">❖</p>
+<br>
 
-<h1 id="kr">한국어</h1>
+<h1 id="kr">VS Code용 SQLite Viewer PRO</h1>
 
 VS Code를 위한 빠르고 쉬운 SQLite 뷰어로, DB Browser for SQLite 및 Airtable에서 영감을 받았습니다.
 
@@ -161,4 +173,6 @@ VS Code를 위한 빠르고 쉬운 SQLite 뷰어로, DB Browser for SQLite 및 A
 - 쿼리 실행기가 없습니다
 - 유료 업그레이드 및 스폰서 콘텐츠가 포함되어 있습니다
 
+<br>
+<p align="center">❖</p>
 <br>
