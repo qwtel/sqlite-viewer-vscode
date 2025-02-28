@@ -42,7 +42,7 @@ Ein schneller und einfacher SQLite-Viewer für VS Code, inspiriert von DB Browse
 <br>
 
 ## Funktionen
-- Plattformunabhängig, keine nativen Abhängigkeiten — funktioniert sogar in VS Code für Web
+- Plattformunabhängig, keine nativen Abhängigkeiten: Es funktioniert sogar in VS Code fürs Web
 - Dateierweiterungszuordnung: Klicken Sie einfach auf eine `.sqlite` oder `.db` Datei und der benutzerdefinierte Viewer öffnet sich
 - Schnelle Benutzeroberfläche mit virtualisiertem Scrollen, Sortieren, Filtern usw.
 - Nahtlose Integration in VS Code und Anpassung an Ihr Farbthema
@@ -66,7 +66,7 @@ Un visualiseur SQLite rapide et facile pour VS Code, inspiré par DB Browser for
 <br>
 
 ## Fonctionnalités
-- Indépendant de la plateforme, sans dépendances natives — fonctionne même dans VS Code pour le Web
+- Indépendant de la plateforme, sans dépendances natives : il fonctionne même sur VS Code pour le Web.
 - Association d'extension de fichier : cliquez simplement sur un fichier `.sqlite` ou `.db` et le visualiseur personnalisé s'ouvre
 - Interface utilisateur rapide avec défilement virtualisé, tri, filtrage, etc.
 - S'intègre parfaitement à VS Code et correspond à votre thème de couleur
