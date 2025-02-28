@@ -27,7 +27,7 @@ A quick and easy SQLite viewer for VS Code, inspired by DB Browser for SQLite an
 You can now use this extension as a standalone web app at [sqliteviewer.app][ref].
 Inspect `.sqlite` files from any machine, no installation or file upload required.
 
-[ref]: https://sqliteviewer.app
+[ref]: https://beta.sqliteviewer.app
 
 <br>
 <p align="center">❖</p>
@@ -175,4 +175,9 @@ VS Code를 위한 빠르고 쉬운 SQLite 뷰어로, DB Browser for SQLite 및 A
 
 <br>
 <p align="center">❖</p>
+<br>
+
+<p align="center">
+<a href="#">English</a> | <a href="#de">Deutsch</a> | <a href="#fr">Français</a> | <a href="#pt-br">Português</a> | <a href="#ja">日本語</a> | <a href="#es">Español</a> | <a href="#kr">한국어</a>
+<br>
 <br>
