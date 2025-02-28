@@ -178,6 +178,6 @@ VS Code를 위한 빠르고 쉬운 SQLite 뷰어로, DB Browser for SQLite 및 A
 <br>
 
 <p align="center">
-<a href="#">English</a> | <a href="#de">Deutsch</a> | <a href="#fr">Français</a> | <a href="#pt-br">Português</a> | <a href="#ja">日本語</a> | <a href="#es">Español</a> | <a href="#kr">한국어</a>
+<a href="#sqlite-viewer-for-vs-code">English</a> | <a href="#de">Deutsch</a> | <a href="#fr">Français</a> | <a href="#pt-br">Português</a> | <a href="#ja">日本語</a> | <a href="#es">Español</a> | <a href="#kr">한국어</a>
 <br>
 <br>
