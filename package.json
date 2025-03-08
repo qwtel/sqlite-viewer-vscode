@@ -137,24 +137,24 @@
     "l10n-export": "npx @vscode/l10n-dev export -o l10n src sqlite-viewer-core/src"
   },
   "devDependencies": {
-    "@txikijs/types": "^24.6.0",
+    "@txikijs/types": "^24.12.0",
     "@types/vscode": "^1.83.1",
-    "bun-types": "^1.1.34",
-    "esbuild": "^0.24.0",
+    "bun-types": "^1.2.4",
+    "esbuild": "^0.25.0",
     "esbuild-plugin-alias": "^0.2.1",
     "esbuild-plugin-polyfill-node": "^0.3.0",
-    "ovsx": "^0.10.0",
-    "typescript": "^5.6.3"
+    "ovsx": "^0.10.1",
+    "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@std/encoding": "npm:@jsr/std__encoding@^1.0.5",
+    "@std/encoding": "npm:@jsr/std__encoding@^1.0.7",
     "@vscode/codicons": "^0.0.36",
-    "@vscode/extension-telemetry": "^0.9.7",
-    "@vscode/vsce": "^2.32.0",
+    "@vscode/extension-telemetry": "^0.9.8",
+    "@vscode/vsce": "^3.2.2",
     "@worker-tools/typed-event-target": "^1.0.0",
     "@workers/typed-event-target": "npm:@jsr/workers__typed-event-target@^1.0.0",
     "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.5.4",
-    "jose": "^5.9.6",
+    "jose": "=5.9.6",
     "node-fetch": "^3.3.2",
     "whatwg-stream-to-async-iter": "^0.6.2"
   }
