@@ -2,8 +2,8 @@
 	"compilerOptions": {
 		"module": "ESNext",
 		"moduleResolution": "Bundler",
-		"target": "ES2021",
-		"lib": ["ES2021", "DOM"],
+		"target": "ES2022",
+    "lib": ["ESNext", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
 		"outDir": "out",
 		"sourceMap": true,
 		"strict": true,
