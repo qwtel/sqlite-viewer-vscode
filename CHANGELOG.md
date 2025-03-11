@@ -7,6 +7,8 @@ If your VS Code display language is set to one of these, the extension will adju
 You can change your VS Code display language from the Command Pallette using "Configure Display Language".
 
 ## v0.10.3 (Pre-Release)
+_Released on March 11, 2025_
+
 - Fixed an issue that caused ordering of exported rows to match the selection order rather and ordering in the UI
 - Updated SQLite to 3.49.1
 - Updated internal dependencies
