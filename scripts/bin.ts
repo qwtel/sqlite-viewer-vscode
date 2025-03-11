@@ -29,7 +29,7 @@ const targets = [
   "web",
 ] as const;
 
-const targetToZigTriple = {
+const targetToZigTriple = Object.freeze({
   "win32-x64": "x86_64-windows",
   "win32-arm64" : "aarch64-windows",
   "linux-x64" : "x86_64-linux-gnu",
@@ -39,7 +39,7 @@ const targetToZigTriple = {
   "alpine-arm64" : "aarch64-linux-musl",
   "darwin-x64" : "x86_64-macos",
   "darwin-arm64" : "aarch64-macos",
-};
+});
 
 const outDir = resolve('out')
 const tmpDir = resolve('tmp')

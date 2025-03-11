@@ -60,7 +60,7 @@ export const packageExt = async (opts: {
     ...target ? ["--target", target] : [], 
     ...tool === "vsce" ? ["--baseContentUrl", "https://raw.githubusercontent.com/qwtel/sqlite-viewer-vscode/master/"] : []
   ];
-  console.log(`Spawning '${cmd.join(" ")}':`);
+  console.log(`Spawning '${cmd.join(" ")}':`, cmd);
   const proc = Bun.spawn(cmd, {
     env: { 
       ...env, 

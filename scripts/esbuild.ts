@@ -14,9 +14,9 @@ console.log({ DEV })
 const outDir = resolve('out')
 
 function envToDefine(env: Record<string, any>): Record<`import.meta.env.${string}`, string> {
-  const res =  Object.fromEntries(Object.entries(env).map(([k, v]) => [`import.meta.env.${k}`, JSON.stringify(v)]))
-  console.log(res)
-  return res;
+  const metaEnv =  Object.fromEntries(Object.entries(env).map(([k, v]) => [`import.meta.env.${k}`, JSON.stringify(v)]))
+  console.log(metaEnv)
+  return metaEnv;
 }
 
 const config = {
