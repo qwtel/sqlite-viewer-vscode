@@ -33,6 +33,8 @@ export const packageExt = async (opts: {
 }, env = Bun.env) => {
   let { tool, kind, target, 'pre-release': preRelease } = opts;
 
+  console.log({ tool, kind, target, preRelease })
+
   tool ||= "vsce";
   if (!tools.includes(tool as any)) {
     throw new Error(`Invalid tool: ${tool}. Must be one of: ${tools.join(', ')}`);
