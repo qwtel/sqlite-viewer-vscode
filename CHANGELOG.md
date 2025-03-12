@@ -9,7 +9,7 @@ You can change your VS Code display language from the Command Pallette using "Co
 ## v0.10.5 (Hotfix)
 _Released on March 12, 2025_
 
-Fixed an issue that prevents the editor from opening in the latest VS Code preview build
+Fixed an issue that prevented the editor from opening in the latest VS Code preview build
 
 ## v0.10.4 (Pre-Release)
 _Released on March 11, 2025_
