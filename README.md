@@ -10,7 +10,7 @@ A quick and easy SQLite viewer for VS Code, inspired by DB Browser for SQLite an
 
 ## Features
 - Platform-independent, no native dependencies — it even works in VS Code for Web
-- File extension association: Just click on a `.sqlite` or `.db` file and the custom viewer opens
+- File extension association: Just click on a `.sqlite` or `.db` file and the custom editor opens
 - Fast UI with virtualized scrolling, sorting, filtering, etc.
 - Seamlessly integrates with VS Code and matches your color theme
 
@@ -43,7 +43,7 @@ Ein schneller und einfacher SQLite-Viewer für VS Code, inspiriert von DB Browse
 
 ## Funktionen
 - Plattformunabhängig, keine nativen Abhängigkeiten: Es funktioniert sogar in VS Code fürs Web
-- Dateierweiterungszuordnung: Klicken Sie einfach auf eine `.sqlite` oder `.db` Datei und der benutzerdefinierte Viewer öffnet sich
+- Dateierweiterungszuordnung: Klicken Sie einfach auf eine `.sqlite` oder `.db` Datei und der spezialisierte Editor öffnet sich
 - Schnelle Benutzeroberfläche mit virtualisiertem Scrollen, Sortieren, Filtern usw.
 - Nahtlose Integration in VS Code und Anpassung an Ihr Farbthema
 
@@ -67,7 +67,7 @@ Un visualiseur SQLite rapide et facile pour VS Code, inspiré par DB Browser for
 
 ## Fonctionnalités
 - Indépendant de la plateforme, sans dépendances natives : il fonctionne même sur VS Code pour le Web.
-- Association d'extension de fichier : cliquez simplement sur un fichier `.sqlite` ou `.db` et le visualiseur personnalisé s'ouvre
+- Association d'extension de fichier : cliquez simplement sur un fichier `.sqlite` ou `.db` et l'éditeur spécialisé s'ouvre
 - Interface utilisateur rapide avec défilement virtualisé, tri, filtrage, etc.
 - S'intègre parfaitement à VS Code et correspond à votre thème de couleur
 
@@ -91,7 +91,7 @@ Um visualizador SQLite rápido e fácil para VS Code, inspirado no DB Browser fo
 
 ## Funcionalidades
 - Independente de plataforma, sem dependências nativas — funciona até mesmo no VS Code para Web
-- Associação de extensão de arquivo: basta clicar em um arquivo `.sqlite` ou `.db` e o visualizador personalizado será aberto
+- Associação de extensão de arquivo: basta clicar em um arquivo `.sqlite` ou `.db` e o editor especializado será aberto
 - Interface rápida com rolagem virtualizada, classificação, filtragem, etc.
 - Integra-se perfeitamente ao VS Code e combina com seu tema de cores
 
@@ -115,7 +115,7 @@ VS Code用の迅速かつ簡単なSQLiteビューアーで、DB Browser for SQLi
 
 ## 機能
 - プラットフォームに依存しない、ネイティブ依存関係なし — Web版VS Codeでも動作します
-- ファイル拡張子の関連付け: `.sqlite` または `.db` ファイルをクリックするだけで、カスタムビューアーが開きます
+- ファイル拡張子の関連付け: `.sqlite` または `.db` ファイルをクリックするだけで、専用エディタが開きます
 - 仮想スクロール、ソート、フィルタリングなどの高速UI
 - VS Codeとシームレスに統合され、カラーテーマにマッチします
 
@@ -139,7 +139,7 @@ Un visor de SQLite rápido y fácil para VS Code, inspirado en DB Browser for SQ
 
 ## Características
 - Independiente de la plataforma, sin dependencias nativas — funciona incluso en VS Code para Web
-- Asociación de extensión de archivo: simplemente haga clic en un archivo `.sqlite` o `.db` y se abrirá el visor personalizado
+- Asociación de extensión de archivo: simplemente haga clic en un archivo `.sqlite` o `.db` y se abrirá el editor especializado
 - Interfaz rápida con desplazamiento virtualizado, clasificación, filtrado, etc.
 - Se integra perfectamente con VS Code y coincide con su tema de color
 
@@ -163,7 +163,7 @@ VS Code를 위한 빠르고 쉬운 SQLite 뷰어로, DB Browser for SQLite 및 A
 
 ## 기능
 - 플랫폼에 독립적이며 네이티브 종속성이 없습니다 — 웹용 VS Code에서도 작동합니다
-- 파일 확장자 연결: `.sqlite` 또는 `.db` 파일을 클릭하기만 하면 사용자 지정 뷰어가 열립니다
+- 파일 확장자 연결: `.sqlite` 또는 `.db` 파일을 클릭하기만 하면 전용 에디터가 열립니다
 - 가상 스크롤, 정렬, 필터링 등의 빠른 UI
 - VS Code와 원활하게 통합되며 색상 테마와 일치합니다
 
