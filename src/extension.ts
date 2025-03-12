@@ -39,20 +39,25 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
   for (const sub of prevSubs) context.subscriptions.splice(context.subscriptions.indexOf(sub), 1);
   disposeAll(prevSubs);
 
-  const licenseKey = context.globalState.get<string>(LicenseKey);
+  let verified = false;
   let accessToken = context.globalState.get<string>(AccessToken);
-  if (licenseKey) {
-    const payload = getPayload(accessToken);
-    const daysSinceIssued = accessToken && payload?.iat && !!payload.exp && calcDaysSinceIssued(payload.iat);
-    const freshAccessToken = refreshAccessToken(context, licenseKey, accessToken).catch(err => {
-      if (err instanceof Error) vsc.window.showWarningMessage(err.message); else console.error(err)
-      return accessToken;
-    });
-    if (!accessToken || (daysSinceIssued && daysSinceIssued > 14)) {
-      accessToken = await freshAccessToken;
+  try {
+    const licenseKey = context.globalState.get<string>(LicenseKey);
+    if (licenseKey) {
+      const payload = getPayload(accessToken);
+      const daysSinceIssued = accessToken && payload?.iat && !!payload.exp && calcDaysSinceIssued(payload.iat);
+      const freshAccessToken = refreshAccessToken(context, licenseKey, accessToken).catch(err => {
+        if (err instanceof Error) vsc.window.showWarningMessage(err.message); else console.error(err)
+        return accessToken;
+      });
+      if (!accessToken || (daysSinceIssued && daysSinceIssued > 14)) {
+        accessToken = await freshAccessToken;
+      }
     }
+    verified = !!accessToken && !!await verifyToken(accessToken);
+  } catch (err) {
+    if (err instanceof Error) vsc.window.showWarningMessage(err.message); else console.error(err)
   }
-  const verified = !!accessToken && !!await verifyToken(accessToken);
 
   const subs = [];
   subs.push(registerProvider(context, reporter, `${ExtensionId}.view`, verified, accessToken));
