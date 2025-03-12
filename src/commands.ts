@@ -152,7 +152,7 @@ export function calcDaysSinceIssued(issuedAt: number) {
 }
 
 export function getPayload(accessToken?: string) {
-  return accessToken != null ? jose.decodeJwt(accessToken) : null;
+  return !!accessToken ? jose.decodeJwt(accessToken) : null;
 }
 
 function abortControllerTimeout(n: number) {
