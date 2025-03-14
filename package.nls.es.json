@@ -1,7 +1,7 @@
 {
-  "extension.config.sqliteViewer.maxFileSize.markdownDescription": "El tamaño máximo de archivo en MB que la extensión intentará cargar. Establezca en 0 para desactivar el límite. El límite interno es de 4GB, pero los límites de la plataforma pueden aplicarse antes.\n\n__Advertencia__: Abrir archivos grandes puede causar un rendimiento deficiente, bloqueos y presión de memoria en todo el sistema.",
-  "extension.commands.addFileNestingPatterns.title": "Agregar Patrones de Anidamiento de Archivos SQLite",
-  "extension.commands.enterLicenseKey.title": "Activar Clave de Licencia",
-  "extension.commands.removeLicenseKey.title": "Desactivar Clave de Licencia",
-  "extension.commands.enterAccessToken.title": "Activación de Licencia Offline"
+  "sqlite-viewer.config.maxFileSize.markdownDescription": "El tamaño máximo de archivo en MB que la extensión intentará cargar. Establezca en 0 para desactivar el límite. El límite interno es de 4GB, pero los límites de la plataforma pueden aplicarse antes.\n\n__Advertencia__: Abrir archivos grandes puede causar un rendimiento deficiente, bloqueos y presión de memoria en todo el sistema.",
+  "sqlite-viewer.commands.addFileNestingPatterns.title": "Agregar Patrones de Anidamiento de Archivos SQLite",
+  "sqlite-viewer.commands.enterLicenseKey.title": "Activar Clave de Licencia",
+  "sqlite-viewer.commands.removeLicenseKey.title": "Desactivar Clave de Licencia",
+  "sqlite-viewer.commands.enterAccessToken.title": "Activación de Licencia Offline"
 }

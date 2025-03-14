@@ -1,7 +1,7 @@
 {
-  "extension.config.sqliteViewer.maxFileSize.markdownDescription": "The maximum file size in MB the extension will attempt to load. Set to 0 to disable the limit. The internal limit is 4GB, but platform limits may apply earlier.\n\n__Warning__: Opening large files may cause poor performance, freezes, and system-wide memory pressure.",
-	"extension.commands.addFileNestingPatterns.title": "Add SQLite File Nesting Patterns",
-  "extension.commands.enterLicenseKey.title": "Activate License Key",
-  "extension.commands.removeLicenseKey.title": "Deactivate License Key",
-  "extension.commands.enterAccessToken.title": "Offline License Activation"
+  "sqlite-viewer.config.maxFileSize.markdownDescription": "The maximum file size in MB the extension will attempt to load. Set to 0 to disable the limit. The internal limit is 4GB, but platform limits may apply earlier.\n\n__Warning__: Opening large files may cause poor performance, freezes, and system-wide memory pressure.",
+	"sqlite-viewer.commands.addFileNestingPatterns.title": "Add SQLite File Nesting Patterns",
+  "sqlite-viewer.commands.enterLicenseKey.title": "Activate License Key",
+  "sqlite-viewer.commands.removeLicenseKey.title": "Deactivate License Key",
+  "sqlite-viewer.commands.enterAccessToken.title": "Offline License Activation"
 }

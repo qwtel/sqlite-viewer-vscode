@@ -85,29 +85,29 @@
           "maximum": 4000,
           "exclusiveMinimum": false,
           "default": 200,
-          "markdownDescription": "%extension.config.sqliteViewer.maxFileSize.markdownDescription%"
+          "markdownDescription": "%sqlite-viewer.config.maxFileSize.markdownDescription%"
         }
       }
     },
     "commands": [
       {
         "command": "sqlite-viewer.addFileNestingPatterns",
-        "title": "%extension.commands.addFileNestingPatterns.title%",
+        "title": "%sqlite-viewer.commands.addFileNestingPatterns.title%",
         "category": "SQLite Viewer"
       },
       {
         "command": "sqlite-viewer.enterLicenseKey",
-        "title": "%extension.commands.enterLicenseKey.title%",
+        "title": "%sqlite-viewer.commands.enterLicenseKey.title%",
         "category": "SQLite Viewer"
       },
       {
         "command": "sqlite-viewer.removeLicenseKey",
-        "title": "%extension.commands.removeLicenseKey.title%",
+        "title": "%sqlite-viewer.commands.removeLicenseKey.title%",
         "category": "SQLite Viewer"
       },
       {
         "command": "sqlite-viewer.enterAccessToken",
-        "title": "%extension.commands.enterAccessToken.title%",
+        "title": "%sqlite-viewer.commands.enterAccessToken.title%",
         "category": "SQLite Viewer"
       }
     ]
