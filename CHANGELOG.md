@@ -1,8 +1,13 @@
 # CHANGELOG
 
-## v25.3.0
-This extension is now published using Calendar Versioning of the shape `YY.MM.MICRO`.
-Using SemVer for a UI client never made much sense, nor was there a clear cutoff when this extension went from 0 to 1.
+## March 2025
+This extension is now published using Calendar Versioning of shape: `YY.MM.MICRO`. Using SemVer for a UI client never made much sense, nor was there a clear cutoff when this extension went from 0 to 1.
+
+## v25.3.0 (Pre-Release)
+_Released on March 14, 2025_
+
+- Fixed a bug that caused shift-select to fail for certain `ORDER BY` combinations
+- Scroll bars of text fields are now thinner
 
 ## v0.10
 ### Localization 🇩🇪 🇫🇷 🇧🇷 🇯🇵 🇪🇸 🇰🇷
@@ -10,10 +15,10 @@ This extension now includes translations for German, French, Portuguese (Brazil)
 If your VS Code display language is set to one of these, the extension will adjust automatically. 
 You can change your VS Code display language from the Command Pallette using "Configure Display Language".
 
-## v0.10.5 (Hotfix)
+## v0.10.5
 _Released on March 12, 2025_
 
-Fixed an issue that prevented the editor from opening in the latest VS Code preview build
+Fixed an issue that prevented the editor from opening in the latest VS Code preview build.
 
 ## v0.10.4 (Pre-Release)
 _Released on March 11, 2025_
