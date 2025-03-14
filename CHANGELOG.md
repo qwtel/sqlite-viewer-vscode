@@ -1,12 +1,14 @@
 # CHANGELOG
 
+## v25.3.0
+This extension is now published using Calendar Versioning of the shape `YY.MM.MICRO`.
+Using SemVer for a UI client never made much sense, nor was there a clear cutoff when this extension went from 0 to 1.
+
 ## v0.10
 ### Localization 🇩🇪 🇫🇷 🇧🇷 🇯🇵 🇪🇸 🇰🇷
 This extension now includes translations for German, French, Portuguese (Brazil), Japanese, Spanish and Korean.
 If your VS Code display language is set to one of these, the extension will adjust automatically. 
 You can change your VS Code display language from the Command Pallette using "Configure Display Language".
-
-## v0.10.6 (Pre-Release)
 
 ## v0.10.5 (Hotfix)
 _Released on March 12, 2025_
