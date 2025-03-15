@@ -4,6 +4,8 @@
 This extension is now published using Calendar Versioning of shape: `YY.MM.MICRO`. Using SemVer for a UI client never made much sense, nor was there a clear cutoff when this extension went from 0 to 1.
 
 ## v25.3.0 (Pre-Release)
+_Released on March 15, 2025_
+
 - Fixed a bug that caused shift-select to fail for certain `ORDER BY` combinations
 - Scroll bars of text fields are now thinner
 
