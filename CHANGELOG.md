@@ -1,13 +1,19 @@
 # CHANGELOG
 
 ## March 2025
-This extension is now published using Calendar Versioning of shape: `YY.MM.MICRO`. Using SemVer for a UI client never made much sense, nor was there a clear cutoff when this extension went from 0 to 1.
+This extension is now published using Calendar Versioning of shape: `YY.MM.MICRO`. Using SemVer for a UI client never made much sense, nor was there a clear cutoff when this extension went from 0 to 1. Going forward, all versions going forward will be a date + incremental number.
+
+## v25.3.1
+Published all changes from recent pre-releases on main channel
 
 ## v25.3.0 (Pre-Release)
 _Released on March 15, 2025_
 
-- Fixed a bug that caused shift-select to fail for certain `ORDER BY` combinations
+- Tables are now always explicitly sorted by `ROWID` unless a user-sorting is present. Tables without `ROWID`s are sorted by their primary keys (in order).
+- `ROWID` is now always used as a tie-breaker when sorting by a column that contains duplicate values to ensure a unique ordering. Tables without `ROWID` use their primary keys (in order) as tie-breakers.
+- Fixed a bug that caused shift-select to fail for certain orderings with duplicate values (see above).
 - Scroll bars of text fields are now thinner
+- Changed frontend bundler from Rollup to esbuild
 
 ## v0.10
 ### Localization 🇩🇪 🇫🇷 🇧🇷 🇯🇵 🇪🇸 🇰🇷
@@ -30,7 +36,8 @@ _Released on March 11, 2025_
 
 - Fixed an issue that caused ordering of exported rows to match the selection order rather and ordering in the UI
 - Updated SQLite to 3.49.1
-- Updated internal dependencies
+- Updated many internal dependencies
+- [PRO] The toolchain to compile the native helper was updated from Zig 0.13 to 0.14
 
 ## v0.10.2
 _Released on February 14, 2025_
