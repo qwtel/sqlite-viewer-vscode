@@ -1,16 +1,30 @@
 # CHANGELOG
 
 ## March 2025
-This extension is now published using Calendar Versioning of shape: `YY.MM.MICRO`. Using SemVer for a UI client never made much sense, nor was there a clear cutoff when this extension went from 0 to 1. Going forward, all versions going forward will be a date + incremental number.
+This extension is now published using Calendar Versioning of shape: `YY.MM.MICRO`. Using SemVer for a UI client never made much sense, nor was there a clear cutoff when this extension went from 0 to 1. Going forward, all versions will be a date + incremental number.
 
-## v25.3.1
-Published all changes from recent pre-releases on main channel
+## v25.3.1 (Pre-Release)
+### Better Dynamic Typing Support
+The viewer will now better differentiate between column types (as defined by `CREATE TABLE`) and the actual types of individual values. 
+The labels in the detail view have been updated to indicate this. 
+For example, when a `TEXT` value was inserted in a `BLOB` column, the label will be `TEXT→BLOB` instead of just `BLOB`.
+
+### Basic `JSONB` Support
+- Values in `JSONB` columns are now rendered in their textual representation instead of downloadable blobs
+- [PRO] Values inserted or updated in `JSONB` columns are now automatically wrapped in `jsonb(?)`
+
+### Other
+- Reduced cutoff for rendering `BLOB` columns in hex format from 256 to 48 bytes 
+- Download button in cells is now always aligned right
+- Size in bytes is now displayed even when showing a preview image in a cell
+- Now always showing the total number of rows alongside the number of filtered rows
+- `BLOB` columns with `NULL` values now show a prominent 'NULL' label in the detail view
 
 ## v25.3.0 (Pre-Release)
 _Released on March 15, 2025_
 
-- Tables are now always explicitly sorted by `ROWID` unless a user-sorting is present. Tables without `ROWID`s are sorted by their primary keys (in order).
-- `ROWID` is now always used as a tie-breaker when sorting by a column that contains duplicate values to ensure a unique ordering. Tables without `ROWID` use their primary keys (in order) as tie-breakers.
+- Tables are now always explicitly sorted by `ROWID` unless a user-sorting is defined. Tables without `ROWID`s are now always explicitly sorted by their primary keys (in order).
+- `ROWID` is now always used as a tie-breaker when sorting by a column that contains duplicate values to ensure a unique ordering. Tables without `ROWID` now always use their primary keys (in order) as tie-breakers.
 - Fixed a bug that caused shift-select to fail for certain orderings with duplicate values (see above).
 - Scroll bars of text fields are now thinner
 - Changed frontend bundler from Rollup to esbuild
