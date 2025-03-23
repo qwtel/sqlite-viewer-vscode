@@ -15,11 +15,16 @@ For example, when a `TEXT` value was inserted in a `BLOB` column, the label will
 
 ### Other
 - Reduced cutoff for rendering `BLOB` columns in hex format from 256 to 48 bytes 
-- Download button in cells is now always aligned right
+- Download button in cells is now always aligned left
 - Size in bytes is now displayed even when showing a preview image in a cell
 - Now always showing the total number of rows alongside the number of filtered rows
 - `BLOB` columns with `NULL` values now show a prominent 'NULL' label in the detail view
 - Added some missing translations
+- Fixed a bug that caused the file size shown on the download button in the detail view to be incorrect
+- Changed storage size calculation and labels to match the user's OS:
+  - On Windows it will use multiples of 1024 and KB, MB, etc. labels (unchanged) 
+  - On macOS it will use multiples of 1000 with KB, MB, etc. labels
+  - Others will use multiples of 1024 with KiB, MiB, etc. labels
 
 ## v25.3.0 (Pre-Release)
 _Released on March 15, 2025_
