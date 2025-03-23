@@ -4,6 +4,8 @@
 This extension is now published using Calendar Versioning of shape: `YY.MM.MICRO`. Using SemVer for a UI client never made much sense, nor was there a clear cutoff when this extension went from 0 to 1. Going forward, all versions will be a date + incremental number.
 
 ## v25.3.1 (Pre-Release)
+_Released on March 23, 2025_
+
 ### Better Dynamic Typing Support
 The viewer will now better differentiate between column types (as defined by `CREATE TABLE`) and the actual types of individual values. 
 The labels in the detail view have been updated to indicate this. 
