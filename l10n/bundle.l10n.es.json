@@ -89,7 +89,7 @@
   "Non-empty": "No vacío",
   "Invert": "Invertir",
   "Delete row(s) in '{0}'": "Eliminar fila(s) en '{0}'",
-  "\"{0}\" ocurrió al intentar eliminar fila(s) en '{1}'": "\"{0}\" ocurrió al intentar eliminar fila(s) en '{1}\".",
+  "\"{0}\" occurred while attempting to delete row(s) in '{1}'": "\"{0}\" ocurrió al intentar eliminar fila(s) en '{1}\".",
   "Open in modal dialog": "Abrir en diálogo modal",
   "Unpin row": "Desanclar fila",
   "Pin row": "Anclar fila",
