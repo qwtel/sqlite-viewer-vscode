@@ -19,6 +19,7 @@ For example, when a `TEXT` value was inserted in a `BLOB` column, the label will
 - Size in bytes is now displayed even when showing a preview image in a cell
 - Now always showing the total number of rows alongside the number of filtered rows
 - `BLOB` columns with `NULL` values now show a prominent 'NULL' label in the detail view
+- Added some missing translations
 
 ## v25.3.0 (Pre-Release)
 _Released on March 15, 2025_
