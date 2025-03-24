@@ -82,8 +82,6 @@ Added German, French and Portuguese translations.
 ### Features
 - [PRO] You can now change values in `BLOB` columns through a new file input field in the modal and sidebar
 - [PRO] Added a button to set a `BLOB` value to `NULL` in the modal and sidebar
-- Using Ctrl+C on a single row in the free version will no longer show the PRO version popup. 
-  Instead it will copy the selected row to the clipboard in TSV format.
 
 ### Changes
 - Image previews are now only fetched from the db when they are visible in the viewport
