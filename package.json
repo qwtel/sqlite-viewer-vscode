@@ -139,18 +139,18 @@
   "devDependencies": {
     "@txikijs/types": "^24.12.0",
     "@types/vscode": "=1.83.1",
-    "bun-types": "^1.2.5",
-    "esbuild": "^0.25.1",
+    "bun-types": "^1.2.8",
+    "esbuild": "^0.25.2",
     "esbuild-plugin-alias": "^0.2.1",
     "esbuild-plugin-polyfill-node": "^0.3.0",
     "ovsx": "^0.10.1",
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@std/encoding": "npm:@jsr/std__encoding@^1.0.7",
+    "@std/encoding": "npm:@jsr/std__encoding@^1.0.8",
     "@vscode/codicons": "^0.0.36",
     "@vscode/extension-telemetry": "^0.9.8",
-    "@vscode/vsce": "^3.2.2",
+    "@vscode/vsce": "^3.3.2",
     "@worker-tools/typed-event-target": "^1.0.0",
     "@workers/typed-event-target": "npm:@jsr/workers__typed-event-target@^1.0.0",
     "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.5.4",
