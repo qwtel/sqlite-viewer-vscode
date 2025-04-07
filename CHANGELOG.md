@@ -3,6 +3,20 @@
 ## March 2025
 This extension is now published using Calendar Versioning of shape: `YY.MM.MICRO`. Using SemVer for a UI client never made much sense, nor was there a clear cutoff when this extension went from 0 to 1. Going forward, all versions will be a date + incremental number.
 
+## v25.3.2 (Pre-Release)
+### Basic Date/Time Support
+Columns that are defined as either `DATE` or `DATETIME` ...
+
+### Changes
+- Column types like `NVARCHAR(255)` will have their limits enforced in the UI
+- Column types like `NUMERIC(10, 3)` will have their 
+
+### Fixes
+- [PRO] Fixed lost precision when viewing integers above 2^53 - 1 and below -(2^53 - 1)
+- [PRO] Fixed potential issues with inserting and updating values in table that have special names
+- Fixed a crash caused by an incorrect call to `setValidity`
+- Fixed incorrect label for `ROWID`
+
 ## v25.3.1 (Pre-Release)
 _Released on March 23, 2025_
 
