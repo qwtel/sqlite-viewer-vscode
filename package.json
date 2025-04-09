@@ -139,15 +139,15 @@
   "devDependencies": {
     "@txikijs/types": "^24.12.0",
     "@types/vscode": "=1.83.1",
-    "bun-types": "^1.2.8",
+    "bun-types": "^1.2.9",
     "esbuild": "^0.25.2",
     "esbuild-plugin-alias": "^0.2.1",
     "esbuild-plugin-polyfill-node": "^0.3.0",
     "ovsx": "^0.10.1",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@std/encoding": "npm:@jsr/std__encoding@^1.0.8",
+    "@std/encoding": "npm:@jsr/std__encoding@^1.0.9",
     "@vscode/codicons": "^0.0.36",
     "@vscode/extension-telemetry": "^0.9.8",
     "@vscode/vsce": "^3.3.2",
