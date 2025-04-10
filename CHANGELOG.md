@@ -1,21 +1,41 @@
 # CHANGELOG
 
-## March 2025
-This extension is now published using Calendar Versioning of shape: `YY.MM.MICRO`. Using SemVer for a UI client never made much sense, nor was there a clear cutoff when this extension went from 0 to 1. Going forward, all versions will be a date + incremental number.
+## v25.4.0 (Pre-Release)
+### Date/Time Support
+Columns that are defined as either `DATE` or `DATETIME` are now shown as formatted dates.
+You can switch between showing raw data and formatted dates in both the main and sidebar section.
+Supported datetime formats are:
+SQLite's ISO-like strings,
+ISO-8601 strings,
+Julian Day,
+Seconds since 1970,
+Milliseconds since 1970\*,
+Microseconds since 1970\*,
+Excel serial date [1900 system] (REAL)\*,
+Windows FILETIME since 1601\*, and
+.NET Ticks since 0001\*.
 
-## v25.3.2 (Pre-Release)
-### Basic Date/Time Support
-Columns that are defined as either `DATE` or `DATETIME` ...
+Formats marked with * are not supported by SQLite's own datetime functions, but the extension can render them in human-readable form regardless.
 
-### Changes
-- Column types like `NVARCHAR(255)` will have their limits enforced in the UI
-- Column types like `NUMERIC(10, 3)` will have their 
+You can toggle between showing the date in your local timezone and UTC. Other timezones are currently not supported. The toggle has no effect on ISO-like textual dates without any timezone identifier.
+
+[PRO] customers can edit values, either through the webview's generic date picker or modifying the ISO-like string. The extension will write the original format to disk if it was recognized correctly, or manually selected in the UI.
+
+### Other
+- ISO-like textual date/time values are now aligned left. These strings grow from left to right, so that left-alignment ensures years, months, etc. line up vertically
+- Minor improvements to various translations 
+  - More language appropriate use of quotation marks and equivalents in error messages
+  - In error messages, table and column names are now marked with `[...]` (or language-appropriate equivalents) instead of `'...'` to avoid double nested single quotes `'` in some generated messages
 
 ### Fixes
 - [PRO] Fixed lost precision when viewing integers above 2^53 - 1 and below -(2^53 - 1)
-- [PRO] Fixed potential issues with inserting and updating values in table that have special names
+- [PRO] Fixed potential issues with inserting and updating values in tables that have special characters in the name
 - Fixed a crash caused by an incorrect call to `setValidity`
-- Fixed incorrect label for `ROWID`
+- Fixed incorrect hover tooltip for `ROWID`
+- Arrow icons in column type labels now look identical across platforms
+
+## March 2025
+This extension is now published using Calendar Versioning of shape: `YY.MM.MICRO`. Using SemVer for a UI client never made much sense, nor was there a clear cutoff when this extension went from 0 to 1. Going forward, all versions will be a date + incremental number.
 
 ## v25.3.1 (Pre-Release)
 _Released on March 23, 2025_
