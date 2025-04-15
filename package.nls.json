@@ -1,4 +1,5 @@
 {
+  "sqlite-viewer.customEditor.option.displayName": "SQLite Viewer (any file extension)",
   "sqlite-viewer.config.maxFileSize.markdownDescription": "The maximum file size in MB the extension will attempt to load. Set to 0 to disable the limit. The internal limit is 4GB, but platform limits may apply earlier.\n\n__Warning__: Opening large files may cause poor performance, freezes, and system-wide memory pressure.",
 	"sqlite-viewer.commands.addFileNestingPatterns.title": "Add SQLite File Nesting Patterns",
   "sqlite-viewer.commands.enterLicenseKey.title": "Activate License Key",

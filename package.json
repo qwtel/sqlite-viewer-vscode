@@ -67,7 +67,7 @@
       },
       {
         "viewType": "sqlite-viewer.option",
-        "displayName": "SQLite Viewer",
+        "displayName": "%sqlite-viewer.customEditor.option.displayName%",
         "selector": [
           {
             "filenamePattern": "*"
@@ -144,7 +144,7 @@
     "esbuild": "^0.25.2",
     "esbuild-plugin-alias": "^0.2.1",
     "esbuild-plugin-polyfill-node": "^0.3.0",
-    "ovsx": "^0.10.1",
+    "ovsx": "^0.10.2",
     "typescript": "^5.8.3"
   },
   "dependencies": {

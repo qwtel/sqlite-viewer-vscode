@@ -1,4 +1,5 @@
 {
+  "sqlite-viewer.customEditor.option.displayName": "SQLite Viewer (cualquier extensión de archivo)",
   "sqlite-viewer.config.maxFileSize.markdownDescription": "El tamaño máximo de archivo en MB que la extensión intentará cargar. Establezca en 0 para desactivar el límite. El límite interno es de 4GB, pero los límites de la plataforma pueden aplicarse antes.\n\n__Advertencia__: Abrir archivos grandes puede causar un rendimiento deficiente, bloqueos y presión de memoria en todo el sistema.",
   "sqlite-viewer.commands.addFileNestingPatterns.title": "Agregar Patrones de Anidamiento de Archivos SQLite",
   "sqlite-viewer.commands.enterLicenseKey.title": "Activar Clave de Licencia",
