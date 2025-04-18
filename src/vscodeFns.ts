@@ -1,8 +1,10 @@
 import * as vsc from 'vscode';
 import { SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
 import { FullExtensionId } from './constants';
+
 import type { DbParams } from '../sqlite-viewer-core/src/signals';
 import type { UITypeAffinity } from '../sqlite-viewer-core/src/utils';
+import type { RowId } from '../sqlite-viewer-core/src/worker-db-utils';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
 
@@ -101,7 +103,7 @@ export class VscodeFns {
     return await vsc.window.showErrorMessage(message, options, ...items as any[]);
   }
 
-  async openCellEditor(params: DbParams, rowId: string|number, colName: string, uiTypeAffinity?: UITypeAffinity) {
+  async openCellEditor(params: DbParams, rowId: RowId, colName: string, uiTypeAffinity?: UITypeAffinity) {
     const { document } = this;
     if (document.uri.scheme !== 'untitled') {
       const cellFilename = colName + (uiTypeAffinity === 'JSON' ? '.json' : '.txt');

@@ -214,10 +214,12 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, licenseK
   return data.token;
 }
 
+const jwtKeyPromise = jose.importSPKI(JWTPublicKeySPKI, 'ES256')
+jwtKeyPromise.catch(() => {});
+
 export async function verifyToken<PayloadType = jose.JWTPayload>(accessToken: string): Promise<PayloadType & jose.JWTPayload|null> {
   try {
-    const jwtKey = await jose.importSPKI(JWTPublicKeySPKI, 'ES256');
-    const { payload } = await jose.jwtVerify<PayloadType>(accessToken, jwtKey);
+    const { payload } = await jose.jwtVerify<PayloadType>(accessToken, await jwtKeyPromise);
     return payload;
   } catch {
     return null;

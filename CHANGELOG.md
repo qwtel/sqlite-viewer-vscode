@@ -37,6 +37,8 @@ You can edit values, either through the webview's generic date picker or modifyi
 ### Additions
 - `JSONB` value are now rendered correctly regardless of column type
 - [PRO] `JSONB` values can now be edited regardless of column type
+- [PRO] Small `BLOB` values (<= 48 bytes) can now be edited as hex inside the viewer instead of requiring a file upload.
+  Common formats like UUIDs or IPv6 addresses can be pasted into the text field.
 
 ### Localization
 - Minor improvements to various translations 
