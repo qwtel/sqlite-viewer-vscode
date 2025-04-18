@@ -1,38 +1,56 @@
 # CHANGELOG
 
 ## v25.4.0 (Pre-Release)
-### Date/Time Support
-Columns that are defined as either `DATE` or `DATETIME` are now shown as formatted dates.
-You can switch between showing raw data and formatted dates in both the main and sidebar section.
-Supported datetime formats are:
-SQLite's ISO-like strings,
-ISO-8601 strings,
-Julian Day,
-Seconds since 1970,
-Milliseconds since 1970\*,
-Microseconds since 1970\*,
-Excel serial date [1900 system] (REAL)\*,
-Windows FILETIME since 1601\*, and
-.NET Ticks since 0001\*.
+### [PRO] Date/Time Support
+Columns that are defined as either `DATE` or `DATETIME` are now shown as formatted dates. 
 
-Formats marked with * are not supported by SQLite's own datetime functions, but the extension can render them in human-readable form regardless.
+Supported formats are:
+- SQLite ISO-like strings
+- ISO-8601 strings
+- Julian Day
+- Seconds since 1970
+- Milliseconds since 1970\*
+- Microseconds since 1970\*
+- Excel serial date (1900 system)\*
+- Windows FILETIME since 1601\*
+- .NET Ticks since 0001\*
 
-You can toggle between showing the date in your local timezone and UTC. Other timezones are currently not supported. The toggle has no effect on ISO-like textual dates without any timezone identifier.
+If a valid date is recognized, it can be shown in one of 4 formats:
+- Local, human-readable strings
+- Local, human-readable time-ago strings (e.g. "6 months ago") 
+- Machine-friendly (ISO-8601-like strings)
+- Raw values, as stored in the database
 
-[PRO] customers can edit values, either through the webview's generic date picker or modifying the ISO-like string. The extension will write the original format to disk if it was recognized correctly, or manually selected in the UI.
+You can toggle between showing the date in your local timezone and UTC. 
 
-### Other
-- ISO-like textual date/time values are now aligned left. These strings grow from left to right, so that left-alignment ensures years, months, etc. line up vertically
+You can edit values, either through the webview's generic date picker or modifying the ISO-like string. The extension will write the original format to disk if it was recognized correctly, or manually selected in the UI.
+
+### [PRO] Exports
+- Renamed the default export format from "TSV" to "Excel" to better reflect its intended purpose
+- Changed HTML export to also populate the `text/html` MIME type in the clipboard. This can help pasting structured content into some applications. The new "Excel" export format also makes use of this, with some values changed to better align with Excel's type conventions.
+- Added a plain "TSV" export format
+- Boolean columns are now exported as `true`/`false` when picking CSV, TSV, JSON as export format
+- Boolean columns are now exported as `TRUE`/`FALSE` when picking Excel as export format
+- `JSONB` columns are now exported as `jsonb('...')` when picking SQLite as export format
+- `NULL` values are now omitted when exporting to Excel, CSV, TSV, HTML, or Markdown instead of being included as "NULL" strings 
+
+### Additions
+- `JSONB` value are now rendered correctly regardless of column type
+- [PRO] `JSONB` values can now be edited regardless of column type
+
+### Localization
 - Minor improvements to various translations 
   - More language appropriate use of quotation marks and equivalents in error messages
-  - In error messages, table and column names are now marked with `[...]` (or language-appropriate equivalents) instead of `'...'` to avoid double nested single quotes `'` in some generated messages
+  - In error messages, table and column names are now surrounded by `[...]` (or language-appropriate equivalents) instead of `'...'` to avoid double nested single quotes in some generated error messages
+
 
 ### Fixes
 - [PRO] Fixed lost precision when viewing integers above 2^53 - 1 and below -(2^53 - 1)
-- [PRO] Fixed potential issues with inserting and updating values in tables that have special characters in the name
+- [PRO] Fixed potential issue when inserting or updating values in tables that have special characters in the name
 - Fixed a crash caused by an incorrect call to `setValidity`
 - Fixed incorrect hover tooltip for `ROWID`
 - Arrow icons in column type labels now look identical across platforms
+- Fixed hex size cutoff mismatch between UI (48) and exports (32)
 
 ## March 2025
 This extension is now published using Calendar Versioning of shape: `YY.MM.MICRO`. Using SemVer for a UI client never made much sense, nor was there a clear cutoff when this extension went from 0 to 1. Going forward, all versions will be a date + incremental number.
