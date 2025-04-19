@@ -2,32 +2,33 @@
 
 ## v25.4.0 (Pre-Release)
 ### [PRO] Date/Time Support
-Columns that are defined as either `DATE` or `DATETIME` are now shown as formatted dates. 
-
-Supported formats are:
+Columns that are defined as either `DATE` or `DATETIME` and have strictured data in them are now shown as formatted dates. Supported formats are:
 - SQLite ISO-like strings
 - ISO-8601 strings
-- Julian Day
+- Julian Day numbers
 - Seconds since 1970
-- Milliseconds since 1970\*
-- Microseconds since 1970\*
-- Excel serial date (1900 system)\*
-- Windows FILETIME since 1601\*
-- .NET Ticks since 0001\*
+- Milliseconds since 1970
+- Microseconds since 1970
+- Excel serial date (1900 system)
+- Windows FILETIME since 1601
+- .NET Ticks since 0001
 
 If a valid date is recognized, it can be shown in one of 4 formats:
-- Local, human-readable strings
-- Local, human-readable time-ago strings (e.g. "6 months ago") 
-- Machine-friendly (ISO-8601-like strings)
-- Raw values, as stored in the database
+- Localized, human-readable strings (default)
+- Localized, human-readable time-ago strings (e.g. "6 months ago") 
+- Machine-friendly ISO-8601 strings
+- Raw values
 
-You can toggle between showing the date in your local timezone and UTC. 
+Values can be edited, either through a generic date picker or modifying the interpreted ISO string. The extension will write the original format to disk if it was recognized correctly, or manually selected in the UI.
 
-You can edit values, either through the webview's generic date picker or modifying the ISO-like string. The extension will write the original format to disk if it was recognized correctly, or manually selected in the UI.
+This feature also integrates with the export feature. E.g. when viewing a column as raw dates, they will be included raw values in the export. This matches the current export behavior. 
+When exporting to JSON, dates will generally be included as ISO strings, unless raw is selected.
+When exporting to human-readable formats like Markdown and HTML, the output will generally match what's on screen.
+When viewing a column in machine-friendly format and exporting for Excel, the dates will be included in Excel's serial date format. 
 
 ### [PRO] Exports
 - Renamed the default export format from "TSV" to "Excel" to better reflect its intended purpose
-- Changed HTML export to also populate the `text/html` MIME type in the clipboard. This can help pasting structured content into some applications. The new "Excel" export format also makes use of this, with some values changed to better align with Excel's type conventions.
+- Changed HTML export to also populate the `text/html` MIME type in the clipboard. This can help pasting structured content into some applications. The old TSV export also made use of this behavior.
 - Added a plain "TSV" export format
 - Boolean columns are now exported as `true`/`false` when picking CSV, TSV, JSON as export format
 - Boolean columns are now exported as `TRUE`/`FALSE` when picking Excel as export format
@@ -37,16 +38,11 @@ You can edit values, either through the webview's generic date picker or modifyi
 ### Additions
 - `JSONB` value are now rendered correctly regardless of column type
 - [PRO] `JSONB` values can now be edited regardless of column type
-- [PRO] Small `BLOB` values (<= 48 bytes) can now be edited as hex inside the viewer instead of requiring a file upload.
-  Common formats like UUIDs or IPv6 addresses can be pasted into the text field.
-
-### Localization
-- Minor improvements to various translations 
-  - More language appropriate use of quotation marks and equivalents in error messages
-  - In error messages, table and column names are now surrounded by `[...]` (or language-appropriate equivalents) instead of `'...'` to avoid double nested single quotes in some generated error messages
-
+- Small `BLOB` values (<= 48 bytes) are now rendered as hexadecimal in text inputs
+- [PRO] Small `BLOB` values can now be inserted and updated in hexadecimal from within the extension. Common formats like UUIDs and IPv6 addresses can be pasted directly into the text field.
 
 ### Fixes
+- Various improvements to  translations 
 - [PRO] Fixed lost precision when viewing integers above 2^53 - 1 and below -(2^53 - 1)
 - [PRO] Fixed potential issue when inserting or updating values in tables that have special characters in the name
 - Fixed a crash caused by an incorrect call to `setValidity`
