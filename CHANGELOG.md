@@ -4,7 +4,7 @@
 _Released on April 19, 2025_
 
 ### [PRO] Date/Time Support
-Columns that are defined as either `DATE` or `DATETIME` and have strictured data in them are now shown as formatted dates. Supported formats are:
+Columns that are defined as either `DATE` or `DATETIME` and have structured data in them are now shown as formatted dates. Supported formats are:
 - SQLite ISO-like strings
 - ISO-8601 strings
 - Julian Day numbers
@@ -23,7 +23,7 @@ If a valid date is recognized, it can be shown in one of 4 formats:
 
 Values can be edited, either through a generic date picker or modifying the interpreted ISO string. The extension will write the original format to disk if it was recognized correctly, or manually selected in the UI.
 
-This feature also integrates with the export feature. E.g. when viewing a column as raw dates, they will be included raw values in the export. This matches the current export behavior. 
+This feature also integrates with the export feature. E.g. when viewing a column as raw dates, they will be included as raw values in the export. This matches the current export behavior. 
 When exporting to JSON, dates will generally be included as ISO strings, unless raw is selected.
 When exporting to human-readable formats like Markdown and HTML, the output will generally match what's on screen.
 When viewing a column in machine-friendly format and exporting for Excel, the dates will be included in Excel's serial date format. 
@@ -38,13 +38,13 @@ When viewing a column in machine-friendly format and exporting for Excel, the da
 - `NULL` values are now omitted when exporting to Excel, CSV, TSV, HTML, or Markdown instead of being included as "NULL" strings 
 
 ### Additions
-- `JSONB` value are now rendered correctly regardless of column type
+- `JSONB` values are now rendered correctly regardless of column type
 - [PRO] `JSONB` values can now be edited regardless of column type
 - Small `BLOB` values (<= 48 bytes) are now rendered as hexadecimal in text inputs
 - [PRO] Small `BLOB` values can now be inserted and updated in hexadecimal from within the extension. Common formats like UUIDs and IPv6 addresses can be pasted directly into the text field.
 
 ### Fixes
-- Various improvements to  translations 
+- Various improvements to translations 
 - [PRO] Fixed lost precision when viewing integers above 2^53 - 1 and below -(2^53 - 1)
 - [PRO] Fixed potential issue when inserting or updating values in tables that have special characters in the name
 - Fixed a crash caused by an incorrect call to `setValidity`
@@ -93,7 +93,7 @@ _Released on March 15, 2025_
 ### Localization 🇩🇪 🇫🇷 🇧🇷 🇯🇵 🇪🇸 🇰🇷
 This extension now includes translations for German, French, Portuguese (Brazil), Japanese, Spanish and Korean.
 If your VS Code display language is set to one of these, the extension will adjust automatically. 
-You can change your VS Code display language from the Command Pallette using "Configure Display Language".
+You can change your VS Code display language from the Command Palette using "Configure Display Language".
 
 ## v0.10.5
 _Released on March 12, 2025_
@@ -108,7 +108,7 @@ Retrying previous release
 ## v0.10.3 (Pre-Release)
 _Released on March 11, 2025_
 
-- Fixed an issue that caused ordering of exported rows to match the selection order rather and ordering in the UI
+- Fixed an issue that caused ordering of exported rows to match the selection order rather than ordering in the UI
 - Updated SQLite to 3.49.1
 - Updated many internal dependencies
 - [PRO] The toolchain to compile the native helper was updated from Zig 0.13 to 0.14
@@ -139,7 +139,7 @@ Added German, French and Portuguese translations.
 - Image previews are now only fetched from the db when they are visible in the viewport
 
 ### Fixes
-- Added a small amount of buffering that prevents many stale and unnecessary queries form being run. This should also prevents freezes and excessive load times in some cases
+- Added a small amount of buffering that prevents many stale and unnecessary queries from being run. This should also prevent freezes and excessive load times in some cases
 - Fixed a bug that caused image previews to not update when refreshing the table
 - Disabled row count caching, which could cause incorrect row numbers to be displayed in some cases.
 - Fixed a bug that prevented input fields in the modal from being auto-focused and scrolled into view in the sidebar if the cell value was empty
@@ -149,7 +149,6 @@ Added German, French and Portuguese translations.
 
 ## v0.9.6
 _Released on January 10, 2025_
-
 
 - SQLite Viewer now remembers the last sidebar position
 - Fixed row selection background color when explorer panel loses focus
@@ -203,7 +202,7 @@ Like the base version, it's designed to *just work*, even in remote workspaces l
 Users of the free version are not affected by this.
 
 ### Secondary Sidebar
-SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.
+SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or metadata about the current table.
 
 ## v0.8.9
 - Improved experience for first-time users of the extension
@@ -268,7 +267,7 @@ Initial 0.8 release
 _Released on September 29, 2024_
 
 - The initial size of the sidebar is now based on available space
-- Resizing the sidebar and columns should now work when using the extension with a web-based version of VSCode on and iPad or other touch device
+- Resizing the sidebar and columns should now work when using the extension with a web-based version of VSCode on an iPad or other touch device
 - Row buttons no longer take up space while the row is not in the hovered state
 - Various bug fixes and improvements
 
@@ -292,12 +291,12 @@ _Released on September 28, 2024_
 - It is now possible to __open more than one SQLite Viewer instance per file__. 
   Additionally, opening large files (~1GB) is now much faster, and opening additional tabs of the same file carries little additional cost.
 
-Note that this release includes signification restructuring of the extension, which may cause (unrelated) issues.
+Note that this release includes significant restructuring of the extension, which may cause (unrelated) issues.
 Please [report](https://github.com/qwtel/sqlite-viewer-vscode/issues) any issues you encounter. 
 
 ## v0.6 (Pre-Release)
 ### Secondary Sidebar
-~~SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or meta data about the current table.~~
+~~SQLite Viewer now features a second sidebar 🎉. It shows either the current row selection or metadata about the current table.~~
 This has been shelved for now, please remain on the pre-release channel if you need the sidebar.
 
 ## v0.6.7 (Pre-Release)
@@ -342,7 +341,7 @@ Added basic keyboard support to table explorer and main view
 ### WAL Mode Support
 This version introduces support for __reading WAL mode databases__. It works across all VSCode file systems including local, remote, and even on github.dev.
 
-This fixes a common issue that caused the contents of a `-wal` file not being shown in the UI when the the auto checkpoint limit hadn't been reached.
+This fixes a common issue that caused the contents of a `-wal` file not being shown in the UI when the auto checkpoint limit hadn't been reached.
 This led to unsatisfying workarounds such as disabling WAL mode, triggering checkpoints manually or reducing the auto checkpoint limit.
 
 While this update removes the need for the above workarounds, it does not change the readonly nature of the extension or remove the need to reload the file for updates to be visible in the UI.
@@ -375,14 +374,14 @@ _Released on July 1, 2024_
 
 Improved column filtering:
 - Added a button to invert a column filter
-- Added a button to filter a column non-nullish (`NULL` or empty string) values. You can combine it with the invert button to filter for nullish values instead.
+- Added a button to filter a column for non-nullish (`NULL` or empty string) values. You can combine it with the invert button to filter for nullish values instead.
 - Typing `NULL` or `''` into the column filter will now filter by null or empty string values respectively.
 - Changed representation of empty strings from `""` to `''`. This is to match the filter values above and to distinguish it from the legitimate search target `""`, which can come up in combination with JSON(B) columns. If you need to search for the exact string sequence `''`, use escape characters: `\'\'`.
 - Fixed a bug that caused column filters to not properly reset when deleting the contents of the search box
 
 Experimental support for Views:
-- SQLite Viewer can now view Views. Note that there is a known performance issue for on large views. This feature will retain the "Experimental" qualifier until I can resolve it.
-- Added button to expand/collapse all tables and view in the sidebar
+- SQLite Viewer can now view Views. Note that there is a known performance issue for large views. This feature will retain the "Experimental" qualifier until I can resolve it.
+- Added button to expand/collapse all tables and views in the sidebar
 
 ## v0.5.8
 _Released on June 11, 2024_
@@ -469,7 +468,7 @@ Additionally, version 0.4 ships many quality of life improvements:
 - It is now possible to select and rearrange multiple columns at the same time in the sidebar
 - The modal/dialog view can now be resized
 - Downloading a blob will now automatically add an appropriate file extension if it can be inferred
-- Column sizes and pinned now persist when switching to another table (but not after closing the tab/file) 
+- Column sizes and pinning now persist when switching to another table (but not after closing the tab/file) 
 
 ### Performance
 - Faster virtualized scrolling
@@ -478,7 +477,6 @@ Additionally, version 0.4 ships many quality of life improvements:
 ### Style
 - Many aspects of the extension's UI should match VSCode's style closer
 
-
 ## v0.4.14
 _Released on April 30, 2024_
 
@@ -486,12 +484,10 @@ _Released on April 30, 2024_
 - Fixed showing `ROWID` column for tables that are created without a `ROWID`
 - Fixed an issue that prevented the extension from loading on github.dev in Safari
 
-
 ## v0.4.12 – v0.4.13
 _Released on April 30, 2024_
 
 Fixed an issue that prevented text selection when using the extension on the web in the latest version of Chrome
-
 
 ## v0.4.11
 _Released on April 30, 2024_
@@ -500,19 +496,16 @@ _Released on April 30, 2024_
 - Fixed foreign key icon not being shown, or being shown on wrong column 
 - Fixed text in foreign key tooltip referencing wrong column names 
 
-
 ## v0.4.10
 _Released on April 30, 2024_
 
 - SQLite updated to 3.45.3
 - Fixed an issue that sometimes caused text selection to be slow
 
-
 ## v0.4.9
 _Released on May 6, 2024_
 
 Fixed an issue that prevented files from loading correctly when connected to a workspace via SSH
-
 
 ## v0.4.8
 _Released on May 6, 2024_
@@ -520,13 +513,11 @@ _Released on May 6, 2024_
 - The detail view has a new, cleaner look that closer matches similar components in VSCode
 - Added extension name and version number to the bottom left
 
-
 ## v0.4.7
 _Released on May 4, 2024_
 
 - Fixed visible cells updating to new values immediately after refreshing a file
 - Fixed an issue that caused the UI to become non-interactive when showing an error message
-
 
 ## v0.4.6
 _Released on May 4, 2024_
@@ -535,12 +526,10 @@ _Released on May 4, 2024_
 - Removed "Not Allowed" cursor from readonly fields in detail view
 - Improved startup time by avoiding unnecessary copying when opening a file
 
-
 ## v0.4.5
 _Released on May 3, 2024_
 
 Fixed an issue that caused the extension to go blank when opening an external link
-
 
 ## v0.4.4
 _Released on May 3, 2024_
@@ -558,8 +547,6 @@ Improved JSON column support
 ### Style
 - Better differentiation between empty strings and NULL by showing them as `""` instead of `NULL`
 
-
-
 ## v0.4.3
 _Released on May 2, 2024_
 
@@ -567,7 +554,6 @@ _Released on May 2, 2024_
 - Added back search functionality for tables
 - Fixed ROWID column sizing
 - Fixed a browser history issue when using the extension on the web
-
 
 ## v0.4.2
 _Released on May 1, 2024_
@@ -579,7 +565,6 @@ _Released on May 1, 2024_
 - Fixed sidebar column order not updating when pinning a column
 ### Style
 - Increased default column width by 20%
-
 
 ## v0.4.1
 _Released on April 30, 2024_
