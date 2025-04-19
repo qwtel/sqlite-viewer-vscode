@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## v25.4.0 (Pre-Release)
+_Released on April 19, 2025_
+
 ### [PRO] Date/Time Support
 Columns that are defined as either `DATE` or `DATETIME` and have strictured data in them are now shown as formatted dates. Supported formats are:
 - SQLite ISO-like strings
