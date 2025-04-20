@@ -55,6 +55,7 @@ const MaxHistory = 100;
 export const globalSQLiteDocuments = new Map<string, SQLiteDocument>();
 
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
+
   static async create(
     openContext: vsc.CustomDocumentOpenContext,
     uri: vsc.Uri,
@@ -69,11 +70,25 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       : createWebWorker;
 
     const { filename } = getUriParts(uri);
-    const { workerFns, createWorkerDb } = await createWorkerBundle(extensionUri, filename, uri, reporter);
-    const { promise } = await createWorkerDb(uri, filename, extensionUri);
+
+    let readWrite, workerFns, createWorkerDb, promise, readOnly;
+    try {
+      ({ workerFns, createWorkerDb } = await createWorkerBundle(extensionUri, filename, uri, reporter));
+      ({ promise, readOnly } = await createWorkerDb(uri, filename, extensionUri));
+      readWrite = !readOnly;
+    } catch (err) {
+      // In case something goes wrong, try to create using the WASM worker
+      if (createWorkerBundle !== createWebWorker) { 
+        ({ workerFns, createWorkerDb } = await createWebWorker(extensionUri, filename, uri, reporter));
+        ({ promise, readOnly } = await createWorkerDb(uri, filename, extensionUri));
+        readWrite = !readOnly;
+      } else {
+        throw err;
+      }
+    }
 
     let history: UndoHistory<SQLiteEdit>|null = null;
-    let workerDbPromise = promise;
+    let workerDbPromise = promise.then(dbRemote => ({ dbRemote, readOnly: !readWrite }));
 
     if (typeof openContext.backupId === 'string') {
       const editsUri = vsc.Uri.parse(openContext.backupId);
@@ -82,7 +97,14 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
       workerDbPromise = promise
         .then(dbRemote => dbRemote.applyEdits(h.getUnsavedEdits(), cancelTokenToAbortSignal(token)))
-        .then(() => promise);
+        .then(async () => ({ dbRemote: await promise, readOnly: !readWrite }))
+        .catch(async err => {
+          await vsc.window.showErrorMessage(vsc.l10n.t('[{0}] occurred while trying to apply unsaved changes', err.message), { 
+            modal: true, 
+            detail: vsc.l10n.t('The document was opened from a backup, but the unsaved changes could not be applied. The document will be opened in read-only mode.')
+          });
+          return { dbRemote: await promise, readOnly: true };
+        });
     }
 
     return new SQLiteDocument(uri, history, workerFns, createWorkerDb, workerDbPromise, reporter);
@@ -99,7 +121,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     history: UndoHistory<SQLiteEdit>|null,
     private readonly workerFns: WorkerBundle["workerFns"],
     private readonly createWorkerDb: WorkerBundle["createWorkerDb"],
-    private workerDbPromise: Promise<Caplink.Remote<WorkerDb>>,
+    private workerDbPromise: Promise<{ dbRemote: Caplink.Remote<WorkerDb>, readOnly: boolean }>,
     private readonly reporter: TelemetryReporter,
   ) {
     super();
@@ -175,10 +197,16 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     });
   }
 
+  checkReadonly = async () => {
+    const readOnly = await this.getReadonly();
+    if (readOnly) throw new Error(vsc.l10n.t('Document is read-only'));
+  }
+
   /**
    * Called by VS Code when the user saves the document.
    */
   async save(token: vsc.CancellationToken): Promise<void> {
+    await this.checkReadonly();
     await this.#history.save();
     const dbRemote = await this.getDb();
     await dbRemote.commit(cancelTokenToAbortSignal(token));
@@ -188,6 +216,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * Called by VS Code when the user saves the document to a new location.
    */
   async saveAs(targetResource: vsc.Uri, token: vsc.CancellationToken): Promise<void> {
+    await this.checkReadonly();
     const dbRemote = await this.getDb();
     const stat = await vsc.workspace.fs.stat(this.uri);
     if (stat.size > this.getConfiguredMaxFileSize()) {
@@ -202,24 +231,29 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * Called by VS Code when the user calls `revert` on a document.
    */
   async revert(token: vsc.CancellationToken): Promise<void> {
+    await this.checkReadonly();
     const dbRemote = await this.getDb();
     await dbRemote.rollback(cancelTokenToAbortSignal(token));
     // XXX: how to handle savedEdits in this case?
   }
 
   async getDb() {
-    return this.workerDbPromise;
+    return (await this.workerDbPromise).dbRemote;
+  }
+
+  async getReadonly() {
+    return (await this.workerDbPromise).readOnly;
   }
 
   async refreshDb() {
-    const dbRemote = await this.workerDbPromise;
+    const dbRemote = await this.getDb()
     if ((await dbRemote.type) === 'wasm') {
       dbRemote[Symbol.dispose]();
       const { promise } = await this.createWorkerDb(this.uri, this.uriParts.filename);
-      this.workerDbPromise = promise;
+      this.workerDbPromise = Promise.resolve({ dbRemote: await promise, readOnly: true });
       return promise;
     }
-    return this.workerDbPromise;
+    return dbRemote;
   }
 
   /**
