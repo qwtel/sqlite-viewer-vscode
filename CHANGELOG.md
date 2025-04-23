@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## v25.4.1 (Pre-Release)
+- [PRO] Improved support for read-only mode. When opening a database file without the required file permissions, the editor will open in read-only mode instead of showing an error, and the UI will indicate that the file has been opened in read-only mode.
+- [PRO] When applying unsaved changes to a database file that has been locked by another process (e.g. VS Code has been forcefully shut down), the viewer will now open in read-only mode instead of showing an error. Saving the changes is not possible in read-only mode, so they can be retried at a later time. Be aware that VS Code may prompt you to revert the changes.
+- [PRO] Added a read-only SQLite Viewer option to VS Code's "Open With…" dialog.
+- If an error occurs while opening a file, it will now be surfaced earlier through VS Code's UI instead of being displayed inside an empty SQLite Viewer tab.
+- [PRO] If an error occurs while opening a file, the extension will attempt to use the read-only WebAssembly implementation to open the file instead of failing immediately. A warning will still be displayed in this case.
+
 ## v25.4.0 (Pre-Release)
 _Released on April 19, 2025_
 
@@ -344,7 +351,7 @@ This version introduces support for __reading WAL mode databases__. It works acr
 This fixes a common issue that caused the contents of a `-wal` file not being shown in the UI when the auto checkpoint limit hadn't been reached.
 This led to unsatisfying workarounds such as disabling WAL mode, triggering checkpoints manually or reducing the auto checkpoint limit.
 
-While this update removes the need for the above workarounds, it does not change the readonly nature of the extension or remove the need to reload the file for updates to be visible in the UI.
+While this update removes the need for the above workarounds, it does not change the read-only nature of the extension or remove the need to reload the file for updates to be visible in the UI.
 
 Note that making this work required significant restructuring of the extension, which may cause (unrelated) issues. Please report any you may encounter. 
 
@@ -523,7 +530,7 @@ _Released on May 4, 2024_
 _Released on May 4, 2024_
 
 - Added button to filter columns by exact search term
-- Removed "Not Allowed" cursor from readonly fields in detail view
+- Removed "Not Allowed" cursor from read-only fields in detail view
 - Improved startup time by avoiding unnecessary copying when opening a file
 
 ## v0.4.5

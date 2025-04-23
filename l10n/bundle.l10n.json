@@ -1,5 +1,12 @@
 {
   "File too large. You can increase this limit in the settings under 'Sqlite Viewer: Max File Size'.": "File too large. You can increase this limit in the settings under 'Sqlite Viewer: Max File Size'.",
+  "[{0}] occurred while trying to open '{1}'": "[{0}] occurred while trying to open '{1}'",
+  "The document could not be opened using SQLite Viewer PRO and will be opened in read-only mode instead.": "The document could not be opened using SQLite Viewer PRO and will be opened in read-only mode instead.",
+  "Failed to open database": "Failed to open database",
+  "[{0}] occurred while trying to apply unsaved changes": "[{0}] occurred while trying to apply unsaved changes",
+  "Unknown error": "Unknown error",
+  "The document was opened from a backup, but the unsaved changes could not be applied. The document will be opened in read-only mode.": "The document was opened from a backup, but the unsaved changes could not be applied. The document will be opened in read-only mode.",
+  "Document is read-only": "Document is read-only",
   "Document not found": "Document not found",
   "SQLite Viewer PRO License Activation": "SQLite Viewer PRO License Activation",
   "Enter License Key": "Enter License Key",

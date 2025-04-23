@@ -40,7 +40,7 @@ export class VscodeFns {
     const { document } = this;
     if (this.webviews.has(document.uri)) {
       this.reporter.sendTelemetryEvent("open");
-      return document.getDb();
+      return document.db;
     }
     throw new Error("Document not found in webviews");
   }

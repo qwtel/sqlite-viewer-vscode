@@ -72,44 +72,45 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
     const { filename } = getUriParts(uri);
 
-    let readWrite, workerFns, createWorkerDb, promise;
+    let workerFns, createWorkerDb, dbRemote;
     try {
       ({ workerFns, createWorkerDb } = await createWorkerBundle(extensionUri, reporter));
-      ({ promise, readOnly } = await createWorkerDb(uri, filename, readOnly));
-      readWrite = !readOnly;
+      ({ dbRemote, readOnly } = await createWorkerDb(uri, filename, readOnly));
     } catch (err) {
-      if (err instanceof Error) vsc.window.showErrorMessage(vsc.l10n.t('[{0}] occurred while trying to open {1}', err.message)); else console.error(err)
       // In case something goes wrong, try to create using the WASM worker
-      if (createWorkerBundle !== createWebWorker) { 
-        ({ workerFns, createWorkerDb } = await createWebWorker(extensionUri, reporter));
-        ({ promise, readOnly } = await createWorkerDb(uri, filename, readOnly));
-        readWrite = !readOnly;
+      if (createWorkerBundle !== createWebWorker) {
+        try {
+          ({ workerFns, createWorkerDb } = await createWebWorker(extensionUri, reporter));
+          ({ dbRemote, readOnly } = await createWorkerDb(uri, filename, readOnly));
+          if (err instanceof Error) vsc.window.showWarningMessage(vsc.l10n.t("[{0}] occurred while trying to open '{1}'", err.message, filename), {
+            detail: vsc.l10n.t('The document could not be opened using SQLite Viewer PRO and will be opened in read-only mode instead.'),
+          }); 
+        } catch (err2) {
+          throw new AggregateError([err, err2], vsc.l10n.t('Failed to open database'));
+        }
       } else {
         throw err;
       }
     }
 
     let history: UndoHistory<SQLiteEdit>|null = null;
-    let workerDbPromise = promise.then(dbRemote => ({ dbRemote, readOnly: !readWrite }));
-
     if (typeof openContext.backupId === 'string') {
       const editsUri = vsc.Uri.parse(openContext.backupId);
       const editsBuffer = await vsc.workspace.fs.readFile(editsUri);
       const h = history = UndoHistory.restore(editsBuffer, MaxHistory);
 
-      workerDbPromise = promise
-        .then(dbRemote => dbRemote.applyEdits(h.getUnsavedEdits(), cancelTokenToAbortSignal(token)))
-        .then(async () => ({ dbRemote: await promise, readOnly: !readWrite }))
-        .catch(async err => {
-          await vsc.window.showErrorMessage(vsc.l10n.t('[{0}] occurred while trying to apply unsaved changes', err.message), { 
-            modal: true, 
-            detail: vsc.l10n.t('The document was opened from a backup, but the unsaved changes could not be applied. The document will be opened in readonly mode.')
-          });
-          return { dbRemote: await promise, readOnly: true };
+      try {
+        await dbRemote.applyEdits(h.getUnsavedEdits(), cancelTokenToAbortSignal(token));
+      } catch (err) {
+        await vsc.window.showErrorMessage(vsc.l10n.t('[{0}] occurred while trying to apply unsaved changes', err instanceof Error ? err.message : vsc.l10n.t('Unknown error')), { 
+          modal: true, 
+          detail: vsc.l10n.t('The document was opened from a backup, but the unsaved changes could not be applied. The document will be opened in read-only mode.')
         });
+        readOnly = true;
+      }
     }
 
-    return new SQLiteDocument(uri, history, workerFns, createWorkerDb, workerDbPromise, reporter);
+    return new SQLiteDocument(uri, history, workerFns, createWorkerDb, { dbRemote, readOnly }, reporter);
   }
 
   getConfiguredMaxFileSize() { return getConfiguredMaxFileSize() }
@@ -123,8 +124,8 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     history: UndoHistory<SQLiteEdit>|null,
     private readonly workerFns: WorkerBundle["workerFns"],
     private readonly createWorkerDb: WorkerBundle["createWorkerDb"],
-    private workerDbPromise: Promise<{ dbRemote: Caplink.Remote<WorkerDb>, readOnly: boolean }>,
-    private readonly _reporter?: TelemetryReporter,
+    private workerDb: { dbRemote: Caplink.Remote<WorkerDb>, readOnly?: boolean },
+    private readonly reporter?: TelemetryReporter,
   ) {
     super();
     this.#uri = uri;
@@ -185,23 +186,20 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       undo: async () => {
         const edit = history.undo();
         if (!edit) return;
-        const dbRemote = await this.getDb();
-        await dbRemote.undo(edit);
+        await this.db.undo(edit);
         this.#onDidChangeDocument.fire({ /* edits: this.#edits */ });
       },
       redo: async () => {
         const edit = history.redo();
         if (!edit) return;
-        const dbRemote = await this.getDb();
-        await dbRemote.redo(edit);
+        await this.db.redo(edit);
         this.#onDidChangeDocument.fire({ /* edits: this.#edits */ });
       }
     });
   }
 
   checkReadonly = async () => {
-    const readOnly = await this.getReadonly();
-    if (readOnly) throw new Error(vsc.l10n.t('Document is readonly'));
+    if (this.readOnly) throw new Error(vsc.l10n.t('Document is read-only'));
   }
 
   /**
@@ -210,8 +208,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   async save(token: vsc.CancellationToken): Promise<void> {
     await this.checkReadonly();
     await this.#history.save();
-    const dbRemote = await this.getDb();
-    await dbRemote.commit(cancelTokenToAbortSignal(token));
+    await this.db.commit(cancelTokenToAbortSignal(token));
   }
 
   /**
@@ -219,13 +216,12 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    */
   async saveAs(targetResource: vsc.Uri, token: vsc.CancellationToken): Promise<void> {
     await this.checkReadonly();
-    const dbRemote = await this.getDb();
     const stat = await vsc.workspace.fs.stat(this.uri);
     if (stat.size > this.getConfiguredMaxFileSize()) {
       throw new Error("File too large to save");
     }
     const { filename } = this.uriParts;
-    const data = await dbRemote.exportDb(filename, cancelTokenToAbortSignal(token));
+    const data = await this.db.exportDb(filename, cancelTokenToAbortSignal(token));
     await vsc.workspace.fs.writeFile(targetResource, data);
   }
 
@@ -234,28 +230,27 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    */
   async revert(token: vsc.CancellationToken): Promise<void> {
     await this.checkReadonly();
-    const dbRemote = await this.getDb();
-    await dbRemote.rollback(cancelTokenToAbortSignal(token));
+    await this.db.rollback(cancelTokenToAbortSignal(token));
     // XXX: how to handle savedEdits in this case?
   }
 
-  async getDb() {
-    return (await this.workerDbPromise).dbRemote;
+  get db() {
+    return this.workerDb.dbRemote;
   }
 
-  async getReadonly() {
-    return (await this.workerDbPromise).readOnly;
+  get readOnly() {
+    return this.workerDb.readOnly;
   }
 
   async refreshDb() {
-    const dbRemote = await this.getDb()
-    if ((await dbRemote.type) === 'wasm') {
-      dbRemote[Symbol.dispose]();
-      const { promise } = await this.createWorkerDb(this.uri, this.uriParts.filename);
-      this.workerDbPromise = Promise.resolve({ dbRemote: await promise, readOnly: true });
-      return promise;
+    const oldDbRemote = this.db;
+    if ((await oldDbRemote.type) === 'wasm') { // XXX: hard-coded refresh for wasm, not sure if this could be put in a better place
+      oldDbRemote[Symbol.dispose]();
+      const { dbRemote, readOnly } = await this.createWorkerDb(this.uri, this.uriParts.filename);
+      this.workerDb = { dbRemote, readOnly };
+      return dbRemote;
     }
-    return dbRemote;
+    return oldDbRemote;
   }
 
   /**
@@ -507,7 +502,7 @@ export function registerFileProvider(_context: vsc.ExtensionContext) {
       const documentUri = vsc.Uri.joinPath(cellUri, '../../../..');
       const document = globalSQLiteDocuments.get(documentUri.path)
       if (document) {
-        const workerDb = await document.getDb()
+        const workerDb = document.db;
         if (workerDb) {
           // console.log("workerDb", await workerDb.filename, 'readonly?', await workerDb.readOnly, 'type', await workerDb.type)
           const filename = document.uriParts.filename;

@@ -43,7 +43,7 @@ export async function createWebWorker(
     async createWorkerDb(xUri, filename) {
       const [data, walData] = await readFile(xUri, reporter);
       if (data == null) {
-        return { promise: Promise.reject(new Error(TooLargeErrorMsg)), readOnly: true };
+        throw new Error(TooLargeErrorMsg);
       }
       const args = {
         data,
@@ -58,9 +58,8 @@ export async function createWebWorker(
         ...data ? [data.buffer as ArrayBuffer] : [],
         ...walData ? [walData.buffer as ArrayBuffer] : [],
       ];
-      const promise = workerFns.importDb(filename, Caplink.transfer(args, transfer));
-      promise.catch(() => {}) // prevent unhandled rejection warning (caught elsewhere)
-      return { promise, readOnly: true };
+      const dbRemote = await workerFns.importDb(filename, Caplink.transfer(args, transfer));
+      return { dbRemote, readOnly: true };
     }
   }
 }
