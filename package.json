@@ -43,7 +43,7 @@
     "customEditors": [
       {
         "viewType": "sqlite-viewer.view",
-        "displayName": "SQLite Viewer",
+        "displayName": "%sqlite-viewer.customEditor.view.displayName%",
         "selector": [
           {
             "filenamePattern": "*.sqlite"
@@ -68,6 +68,16 @@
       {
         "viewType": "sqlite-viewer.option",
         "displayName": "%sqlite-viewer.customEditor.option.displayName%",
+        "selector": [
+          {
+            "filenamePattern": "*"
+          }
+        ],
+        "priority": "option"
+      },
+      {
+        "viewType": "sqlite-viewer.readonly",
+        "displayName": "%sqlite-viewer.customEditor.readonly.displayName%",
         "selector": [
           {
             "filenamePattern": "*"

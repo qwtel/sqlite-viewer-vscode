@@ -148,7 +148,8 @@ export function getUriParts(uri: vsc.Uri) {
   return { dirname, filename, basename, extname };
 }
 
-export function cancelTokenToAbortSignal(token: vsc.CancellationToken): AbortSignal {
+export function cancelTokenToAbortSignal(token?: vsc.CancellationToken): AbortSignal|undefined {
+  if (token == null) return;
   const ctrl = new AbortController();
   if (token.isCancellationRequested) ctrl.abort(); 
   else token.onCancellationRequested(() => ctrl.abort());

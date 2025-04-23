@@ -29,8 +29,6 @@ function roundToNearestOOM(num: number) {
 
 export async function createWebWorker(
   extensionUri: vsc.Uri,
-  _filename: string,
-  _uri: vsc.Uri,
   reporter?: TelemetryReporter,
 ): Promise<WorkerBundle> {
   const workerPath = import.meta.env.VSCODE_BROWSER_EXT
@@ -60,9 +58,9 @@ export async function createWebWorker(
         ...data ? [data.buffer as ArrayBuffer] : [],
         ...walData ? [walData.buffer as ArrayBuffer] : [],
       ];
-      const workerDbPromise = workerFns.importDb(filename, Caplink.transfer(args, transfer));
-      workerDbPromise.catch(() => {}) // prevent unhandled rejection warning (caught elsewhere)
-      return { promise: workerDbPromise, readOnly: true };
+      const promise = workerFns.importDb(filename, Caplink.transfer(args, transfer));
+      promise.catch(() => {}) // prevent unhandled rejection warning (caught elsewhere)
+      return { promise, readOnly: true };
     }
   }
 }
@@ -86,6 +84,6 @@ async function readFile(uri: vsc.Uri, reporter?: TelemetryReporter): Promise<[da
 
   return Promise.all([
     vsc.workspace.fs.readFile(uri),
-    vsc.workspace.fs.readFile(walUri).then(x => x, () => null)
+    Promise.resolve(vsc.workspace.fs.readFile(walUri)).catch(() => null),
   ]);
 }

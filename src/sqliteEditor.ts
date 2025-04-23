@@ -57,12 +57,13 @@ export const globalSQLiteDocuments = new Map<string, SQLiteDocument>();
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
   static async create(
-    openContext: vsc.CustomDocumentOpenContext,
     uri: vsc.Uri,
+    openContext: vsc.CustomDocumentOpenContext,
     extensionUri: vsc.Uri,
     verified: boolean,
-    token: vsc.CancellationToken,
-    reporter: TelemetryReporter,
+    readOnly?: boolean,
+    reporter?: TelemetryReporter,
+    token?: vsc.CancellationToken,
   ): Promise<SQLiteDocument> {
 
     const createWorkerBundle = !import.meta.env.VSCODE_BROWSER_EXT && verified && ReadWriteMode // Do not change this line
@@ -71,16 +72,17 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
     const { filename } = getUriParts(uri);
 
-    let readWrite, workerFns, createWorkerDb, promise, readOnly;
+    let readWrite, workerFns, createWorkerDb, promise;
     try {
-      ({ workerFns, createWorkerDb } = await createWorkerBundle(extensionUri, filename, uri, reporter));
-      ({ promise, readOnly } = await createWorkerDb(uri, filename, extensionUri));
+      ({ workerFns, createWorkerDb } = await createWorkerBundle(extensionUri, reporter));
+      ({ promise, readOnly } = await createWorkerDb(uri, filename, readOnly));
       readWrite = !readOnly;
     } catch (err) {
+      if (err instanceof Error) vsc.window.showErrorMessage(vsc.l10n.t('[{0}] occurred while trying to open {1}', err.message)); else console.error(err)
       // In case something goes wrong, try to create using the WASM worker
       if (createWorkerBundle !== createWebWorker) { 
-        ({ workerFns, createWorkerDb } = await createWebWorker(extensionUri, filename, uri, reporter));
-        ({ promise, readOnly } = await createWorkerDb(uri, filename, extensionUri));
+        ({ workerFns, createWorkerDb } = await createWebWorker(extensionUri, reporter));
+        ({ promise, readOnly } = await createWorkerDb(uri, filename, readOnly));
         readWrite = !readOnly;
       } else {
         throw err;
@@ -101,7 +103,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
         .catch(async err => {
           await vsc.window.showErrorMessage(vsc.l10n.t('[{0}] occurred while trying to apply unsaved changes', err.message), { 
             modal: true, 
-            detail: vsc.l10n.t('The document was opened from a backup, but the unsaved changes could not be applied. The document will be opened in read-only mode.')
+            detail: vsc.l10n.t('The document was opened from a backup, but the unsaved changes could not be applied. The document will be opened in readonly mode.')
           });
           return { dbRemote: await promise, readOnly: true };
         });
@@ -122,7 +124,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     private readonly workerFns: WorkerBundle["workerFns"],
     private readonly createWorkerDb: WorkerBundle["createWorkerDb"],
     private workerDbPromise: Promise<{ dbRemote: Caplink.Remote<WorkerDb>, readOnly: boolean }>,
-    private readonly reporter: TelemetryReporter,
+    private readonly _reporter?: TelemetryReporter,
   ) {
     super();
     this.#uri = uri;
@@ -199,7 +201,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
   checkReadonly = async () => {
     const readOnly = await this.getReadonly();
-    if (readOnly) throw new Error(vsc.l10n.t('Document is read-only'));
+    if (readOnly) throw new Error(vsc.l10n.t('Document is readonly'));
   }
 
   /**
@@ -282,19 +284,21 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
   protected readonly hostFns = new Map<SQLiteDocument, VscodeFns>();
 
   constructor(
+    readonly viewType: string,
     readonly context: vsc.ExtensionContext,
     readonly reporter: TelemetryReporter,
     readonly verified: boolean,
     readonly accessToken?: string,
+    readonly readOnly?: boolean,
   ) {}
 
   async openCustomDocument(
     uri: vsc.Uri,
     openContext: vsc.CustomDocumentOpenContext,
-    token: vsc.CancellationToken
+    token?: vsc.CancellationToken
   ): Promise<SQLiteDocument> {
 
-    const document = await SQLiteDocument.create(openContext, uri, this.context.extensionUri, this.verified, token, this.reporter);
+    const document = await SQLiteDocument.create(uri, openContext, this.context.extensionUri, this.verified, this.readOnly, this.reporter, token);
 
     const listeners = this.setupListeners(document);
 
@@ -387,7 +391,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       firstInstall: new Date(this.context.globalState.get<number>(FistInstallMs) ?? Date.now()).toISOString(),
       sidebarLeft: this.context.globalState.get<number>(SidebarLeft)?.toString(),
       sidebarRight: this.context.globalState.get<number>(SidebarRight)?.toString(),
-      l10nBundle: encodeBase64(v8.serialize(vsc.l10n.bundle)),
+      l10nBundle: encodeBase64(v8.serialize(vsc.l10n.bundle)), // XXX: this is a hack to get the l10n bundle into the webview, maybe send as a message instead?
     } satisfies VSCODE_ENV;
 
     const lang = vsc.env.language.split('.')[0]?.replace('_', '-') ?? 'en';
@@ -475,11 +479,17 @@ export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implement
   }
 }
 
-export function registerProvider(context: vsc.ExtensionContext, reporter: TelemetryReporter, viewType: string, verified: boolean, accessToken?: string) {
-  const isReadWrite = !import.meta.env.VSCODE_BROWSER_EXT && verified && ReadWriteMode;
+export function registerProvider(
+  context: vsc.ExtensionContext, 
+  reporter: TelemetryReporter, 
+  viewType: string, 
+  { verified, accessToken, readOnly }: { verified: boolean, accessToken?: string, readOnly?: boolean }
+) {
+  const readWrite = !import.meta.env.VSCODE_BROWSER_EXT && verified && ReadWriteMode;
+  const Provider = readWrite ? SQLiteEditorProvider : SQLiteReadonlyEditorProvider;
   return vsc.window.registerCustomEditorProvider(
     viewType,
-    new class extends (isReadWrite ? SQLiteEditorProvider : SQLiteReadonlyEditorProvider) { static viewType = viewType }(context, reporter, verified, accessToken),
+    new Provider(viewType, context, reporter, verified, accessToken, readOnly),
     {
       webviewOptions: {
         enableFindWidget: false,

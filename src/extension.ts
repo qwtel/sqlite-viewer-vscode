@@ -4,7 +4,7 @@ import { calcDaysSinceIssued, deleteLicenseKeyCommand, enterAccessTokenCommand, 
 import { IS_VSCODE } from './util';
 import { AccessToken, ExtensionId, FileNestingPatternsAdded, FistInstallMs, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
 import { disposeAll } from './dispose';
-import { registerFileProvider, registerProvider, SQLiteDocument } from './sqliteEditor';
+import { registerFileProvider, registerProvider } from './sqliteEditor';
 
 export async function activate(context: vsc.ExtensionContext) {
   const reporter = new TelemetryReporter(TelemetryConnectionString);
@@ -34,6 +34,11 @@ export async function activate(context: vsc.ExtensionContext) {
 
 const globalProviderSubs = new WeakSet<vsc.Disposable>();
 
+const showWarningAndReturn = <T>(accessToken?: T) => (err: unknown) => {
+  if (err instanceof Error) vsc.window.showWarningMessage(err.message); else console.error(err)
+  return accessToken;
+}
+
 export async function activateProviders(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
   const prevSubs = context.subscriptions.filter(x => globalProviderSubs.has(x));
   for (const sub of prevSubs) context.subscriptions.splice(context.subscriptions.indexOf(sub), 1);
@@ -45,23 +50,21 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
     const licenseKey = context.globalState.get<string>(LicenseKey);
     if (licenseKey) {
       const payload = getPayload(accessToken);
-      const daysSinceIssued = accessToken && payload?.iat && !!payload.exp && calcDaysSinceIssued(payload.iat);
-      const freshAccessToken = refreshAccessToken(context, licenseKey, accessToken).catch(err => {
-        if (err instanceof Error) vsc.window.showWarningMessage(err.message); else console.error(err)
-        return accessToken;
-      });
+      const daysSinceIssued = accessToken && payload?.exp && calcDaysSinceIssued(payload.iat);
+      const freshAccessTokenPromise = refreshAccessToken(context, licenseKey, accessToken).catch(showWarningAndReturn(accessToken));
       if (!accessToken || (daysSinceIssued && daysSinceIssued > 14)) {
-        accessToken = await freshAccessToken;
+        accessToken = await freshAccessTokenPromise;
       }
     }
-    verified = !!accessToken && !!await verifyToken(accessToken);
+    verified = !!accessToken && !!(await verifyToken(accessToken));
   } catch (err) {
     if (err instanceof Error) vsc.window.showWarningMessage(err.message); else console.error(err)
   }
 
   const subs = [];
-  subs.push(registerProvider(context, reporter, `${ExtensionId}.view`, verified, accessToken));
-  subs.push(registerProvider(context, reporter, `${ExtensionId}.option`, verified, accessToken));
+  subs.push(registerProvider(context, reporter, `${ExtensionId}.view`, { verified, accessToken }));
+  subs.push(registerProvider(context, reporter, `${ExtensionId}.option`, { verified, accessToken }));
+  subs.push(registerProvider(context, reporter, `${ExtensionId}.readonly`, { verified, accessToken, readOnly: true }));
   subs.push(registerFileProvider(context));
 
   for (const sub of subs) globalProviderSubs.add(sub);

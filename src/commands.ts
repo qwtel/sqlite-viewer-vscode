@@ -144,7 +144,8 @@ export async function deleteLicenseKeyCommand(context: vsc.ExtensionContext, rep
   });
 }
 
-export function calcDaysSinceIssued(issuedAt: number) {
+export function calcDaysSinceIssued(issuedAt?: number) {
+  if (!issuedAt) return null;
   const currentTime = Date.now() / 1000;
   const diffSeconds = currentTime - issuedAt;
   const diffDays = diffSeconds / (24 * 60 * 60);
@@ -169,7 +170,7 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, licenseK
     const payload = getPayload(accessToken);
     if (payload && 'ent' in payload) return accessToken;
 
-    const daysSinceIssued = accessToken && payload?.iat && calcDaysSinceIssued(payload.iat);
+    const daysSinceIssued = accessToken && calcDaysSinceIssued(payload?.iat);
     if (!daysSinceIssued || daysSinceIssued > 14) {
       response = await fetch(new URL('/api/register', baseURL), {
         method: 'POST',
