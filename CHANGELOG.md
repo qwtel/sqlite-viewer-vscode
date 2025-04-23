@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## v25.4.1 (Pre-Release)
+_Released on April 23, 2025_
+
 - [PRO] Improved support for read-only mode. When opening a database file without the required file permissions, the editor will open in read-only mode instead of showing an error, and the UI will indicate that the file has been opened in read-only mode.
 - [PRO] When applying unsaved changes to a database file that has been locked by another process (e.g. VS Code has been forcefully shut down), the viewer will now open in read-only mode instead of showing an error. Saving the changes is not possible in read-only mode, so they can be retried at a later time. Be aware that VS Code may prompt you to revert the changes.
 - [PRO] Added a read-only SQLite Viewer option to VS Code's "Open With…" dialog.
