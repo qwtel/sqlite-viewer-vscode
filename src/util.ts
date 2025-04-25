@@ -159,3 +159,11 @@ export function cancelTokenToAbortSignal(token?: vsc.CancellationToken): AbortSi
 export const encodeUtf8 = TextEncoder.prototype.encode.bind(new TextEncoder());
 export const decodeUtf8 = TextDecoder.prototype.decode.bind(new TextDecoder());
 export const getShortMachineId = async () => encodeBase58(new Uint8Array(await crypto.subtle.digest('SHA-256', encodeUtf8(vsc.env.machineId))).subarray(0, 6));
+
+export type ESDisposable = {
+  [Symbol.dispose](): void
+}
+
+export const assignESDispose = <T extends vsc.Disposable>(ch: T): T & ESDisposable => {
+  return Object.assign(ch, { [Symbol.dispose]() { ch.dispose() } });
+}

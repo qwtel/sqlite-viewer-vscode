@@ -2,6 +2,7 @@ import * as vsc from 'vscode';
 import { SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
 import { FullExtensionId } from './constants';
 
+import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import type { DbParams } from '../sqlite-viewer-core/src/signals';
 import type { UITypeAffinity } from '../sqlite-viewer-core/src/utils';
 import type { RowId } from '../sqlite-viewer-core/src/worker-db-utils';
@@ -89,6 +90,10 @@ export class VscodeFns {
   saveSidebarState(side: 'left'|'right', position: number) {
     const key = side === 'left' ? 'sidebarLeft' : 'sidebarRight';
     return Promise.resolve(this.context.globalState.update(key, position));
+  }
+
+  acquireOutputChannel() {
+    return Caplink.proxy(this.provider.outputChannel);
   }
 
   async showInformationMessage<T extends string|vsc.MessageItem>(message: string, options?: vsc.MessageOptions, ...items: T[]): Promise<T | undefined> {

@@ -11,7 +11,7 @@ import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-
 
 import { AccessToken, ExtensionId, FistInstallMs, FullExtensionId, LicenseKey, Ns, SidebarLeft, SidebarRight } from './constants';
 import { Disposable, disposeAll } from './dispose';
-import { IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts } from './util';
+import { ESDisposable, IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts } from './util';
 import { VscodeFns } from './vscodeFns';
 import { WorkerBundle } from './workerBundle';
 import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
@@ -30,6 +30,9 @@ export type SQLiteEdit = {
   undoValues: SqlValue[],
 };
 
+export type BoolString = 'true'|'false';
+export const toBoolString = (x?: boolean|null): BoolString|undefined => x === true ? 'true' : x === false ? 'false' : undefined;
+
 export type VSCODE_ENV = {
     appName: string, 
     appHost: string,
@@ -42,6 +45,8 @@ export type VSCODE_ENV = {
     sidebarLeft?: string
     sidebarRight?: string
     l10nBundle?: string,
+    panelVisible?: BoolString,
+    panelActive?: BoolString,
 };
 
 const Extension = vsc.extensions.getExtension(FullExtensionId);
@@ -55,7 +60,6 @@ const MaxHistory = 100;
 export const globalSQLiteDocuments = new Map<string, SQLiteDocument>();
 
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
-
   static async create(
     uri: vsc.Uri,
     openContext: vsc.CustomDocumentOpenContext,
@@ -116,8 +120,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   getConfiguredMaxFileSize() { return getConfiguredMaxFileSize() }
 
   readonly #uri: vsc.Uri;
-
-  #history: UndoHistory<SQLiteEdit>;
+  readonly #history: UndoHistory<SQLiteEdit>;
 
   private constructor(
     uri: vsc.Uri,
@@ -230,8 +233,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    */
   async revert(token: vsc.CancellationToken): Promise<void> {
     await this.checkReadonly();
-    await this.db.rollback(cancelTokenToAbortSignal(token));
-    // XXX: how to handle savedEdits in this case?
+    await this.db.rollback(this.#history.getUnsavedEdits(), cancelTokenToAbortSignal(token));
   }
 
   get db() {
@@ -282,6 +284,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     readonly viewType: string,
     readonly context: vsc.ExtensionContext,
     readonly reporter: TelemetryReporter,
+    readonly outputChannel: vsc.OutputChannel & ESDisposable,
     readonly verified: boolean,
     readonly accessToken?: string,
     readonly readOnly?: boolean,
@@ -320,6 +323,22 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     return listeners;
   }
 
+  #mkWebviewPanelDidDispose = (webviewPanel: vsc.WebviewPanel) => () => {
+    this.webviewRemotes.get(webviewPanel)?.[Symbol.dispose]();
+    this.webviewRemotes.delete(webviewPanel);
+  }
+
+  #mkWebviewPanelDidChangeViewState = (webviewPanel: vsc.WebviewPanel) => (e: vsc.WebviewPanelOnDidChangeViewStateEvent) => {
+    const webviewRemote = this.webviewRemotes.get(webviewPanel);
+    if (webviewRemote) {
+      webviewRemote.updateViewState({
+        visible: e.webviewPanel.visible,
+        active: e.webviewPanel.active,
+        // viewColumn: e.webviewPanel.viewColumn,
+      })
+    }
+  }
+
   async resolveCustomEditor(
     document: SQLiteDocument,
     webviewPanel: vsc.WebviewPanel,
@@ -327,30 +346,25 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
   ): Promise<void> {
     this.webviews.add(document.uri, webviewPanel);
 
-    const webviewStream = new WebviewStream(webviewPanel);
-    const webviewEndpoint = new WireEndpoint(webviewStream, document.uriParts.filename)
-    webviewEndpoint.addEventListener('messageerror', ev => console.error(ev.data))
-    webviewEndpoint.addEventListener('error', ev => console.error(ev.error))
+    const webviewEndpoint = new WireEndpoint(new WebviewStream(webviewPanel), document.uriParts.filename)
+    webviewEndpoint.addEventListener('messageerror', ev => console.error('WireEndpoint.onmessageerror', ev.data))
+    webviewEndpoint.addEventListener('error', ev => console.error('WireEndpoint.onerror', ev.error))
 
-    const webviewRemote = Caplink.wrap<WebviewFns>(webviewEndpoint);
+    const webviewRemote = Caplink.wrap<WebviewFns>(webviewEndpoint, undefined, { owned: true });
     this.webviewRemotes.set(webviewPanel, webviewRemote);
 
     const vscodeFns = this.hostFns.get(document)!;
     Caplink.expose(vscodeFns, webviewEndpoint);
 
     webviewPanel.webview.options = { enableScripts: true };
-    webviewPanel.webview.html = await this.getHtmlForWebview(webviewPanel.webview);
+    webviewPanel.webview.html = await this.getHtmlForWebview(webviewPanel);
 
-    webviewPanel.onDidDispose(() => {
-      const webviewRemote = this.webviewRemotes.get(webviewPanel);
-      if (webviewRemote) {
-        this.webviewRemotes.delete(webviewPanel);
-        webviewRemote[Symbol.dispose]();
-      }
-    });
+    webviewPanel.onDidChangeViewState(this.#mkWebviewPanelDidChangeViewState(webviewPanel)),
+    webviewPanel.onDidDispose(this.#mkWebviewPanelDidDispose(webviewPanel));
   }
 
-  private async getHtmlForWebview(webview: vsc.Webview): Promise<string> {
+  private async getHtmlForWebview(webviewPanel: vsc.WebviewPanel): Promise<string> {
+    const webview = webviewPanel.webview;
     const buildUri = vsc.Uri.joinPath(this.context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build');
     const codiconsUri = vsc.Uri.joinPath(this.context.extensionUri, 'node_modules', 'codicons', 'dist', 'codicon.css');
 
@@ -387,6 +401,8 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       sidebarLeft: this.context.globalState.get<number>(SidebarLeft)?.toString(),
       sidebarRight: this.context.globalState.get<number>(SidebarRight)?.toString(),
       l10nBundle: encodeBase64(v8.serialize(vsc.l10n.bundle)), // XXX: this is a hack to get the l10n bundle into the webview, maybe send as a message instead?
+      panelVisible: toBoolString(webviewPanel.visible),
+      panelActive: toBoolString(webviewPanel.active),
     } satisfies VSCODE_ENV;
 
     const lang = vsc.env.language.split('.')[0]?.replace('_', '-') ?? 'en';
@@ -475,16 +491,17 @@ export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implement
 }
 
 export function registerProvider(
+  viewType: string, 
   context: vsc.ExtensionContext, 
   reporter: TelemetryReporter, 
-  viewType: string, 
+  outputChannel: vsc.OutputChannel & ESDisposable,
   { verified, accessToken, readOnly }: { verified: boolean, accessToken?: string, readOnly?: boolean }
 ) {
   const readWrite = !import.meta.env.VSCODE_BROWSER_EXT && verified && ReadWriteMode;
   const Provider = readWrite ? SQLiteEditorProvider : SQLiteReadonlyEditorProvider;
   return vsc.window.registerCustomEditorProvider(
     viewType,
-    new Provider(viewType, context, reporter, verified, accessToken, readOnly),
+    new Provider(viewType, context, reporter, outputChannel, verified, accessToken, readOnly),
     {
       webviewOptions: {
         enableFindWidget: false,

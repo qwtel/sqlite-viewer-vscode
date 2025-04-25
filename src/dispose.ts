@@ -1,10 +1,16 @@
 import * as vscode from 'vscode';
 
 export function disposeAll(disposables: vscode.Disposable[]): void {
+  const errs = [];
   while (disposables.length) {
     const item = disposables.pop();
-    item?.dispose();
+    try { 
+      item?.dispose();
+    } catch (err) { 
+      errs.push(err);
+    }
   }
+  if (errs.length) throw new AggregateError(errs, 'Errors while disposing');
 }
 
 export abstract class Disposable implements vscode.Disposable {

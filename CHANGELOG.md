@@ -1,5 +1,7 @@
 # CHANGELOG
 
+## v25.4.2 (Pre-Release)
+
 ## v25.4.1 (Pre-Release)
 _Released on April 23, 2025_
 

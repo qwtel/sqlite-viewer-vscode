@@ -1,8 +1,8 @@
 import * as vsc from 'vscode';
 import TelemetryReporter from '@vscode/extension-telemetry';
 import { calcDaysSinceIssued, deleteLicenseKeyCommand, enterAccessTokenCommand, enterLicenseKeyCommand, getPayload, refreshAccessToken, verifyToken } from './commands';
-import { IS_VSCODE } from './util';
-import { AccessToken, ExtensionId, FileNestingPatternsAdded, FistInstallMs, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString } from './constants';
+import { assignESDispose, IS_VSCODE } from './util';
+import { AccessToken, ExtensionId, FileNestingPatternsAdded, FistInstallMs, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString, Title } from './constants';
 import { disposeAll } from './dispose';
 import { registerFileProvider, registerProvider } from './sqliteEditor';
 
@@ -62,9 +62,11 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
   }
 
   const subs = [];
-  subs.push(registerProvider(context, reporter, `${ExtensionId}.view`, { verified, accessToken }));
-  subs.push(registerProvider(context, reporter, `${ExtensionId}.option`, { verified, accessToken }));
-  subs.push(registerProvider(context, reporter, `${ExtensionId}.readonly`, { verified, accessToken, readOnly: true }));
+  const outputChannel = assignESDispose(vsc.window.createOutputChannel(Title, 'sql'));
+  subs.push(outputChannel)
+  subs.push(registerProvider(`${ExtensionId}.view`, context, reporter, outputChannel, { verified, accessToken }));
+  subs.push(registerProvider(`${ExtensionId}.option`, context, reporter, outputChannel, { verified, accessToken }));
+  subs.push(registerProvider(`${ExtensionId}.readonly`, context, reporter, outputChannel, { verified, accessToken, readOnly: true }));
   subs.push(registerFileProvider(context));
 
   for (const sub of subs) globalProviderSubs.add(sub);

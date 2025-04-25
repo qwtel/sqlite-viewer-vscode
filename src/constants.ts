@@ -22,6 +22,7 @@ export const SyncedKeys = [
   FistInstallMs,
 ];
 
+export const Title = 'SQLite Viewer';
 export const ProcessTitle = 'SQLite Viewer Helper';
 
 export const JWTPublicKeySPKI = `
