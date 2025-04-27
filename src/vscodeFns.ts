@@ -4,7 +4,7 @@ import { FullExtensionId } from './constants';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import type { DbParams } from '../sqlite-viewer-core/src/signals';
-import type { UITypeAffinity } from '../sqlite-viewer-core/src/utils';
+import { sqlBufferToUint8Array, type UITypeAffinity } from '../sqlite-viewer-core/src/utils';
 import type { RowId } from '../sqlite-viewer-core/src/worker-db-utils';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
@@ -58,12 +58,12 @@ export class VscodeFns {
     throw new Error("Document not found in webviews");
   }
 
-  async downloadBlob(data: Uint8Array, download: string, metaKey: boolean) {
+  async downloadBlob(data: Uint8Array|Int8Array|ArrayBuffer, download: string, metaKey: boolean) {
     const { document } = this;
     const { dirname } = document.uriParts;
     const dlUri = vsc.Uri.parse(`${dirname}/${download}`);
 
-    await vsc.workspace.fs.writeFile(dlUri, data);
+    await vsc.workspace.fs.writeFile(dlUri, sqlBufferToUint8Array(data));
     if (!metaKey) await vsc.commands.executeCommand('vscode.open', dlUri);
     return;
   }

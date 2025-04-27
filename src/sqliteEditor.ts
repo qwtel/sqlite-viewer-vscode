@@ -233,7 +233,9 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    */
   async revert(token: vsc.CancellationToken): Promise<void> {
     await this.checkReadonly();
+    this.#history.revert();
     await this.db.rollback(this.#history.getUnsavedEdits(), cancelTokenToAbortSignal(token));
+    this.#onDidChangeDocument.fire({ /* edits: this.#edits */ });
   }
 
   get db() {
@@ -376,7 +378,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       [cspUtil.defaultSrc]: [webview.cspSource],
       [cspUtil.scriptSrc]: [webview.cspSource, cspUtil.wasmUnsafeEval],
       [cspUtil.styleSrc]: [webview.cspSource, cspUtil.inlineStyle],
-      [cspUtil.imgSrc]: [webview.cspSource, cspUtil.data],
+      [cspUtil.imgSrc]: [webview.cspSource, cspUtil.data, cspUtil.blob],
       [cspUtil.fontSrc]: [webview.cspSource],
       [cspUtil.frameSrc]: [this.context.extensionMode === vsc.ExtensionMode.Development ? '*' : 'https://vscode.sqliteviewer.app'],
       [cspUtil.childSrc]: [cspUtil.blob],
