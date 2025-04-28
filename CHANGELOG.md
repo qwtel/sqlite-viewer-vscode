@@ -1,8 +1,10 @@
 # CHANGELOG
 
+## v25.4.3 (Pre-Release)
+Fixed a potential issue during file opening
+
 ## v25.4.2 (Pre-Release)
 _Released on April 28, 2025_
-
 
 ### [PRO] Improved Logging
 The Log has moved to VS Code's Output tab. This enables syntax highlighting, search, filtering, and also improves logging performance.
