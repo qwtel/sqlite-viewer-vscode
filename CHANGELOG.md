@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## v25.4.3 (Pre-Release)
+_Released on April 28, 2025_
+
 Fixed a potential issue during file opening
 
 ## v25.4.2 (Pre-Release)
