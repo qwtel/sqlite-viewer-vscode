@@ -30,7 +30,7 @@ export const packageExt = async (opts: {
   kind?: string,
   target?: string,
   'pre-release'?: boolean,
-}, env = Bun.env) => {
+}, env: Record<string, string|boolean|undefined> = Bun.env) => {
   let { tool, kind, target, 'pre-release': preRelease } = opts;
 
   console.log({ tool, kind, target, preRelease })
