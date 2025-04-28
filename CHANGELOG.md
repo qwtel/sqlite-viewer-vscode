@@ -2,6 +2,26 @@
 
 ## v25.4.2 (Pre-Release)
 
+### [PRO] Improved Logging
+The Log has moved to VS Code's Output tab. This enables syntax highlighting, search, filtering, and also improves logging performance.
+
+- Clicking the Log tab in the sidebar now opens VS Code's Output pane with the SQLite Viewer log pre-selected
+- Added `[read]` and `[WRITE]` to all log lines, making it easier to scan for unsaved edits, both visually and when using the UI filter
+- Added `[${filename}]` to all log lines. This allows you to use the quick filter to limit the output to specific files
+
+### [PRO] Basic Batch Updates
+Added basic multi-select and batch editing. When selecting two or more rows, the sidebar now shows the number of distinct values in the selection, or the single common value. 
+Changing a value in the sidebar will apply it to all selected rows. 
+For now, this is limited to fixed values. 
+Hopefully, more functionality from SQLite's `SET` statement can be surfaced in a future update.
+
+### Fixes
+- [PRO] Fixed a bug that caused the extension to hang after encountering certain SQLite errors, such as foreign key mismatches
+- [PRO] Fixed the UI not updating when reverting unsaved changes through VS Code
+- Fixed a bug when using `\` in search terms
+- Fixed a bug related to `'` and `"` in column names
+- Added missing translations
+
 ## v25.4.1 (Pre-Release)
 _Released on April 23, 2025_
 
