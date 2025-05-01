@@ -11,7 +11,7 @@ import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-
 
 import { AccessToken, ExtensionId, FistInstallMs, FullExtensionId, LicenseKey, Ns, SidebarLeft, SidebarRight } from './constants';
 import { Disposable, disposeAll } from './dispose';
-import { ESDisposable, IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts } from './util';
+import { ESDisposable, IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts, doTry } from './util';
 import { VscodeFns } from './vscodeFns';
 import { WorkerBundle } from './workerBundle';
 import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
@@ -402,7 +402,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       firstInstall: new Date(this.context.globalState.get<number>(FistInstallMs) ?? Date.now()).toISOString(),
       sidebarLeft: this.context.globalState.get<number>(SidebarLeft)?.toString(),
       sidebarRight: this.context.globalState.get<number>(SidebarRight)?.toString(),
-      l10nBundle: encodeBase64(v8.serialize(vsc.l10n.bundle)), // XXX: this is a hack to get the l10n bundle into the webview, maybe send as a message instead?
+      l10nBundle: doTry(() => encodeBase64(v8.serialize(vsc.l10n.bundle))), // XXX: this is a hack to get the l10n bundle into the webview, maybe send as a message instead?
       panelVisible: toBoolString(webviewPanel.visible),
       panelActive: toBoolString(webviewPanel.active),
     } satisfies VSCODE_ENV;

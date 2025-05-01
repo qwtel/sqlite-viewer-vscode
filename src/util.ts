@@ -3,6 +3,7 @@ import { encodeBase58 } from '@std/encoding';
 import { Disposable } from './dispose';
 import { ReadableStream, WritableStream } from './o/stream/web';
 import { crypto } from './o/crypto';
+import { Title } from './constants';
 
 // A bunch of tests to figure out where we're running. Some more reliable than others.
 export const IS_VSCODE = vsc.env.uriScheme.includes("vscode");
@@ -166,4 +167,12 @@ export type ESDisposable = {
 
 export const assignESDispose = <T extends vsc.Disposable>(ch: T): T & ESDisposable => {
   return Object.assign(ch, { [Symbol.dispose]() { ch.dispose() } });
+}
+
+export function doTry<T extends (...args: any[]) => any>(fn: T): ReturnType<T>|undefined {
+  try {
+    return fn();
+  } catch (err) {
+    console.error(`[${Title}]`, err instanceof Error ? err.message : String(err));
+  }
 }
