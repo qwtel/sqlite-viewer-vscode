@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## v25.5.0 (Pre-Release)
+_Released on May 2, 2025_
+
 - Labels inside sidebar will now overflow more gracefully when running low on horizontal space
 - Fixed a potential issue during file opening
 - Updated and changed dependencies
