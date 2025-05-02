@@ -152,8 +152,8 @@
   "devDependencies": {
     "@txikijs/types": "^24.12.0",
     "@types/vscode": "=1.83.1",
-    "bun-types": "^1.2.10",
-    "esbuild": "^0.25.2",
+    "bun-types": "^1.2.11",
+    "esbuild": "^0.25.3",
     "esbuild-plugin-alias": "^0.2.1",
     "esbuild-plugin-polyfill-node": "^0.3.0",
     "ovsx": "^0.10.2",
