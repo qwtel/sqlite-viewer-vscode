@@ -2,10 +2,11 @@ import * as vsc from 'vscode';
 import { SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
 import { FullExtensionId } from './constants';
 
-import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import type { DbParams } from '../sqlite-viewer-core/src/signals';
-import { sqlBufferToUint8Array, type UITypeAffinity } from '../sqlite-viewer-core/src/utils';
 import type { RowId } from '../sqlite-viewer-core/src/worker-db-utils';
+
+import * as Caplink from "../sqlite-viewer-core/src/caplink";
+import { sqlBufferToUint8Array, type UITypeAffinity } from '../sqlite-viewer-core/src/utils';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
 

@@ -160,13 +160,13 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@std/encoding": "npm:@jsr/std__encoding@^1.0.9",
+    "@scure/base": "^1.2.5",
     "@vscode/codicons": "^0.0.36",
     "@vscode/extension-telemetry": "^0.9.8",
     "@vscode/vsce": "^3.3.2",
     "@worker-tools/typed-event-target": "^1.0.0",
     "@workers/typed-event-target": "npm:@jsr/workers__typed-event-target@^1.0.0",
-    "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.5.4",
+    "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.5.5",
     "jose": "=5.10.0",
     "node-fetch": "^3.3.2",
     "whatwg-stream-to-async-iter": "^0.6.2"

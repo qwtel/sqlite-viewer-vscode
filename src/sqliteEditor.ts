@@ -4,12 +4,12 @@ import type { WorkerDb, SqlValue } from '../sqlite-viewer-core/src/worker-db';
 
 import * as vsc from 'vscode';
 import * as v8 from '@workers/v8-value-serializer/v8';
-import { encodeBase64 } from '@std/encoding';
+import { base64 } from '@scure/base';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
-import { AccessToken, ExtensionId, FistInstallMs, FullExtensionId, LicenseKey, Ns, SidebarLeft, SidebarRight } from './constants';
+import { AccessToken, ExtensionId, FistInstallMs, FullExtensionId, LicenseKey, Ns, SidebarLeft, SidebarRight, Title } from './constants';
 import { Disposable, disposeAll } from './dispose';
 import { ESDisposable, IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts, doTry } from './util';
 import { VscodeFns } from './vscodeFns';
@@ -41,7 +41,7 @@ export type VSCODE_ENV = {
     accessToken?: string,
     uiKind?: 'desktop'|'web',
     machineId: string,
-    firstInstall: string,
+    firstInstall?: string,
     sidebarLeft?: string
     sidebarRight?: string
     l10nBundle?: string,
@@ -390,7 +390,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       : ''
 
     const { uriScheme, appHost, appName, uiKind } = vsc.env;
-    const extensionUrl = uriScheme.includes('vscode')
+    const extensionUrl = uriScheme?.includes('vscode')
       ? `https://marketplace.visualstudio.com/items?itemName=${FullExtensionId}&ref=vscode`
       : `https://open-vsx.org/extension/${Ns}/${ExtensionId}&ref=vscode`;
 
@@ -399,10 +399,10 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       accessToken: this.accessToken, 
       uiKind: uiKindToString(uiKind),
       machineId: vsc.env.machineId,
-      firstInstall: new Date(this.context.globalState.get<number>(FistInstallMs) ?? Date.now()).toISOString(),
+      firstInstall: doTry(() => new Date(this.context.globalState.get<number>(FistInstallMs) ?? Date.now()).toISOString()),
       sidebarLeft: this.context.globalState.get<number>(SidebarLeft)?.toString(),
       sidebarRight: this.context.globalState.get<number>(SidebarRight)?.toString(),
-      l10nBundle: doTry(() => encodeBase64(v8.serialize(vsc.l10n.bundle))), // XXX: this is a hack to get the l10n bundle into the webview, maybe send as a message instead?
+      l10nBundle: doTry(() => base64.encode(v8.serialize(vsc.l10n.bundle))), // XXX: this is a hack to get the l10n bundle into the webview, maybe send as a message instead?
       panelVisible: toBoolString(webviewPanel.visible),
       panelActive: toBoolString(webviewPanel.active),
     } satisfies VSCODE_ENV;

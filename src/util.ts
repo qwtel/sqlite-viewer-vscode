@@ -1,5 +1,5 @@
 import * as vsc from 'vscode';
-import { encodeBase58 } from '@std/encoding';
+import { base58 } from '@scure/base';
 import { Disposable } from './dispose';
 import { ReadableStream, WritableStream } from './o/stream/web';
 import { crypto } from './o/crypto';
@@ -158,8 +158,7 @@ export function cancelTokenToAbortSignal(token?: vsc.CancellationToken): AbortSi
 }
 
 export const encodeUtf8 = TextEncoder.prototype.encode.bind(new TextEncoder());
-export const decodeUtf8 = TextDecoder.prototype.decode.bind(new TextDecoder());
-export const getShortMachineId = async () => encodeBase58(new Uint8Array(await crypto.subtle.digest('SHA-256', encodeUtf8(vsc.env.machineId))).subarray(0, 6));
+export const getShortMachineId = async () => base58.encode(new Uint8Array(await crypto.subtle.digest('SHA-256', encodeUtf8(vsc.env.machineId))).subarray(0, 6));
 
 export type ESDisposable = {
   [Symbol.dispose](): void
@@ -169,9 +168,17 @@ export const assignESDispose = <T extends vsc.Disposable>(ch: T): T & ESDisposab
   return Object.assign(ch, { [Symbol.dispose]() { ch.dispose() } });
 }
 
-export function doTry<T extends (...args: any[]) => any>(fn: T): ReturnType<T>|undefined {
+export function doTry<T extends (...args: any) => any>(fn: T): ReturnType<T>|undefined {
   try {
     return fn();
+  } catch (err) {
+    console.error(`[${Title}]`, err instanceof Error ? err.message : String(err));
+  }
+}
+
+export async function doTryAsync<T extends (...args: any) => Promise<any>>(fn: T): Promise<ReturnType<T>|undefined> {
+  try {
+    return await fn();
   } catch (err) {
     console.error(`[${Title}]`, err instanceof Error ? err.message : String(err));
   }

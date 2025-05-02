@@ -52,10 +52,10 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
   }
 				
   const payload = jose.decodeJwt(data.token);
-  // if (!payload) throw Error(l10n.t('Invalid access token'));
-  // if (payload.mid !== shortMachineId) {
-  //   throw Error(l10n.t('Machine ID in token does not match this device, this should never happen!'));
-  // }
+  if (!payload) throw Error(l10n.t('Invalid access token'));
+  if (payload.mid !== shortMachineId) {
+    reporter.sendTelemetryErrorEvent('licenseKeyMismatch', { licenseKey, machineId: shortMachineId, payload: JSON.stringify(payload) }); 
+  }
 
   await Promise.all([
     context.globalState.update(LicenseKey, licenseKey),
