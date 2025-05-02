@@ -6,6 +6,9 @@ This extension now includes translations for German, French, Portuguese (Brazil)
 If your VS Code display language is set to one of these, the extension will adjust automatically. 
 You can change your VS Code display language from the Command Pallette using "Configure Display Language".
 
+## v0.10.6 (Hotfix)
+[PRO] Fixed a bug that caused the extension to hang after encountering certain SQLite errors, such as foreign key mismatches.
+
 ## v0.10.5 (Hotfix)
 _Released on March 12, 2025_
 
