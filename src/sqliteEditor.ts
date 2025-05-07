@@ -286,7 +286,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     readonly viewType: string,
     readonly context: vsc.ExtensionContext,
     readonly reporter: TelemetryReporter,
-    readonly outputChannel: vsc.OutputChannel & ESDisposable,
+    readonly outputChannel: vsc.OutputChannel|null,
     readonly verified: boolean,
     readonly accessToken?: string,
     readonly readOnly?: boolean,
@@ -496,7 +496,7 @@ export function registerProvider(
   viewType: string, 
   context: vsc.ExtensionContext, 
   reporter: TelemetryReporter, 
-  outputChannel: vsc.OutputChannel & ESDisposable,
+  outputChannel: vsc.OutputChannel|null,
   { verified, accessToken, readOnly }: { verified: boolean, accessToken?: string, readOnly?: boolean }
 ) {
   const readWrite = !import.meta.env.VSCODE_BROWSER_EXT && verified && ReadWriteMode;

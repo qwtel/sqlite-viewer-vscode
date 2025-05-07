@@ -94,7 +94,7 @@ export class VscodeFns {
   }
 
   acquireOutputChannel() {
-    return Caplink.proxy(this.provider.outputChannel);
+    return this.provider.outputChannel ? Caplink.proxy(this.provider.outputChannel) : null;
   }
 
   async showInformationMessage<T extends string|vsc.MessageItem>(message: string, options?: vsc.MessageOptions, ...items: T[]): Promise<T | undefined> {

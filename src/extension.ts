@@ -62,8 +62,8 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
   }
 
   const subs = [];
-  const outputChannel = assignESDispose(vsc.window.createOutputChannel(Title, 'sql'));
-  subs.push(outputChannel)
+  const outputChannel = verified ? vsc.window.createOutputChannel(Title, 'sql') : null;
+  outputChannel && subs.push(outputChannel)
   subs.push(registerProvider(`${ExtensionId}.view`, context, reporter, outputChannel, { verified, accessToken }));
   subs.push(registerProvider(`${ExtensionId}.option`, context, reporter, outputChannel, { verified, accessToken }));
   subs.push(registerProvider(`${ExtensionId}.readonly`, context, reporter, outputChannel, { verified, accessToken, readOnly: true }));
