@@ -1,8 +1,7 @@
 # CHANGELOG
 
-## v25.5.1 (Pre-Release)
+## v25.5.2 (Pre-Release)
 _Released on May 7, 2025_
-
 
 ### [PRO] Pragma Editor
 PRO users now have access to a experimental PRAGMA editor. It is located in a new tab in the sidebar.
