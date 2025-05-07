@@ -85,6 +85,7 @@
   "[{0}] occurred while setting pragma '{1}' to {2}": "[{0}] occurred while setting pragma '{1}' to {2}",
   "Pragma '{0}' returned: {1}": "Pragma '{0}' returned: {1}",
   "[{0}] occurred while calling pragma '{1}'": "[{0}] occurred while calling pragma '{1}'",
+  "PRAGMAs apply instantly and may alter the database. Undo cannot reverse side effects, only set the original value (if any). Use with caution, especially on live databases.": "PRAGMAs apply instantly and may alter the database. Undo cannot reverse side effects, only set the original value (if any). Use with caution, especially on live databases.",
   "Pragmas: {0}": "Pragmas: {0}",
   "Database": "Database",
   "Connection": "Connection",

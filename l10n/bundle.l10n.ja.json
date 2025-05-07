@@ -85,6 +85,7 @@
   "[{0}] occurred while setting pragma '{1}' to {2}": "プラグマ '{1}' を {2} に設定中に [{0}] が発生しました",
   "Pragma '{0}' returned: {1}": "プラグマ '{0}' の戻り値: {1}",
   "[{0}] occurred while calling pragma '{1}'": "プラグマ '{1}' の呼び出し中に [{0}] が発生しました",
+  "PRAGMAs apply instantly and may alter the database. Undo cannot reverse side effects, only set the original value (if any). Use with caution, especially on live databases.": "PRAGMAは即座に適用され、データベースを変更する可能性があります。元に戻す操作では副作用を完全に取り消せず、元の値（存在する場合）の再設定のみが行われます。特に本番データベースでは注意してご利用ください。",
   "Pragmas: {0}": "プラグマ: {0}",
   "Database": "データベース",
   "Connection": "接続",

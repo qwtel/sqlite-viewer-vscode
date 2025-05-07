@@ -85,6 +85,7 @@
   "[{0}] occurred while setting pragma '{1}' to {2}": "프라그마 '{1}'을(를) {2}(으)로 설정하는 중 [{0}] 오류 발생",
   "Pragma '{0}' returned: {1}": "프라그마 '{0}'의 반환값: {1}",
   "[{0}] occurred while calling pragma '{1}'": "프라그마 '{1}' 호출 중 [{0}] 오류 발생",
+  "PRAGMAs apply instantly and may alter the database. Undo cannot reverse side effects, only set the original value (if any). Use with caution, especially on live databases.": "PRAGMA는 즉시 적용되며 데이터베이스를 변경할 수 있습니다. 실행 취소는 부작용을 완전히 되돌릴 수 없으며, 원래 값(있는 경우)만 재설정합니다. 특히 운영 데이터베이스에서는 주의해서 사용하세요.",
   "Pragmas: {0}": "프라그마: {0}",
   "Database": "데이터베이스",
   "Connection": "연결",

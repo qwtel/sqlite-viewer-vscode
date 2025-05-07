@@ -85,6 +85,7 @@
   "[{0}] occurred while setting pragma '{1}' to {2}": "[{0}] ocorreu ao definir o pragma '{1}' para {2}",
   "Pragma '{0}' returned: {1}": "A pragma '{0}' retornou: {1}",
   "[{0}] occurred while calling pragma '{1}'": "[{0}] ocorreu ao chamar a pragma '{1}'",
+  "PRAGMAs apply instantly and may alter the database. Undo cannot reverse side effects, only set the original value (if any). Use with caution, especially on live databases.": "As PRAGMAs são aplicadas instantaneamente e podem alterar o banco de dados. O desfazer não pode reverter efeitos colaterais, apenas restaurar o valor original (se houver). Use com cautela, especialmente em bancos de dados de produção.",
   "Pragmas: {0}": "Pragmas: {0}",
   "Database": "Banco de dados",
   "Connection": "Conexão",
