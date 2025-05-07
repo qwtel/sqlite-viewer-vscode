@@ -2,6 +2,16 @@
 
 ## v25.5.1 (Pre-Release)
 
+### [PRO] Pragma Editor
+PRO users now have access to a experimental PRAGMA editor. It is located in a new tab in the sidebar.
+
+### Changes
+- Changed icons in datetime text input to match icons in cells
+- Changed rendering of datetime values to omit the `T` in the UI (export not affected)
+
+### Fixes
+- [PRO] Fixed an issue that caused an extra entry on the undo history when an SQLite error occurred during an operation
+- [PRO] Fixed a potential memory issues related to event listeners
 
 ## v25.5.0 (Pre-Release)
 _Released on May 2, 2025_
