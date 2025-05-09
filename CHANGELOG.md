@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v25.5.3 (Pre-Release)
+- [PRO] Fixed a bug that prevented undoing delete operations in tables with generated columns after tx commit
+- Boolean columns are now rendered as readonly checkboxes
+- Valid JSON values will now be pretty printed regardless of column type
+- Numeric values will now be rendered in code font regardless of column type
+- Rearranged cell layout for BLOBs. 
+  The download button is now on the right side, no longer in the same spot as image preview.
+
 ## v25.5.2 (Pre-Release)
 _Released on May 7, 2025_
 
@@ -12,7 +20,7 @@ PRO users now have access to a experimental PRAGMA editor. It is located in a ne
 
 ### Fixes
 - [PRO] Fixed an issue that caused an extra entry on the undo history when an SQLite error occurred during an operation
-- [PRO] Fixed a potential memory issues related to event listeners
+- [PRO] Fixed a memory leak related to event listeners
 
 ## v25.5.0 (Pre-Release)
 _Released on May 2, 2025_
