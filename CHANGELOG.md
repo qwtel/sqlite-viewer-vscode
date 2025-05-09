@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## v25.5.3 (Pre-Release)
+_Released on May 9, 2025_
+
 - [PRO] Fixed a bug that prevented undoing delete operations in tables with generated columns after tx commit
 - [PRO] Changing numeric values in non-numeric column types will no longer change the type to text
 - [PRO] Disabled Pragmas when opening a readonly database
