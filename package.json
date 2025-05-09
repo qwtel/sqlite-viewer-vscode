@@ -166,7 +166,7 @@
     "@vscode/vsce": "^3.3.2",
     "@worker-tools/typed-event-target": "^1.0.0",
     "@workers/typed-event-target": "npm:@jsr/workers__typed-event-target@^1.0.0",
-    "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.5.5",
+    "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.5.6",
     "jose": "=5.10.0",
     "node-fetch": "^3.3.2",
     "whatwg-stream-to-async-iter": "^0.6.2"
