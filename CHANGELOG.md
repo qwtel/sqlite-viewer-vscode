@@ -2,11 +2,16 @@
 
 ## v25.5.3 (Pre-Release)
 - [PRO] Fixed a bug that prevented undoing delete operations in tables with generated columns after tx commit
+- [PRO] Changing numeric values in non-numeric column types will no longer change the type to text
 - Boolean columns are now rendered as readonly checkboxes
-- Valid JSON values will now be pretty printed regardless of column type
+- Valid JSON values will now be pretty-printed regardless of column type
 - Numeric values will now be rendered in code font regardless of column type
+- Text values should now be rendered as text regardless of column type
 - Rearranged cell layout for BLOBs. 
   The download button is now on the right side, no longer in the same spot as image preview.
+- Now showing the file type of blobs (e.g. "PNG") on the download button
+- Will no longer run SQLite queries originating from the sidebar when the sidebar is closed
+- Added dedicated symbol for `ANY` type columns
 
 ## v25.5.2 (Pre-Release)
 _Released on May 7, 2025_
