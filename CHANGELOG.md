@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## v25.5.4 (Pre-Release)
+_Released on May 9, 2025_
+
 Fix row number alignment
 
 ## v25.5.3 (Pre-Release)
