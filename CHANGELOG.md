@@ -3,6 +3,7 @@
 ## v25.5.3 (Pre-Release)
 - [PRO] Fixed a bug that prevented undoing delete operations in tables with generated columns after tx commit
 - [PRO] Changing numeric values in non-numeric column types will no longer change the type to text
+- [PRO] Disabled Pragmas when opening a readonly database
 - Boolean columns are now rendered as readonly checkboxes
 - Valid JSON values will now be pretty-printed regardless of column type
 - Numeric values will now be rendered in code font regardless of column type
