@@ -183,3 +183,28 @@ export async function doTryAsync<T extends (...args: any) => Promise<any>>(fn: T
     console.error(`[${Title}]`, err instanceof Error ? err.message : String(err));
   }
 }
+
+const toDashCase = (str: string) => str.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
+
+export function toDatasetAttrs(obj: Record<string, string|boolean|undefined>) {
+  return Object.entries(obj).map(([k, v]) => v != null ? `data-${toDashCase(k)}="${v}"` : '').join(' ');
+}
+
+export function themeToCss(theme: vsc.ColorTheme) {
+  switch (theme.kind) {
+    case vsc.ColorThemeKind.Dark: return 'dark';
+    case vsc.ColorThemeKind.Light: return 'light';
+    case vsc.ColorThemeKind.HighContrast: return 'dark';
+    case vsc.ColorThemeKind.HighContrastLight: return 'light';
+  }
+}
+
+export function uiKindToString(uiKind: vsc.UIKind) {
+  switch (uiKind) {
+    case vsc.UIKind.Web: return 'web';
+    case vsc.UIKind.Desktop: return 'desktop';
+  }
+}
+
+export type BoolString = 'true'|'false';
+export const toBoolString = (x?: boolean|null): BoolString|undefined => x === true ? 'true' : x === false ? 'false' : undefined;

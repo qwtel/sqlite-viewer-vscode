@@ -11,16 +11,14 @@ import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-
 
 import { AccessToken, ExtensionId, FistInstallMs, FullExtensionId, LicenseKey, Ns, SidebarLeft, SidebarRight, Title } from './constants';
 import { Disposable, disposeAll } from './dispose';
-import { ESDisposable, IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts, doTry } from './util';
+import { ESDisposable, IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts, doTry, toDatasetAttrs, themeToCss, uiKindToString, BoolString, toBoolString } from './util';
 import { VscodeFns } from './vscodeFns';
 import { WorkerBundle } from './workerBundle';
 import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
 import { enterLicenseKeyCommand } from './commands';
 
-//#region Pro
 import { createProWorker } from '../sqlite-viewer-core/pro/src/proWorker';
 import { UndoHistory } from '../sqlite-viewer-core/pro/src/undoHistory';
-//#endregion
 
 export type SQLiteEdit = {
   label: string,
@@ -29,9 +27,6 @@ export type SQLiteEdit = {
   undoQuery?: string,
   undoValues: SqlValue[],
 };
-
-export type BoolString = 'true'|'false';
-export const toBoolString = (x?: boolean|null): BoolString|undefined => x === true ? 'true' : x === false ? 'false' : undefined;
 
 export type VSCODE_ENV = {
     appName: string, 
@@ -136,11 +131,11 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     globalSQLiteDocuments.set(this.uri.path, this);
   }
 
-  public get uri() { return this.#uri; }
-  public get uriParts() { return getUriParts(this.#uri); }
+  get uri() { return this.#uri; }
+  get uriParts() { return getUriParts(this.#uri); }
 
   readonly #onDidDispose = this._register(new vsc.EventEmitter<void>());
-  public readonly onDidDispose = this.#onDidDispose.event;
+  readonly onDidDispose = this.#onDidDispose.event;
 
   readonly #onDidChangeDocument = this._register(new vsc.EventEmitter<{
     // readonly edits: readonly SQLiteEdit[];
@@ -149,9 +144,9 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   /**
    * Fired to notify webviews that the document has changed.
    */
-  public readonly onDidChangeContent = this.#onDidChangeDocument.event;
+  readonly onDidChangeContent = this.#onDidChangeDocument.event;
 
-  private readonly _onDidChange = this._register(new vsc.EventEmitter<{
+  readonly #onDidChange = this._register(new vsc.EventEmitter<{
     readonly label: string,
     undo(): void|Promise<void>,
     redo(): void|Promise<void>,
@@ -162,7 +157,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    *
    * This updates the document's dirty indicator.
    */
-  public readonly onDidChange = this._onDidChange.event;
+  readonly onDidChange = this.#onDidChange.event;
 
   /**
    * Called by VS Code when there are no more references to the document.
@@ -184,7 +179,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   makeEdit(edit: SQLiteEdit) {
     const history = this.#history;
     history.push(edit);
-    this._onDidChange.fire({
+    this.#onDidChange.fire({
       label: edit.label,
       undo: async () => {
         const edit = history.undo();
@@ -359,13 +354,13 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     Caplink.expose(vscodeFns, webviewEndpoint);
 
     webviewPanel.webview.options = { enableScripts: true };
-    webviewPanel.webview.html = await this.getHtmlForWebview(webviewPanel);
+    webviewPanel.webview.html = await this.#getHtmlForWebview(webviewPanel);
 
     webviewPanel.onDidChangeViewState(this.#mkWebviewPanelDidChangeViewState(webviewPanel)),
     webviewPanel.onDidDispose(this.#mkWebviewPanelDidDispose(webviewPanel));
   }
 
-  private async getHtmlForWebview(webviewPanel: vsc.WebviewPanel): Promise<string> {
+  async #getHtmlForWebview(webviewPanel: vsc.WebviewPanel): Promise<string> {
     const webview = webviewPanel.webview;
     const buildUri = vsc.Uri.joinPath(this.context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build');
     const codiconsUri = vsc.Uri.joinPath(this.context.extensionUri, 'node_modules', 'codicons', 'dist', 'codicon.css');
@@ -430,34 +425,13 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
   }
 }
 
-const toDashCase = (str: string) => str.replace(/[A-Z]/g, m => `-${m.toLowerCase()}`);
-function toDatasetAttrs(obj: Record<string, string|boolean|undefined>) {
-  return Object.entries(obj).map(([k, v]) => v != null ? `data-${toDashCase(k)}="${v}"` : '').join(' ');
-}
-
-function themeToCss(theme: vsc.ColorTheme) {
-  switch (theme.kind) {
-    case vsc.ColorThemeKind.Dark: return 'dark';
-    case vsc.ColorThemeKind.Light: return 'light';
-    case vsc.ColorThemeKind.HighContrast: return 'dark';
-    case vsc.ColorThemeKind.HighContrastLight: return 'light';
-  }
-}
-
-function uiKindToString(uiKind: vsc.UIKind) {
-  switch (uiKind) {
-    case vsc.UIKind.Web: return 'web';
-    case vsc.UIKind.Desktop: return 'desktop';
-  }
-}
-
 export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implements vsc.CustomEditorProvider<SQLiteDocument> {
   protected setupListeners(document: SQLiteDocument): vsc.Disposable[] {
     const listeners: vsc.Disposable[] = super.setupListeners(document);
 
     listeners.push(document.onDidChange(edit => {
       // Tell VS Code that the document has been edited by the use.
-      this._onDidChangeCustomDocument.fire({ document, ...edit });
+      this.#onDidChangeCustomDocument.fire({ document, ...edit });
     }));
 
     listeners.push(document.onDidChangeContent(async () => {
@@ -472,22 +446,22 @@ export class SQLiteEditorProvider extends SQLiteReadonlyEditorProvider implement
     return listeners;
   }
 
-  private readonly _onDidChangeCustomDocument = new vsc.EventEmitter<vsc.CustomDocumentEditEvent<SQLiteDocument>>();
-  public readonly onDidChangeCustomDocument = this._onDidChangeCustomDocument.event;
+  readonly #onDidChangeCustomDocument = new vsc.EventEmitter<vsc.CustomDocumentEditEvent<SQLiteDocument>>();
+  readonly onDidChangeCustomDocument = this.#onDidChangeCustomDocument.event;
 
-  public saveCustomDocument(document: SQLiteDocument, cancellation: vsc.CancellationToken): Thenable<void> {
+  saveCustomDocument(document: SQLiteDocument, cancellation: vsc.CancellationToken): Thenable<void> {
     return document.save(cancellation);
   }
 
-  public saveCustomDocumentAs(document: SQLiteDocument, destination: vsc.Uri, cancellation: vsc.CancellationToken): Thenable<void> {
+  saveCustomDocumentAs(document: SQLiteDocument, destination: vsc.Uri, cancellation: vsc.CancellationToken): Thenable<void> {
     return document.saveAs(destination, cancellation);
   }
 
-  public revertCustomDocument(document: SQLiteDocument, cancellation: vsc.CancellationToken): Thenable<void> {
+  revertCustomDocument(document: SQLiteDocument, cancellation: vsc.CancellationToken): Thenable<void> {
     return document.revert(cancellation);
   }
 
-  public backupCustomDocument(document: SQLiteDocument, context: vsc.CustomDocumentBackupContext, cancellation: vsc.CancellationToken): Thenable<vsc.CustomDocumentBackup> {
+  backupCustomDocument(document: SQLiteDocument, context: vsc.CustomDocumentBackupContext, cancellation: vsc.CancellationToken): Thenable<vsc.CustomDocumentBackup> {
     return document.backup(context.destination, cancellation);
   }
 }
