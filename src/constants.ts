@@ -31,3 +31,5 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFK3xjgL1y4OazahxzcvxUVcRPfYY
 hixfUOoecMEXQ2c2wy95T/JgmiRh9MxPTdRwoSO1Ub1nVFII2s1d8E2RCw==
 -----END PUBLIC KEY-----
 `.trim();
+
+export const CopilotChatId = 'github.copilot-chat';

@@ -6,13 +6,14 @@ import { crypto } from './o/crypto';
 import { Title } from './constants';
 
 // A bunch of tests to figure out where we're running. Some more reliable than others.
-export const IS_VSCODE = vsc.env.uriScheme.includes("vscode");
-export const IS_VSCODIUM = vsc.env.uriScheme.includes("vscodium");
-export const IS_GITHUB_DEV = vsc.env.uriScheme.includes("vscode") && vsc.env.appHost === "gihub.dev";
-export const IS_GITPOD_WEB = vsc.env.uriScheme.includes("gitpod-code") || vsc.env.appHost === "Gitpod" || vsc.env.appName === "Gitpod Code";
-export const IS_GOOGLE_IDX = vsc.env.appName.includes("IDX") || (vsc.env.appHost === "web" && vsc.env.remoteName?.startsWith('idx'));
+export const IsVSCode = vsc.env.uriScheme.includes("vscode");
+export const IsVSCodium = vsc.env.uriScheme.includes("vscodium");
+export const IsGitHubDotDev = vsc.env.uriScheme.includes("vscode") && vsc.env.appHost === "gihub.dev";
+export const IsGitPodWeb = vsc.env.uriScheme.includes("gitpod-code") || vsc.env.appHost === "Gitpod" || vsc.env.appName === "Gitpod Code";
+export const IsGoogleIDX = vsc.env.appName.includes("IDX") || (vsc.env.appHost === "web" && vsc.env.remoteName?.startsWith('idx'));
+export const IsCursorIDE = vsc.env.appName.includes("Cursor") || vsc.env.uriScheme.includes("cursor");
 
-export const IS_DESKTOP = vsc.env.appHost === "desktop";
+export const IsDesktop = vsc.env.appHost === "desktop";
 
 export class WebviewCollection {
   private readonly _webviews = new Set<{

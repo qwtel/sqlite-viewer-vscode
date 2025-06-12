@@ -9,9 +9,9 @@ import { base64 } from '@scure/base';
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
-import { AccessToken, ExtensionId, FistInstallMs, FullExtensionId, LicenseKey, Ns, SidebarLeft, SidebarRight, Title } from './constants';
+import { AccessToken, CopilotChatId, ExtensionId, FistInstallMs, FullExtensionId, LicenseKey, Ns, SidebarLeft, SidebarRight, Title } from './constants';
 import { Disposable, disposeAll } from './dispose';
-import { ESDisposable, IS_DESKTOP, IS_VSCODE, IS_VSCODIUM, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts, doTry, toDatasetAttrs, themeToCss, uiKindToString, BoolString, toBoolString } from './util';
+import { ESDisposable, IsDesktop, IsVSCode, IsVSCodium, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts, doTry, toDatasetAttrs, themeToCss, uiKindToString, BoolString, toBoolString, IsCursorIDE } from './util';
 import { VscodeFns } from './vscodeFns';
 import { WorkerBundle } from './workerBundle';
 import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
@@ -42,6 +42,7 @@ export type VSCODE_ENV = {
     l10nBundle?: string,
     panelVisible?: BoolString,
     panelActive?: BoolString,
+    copilotActive?: BoolString,
 };
 
 const Extension = vsc.extensions.getExtension(FullExtensionId);
@@ -332,8 +333,14 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
         visible: e.webviewPanel.visible,
         active: e.webviewPanel.active,
         // viewColumn: e.webviewPanel.viewColumn,
-      })
+      }).catch(() => {})
     }
+  }
+
+  #mkExtensionsDidChange = (webviewPanel: vsc.WebviewPanel) => () => {
+    const chat = vsc.extensions.getExtension(CopilotChatId);
+    const webviewRemote = this.webviewRemotes.get(webviewPanel);
+    webviewRemote?.updateCopilotActive(!!chat?.isActive || IsCursorIDE).catch(() => {})
   }
 
   async resolveCustomEditor(
@@ -358,6 +365,8 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
 
     webviewPanel.onDidChangeViewState(this.#mkWebviewPanelDidChangeViewState(webviewPanel)),
     webviewPanel.onDidDispose(this.#mkWebviewPanelDidDispose(webviewPanel));
+
+    vsc.extensions.onDidChange(this.#mkExtensionsDidChange(webviewPanel));
   }
 
   async #getHtmlForWebview(webviewPanel: vsc.WebviewPanel): Promise<string> {
@@ -380,7 +389,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     };
 
     // Only set csp for hosts that are known to correctly set `webview.cspSource`
-    const cspStr = IS_VSCODE || IS_VSCODIUM
+    const cspStr = IsVSCode || IsVSCodium
       ? cspUtil.build(cspObj)
       : ''
 
@@ -400,6 +409,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       l10nBundle: doTry(() => base64.encode(v8.serialize(vsc.l10n.bundle))), // XXX: this is a hack to get the l10n bundle into the webview, maybe send as a message instead?
       panelVisible: toBoolString(webviewPanel.visible),
       panelActive: toBoolString(webviewPanel.active),
+      copilotActive: vsc.extensions.getExtension(CopilotChatId)?.isActive || IsCursorIDE ? 'true' : 'false',
     } satisfies VSCODE_ENV;
 
     const lang = vsc.env.language.split('.')[0]?.replace('_', '-') ?? 'en';

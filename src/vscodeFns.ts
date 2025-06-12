@@ -7,6 +7,7 @@ import type { RowId } from '../sqlite-viewer-core/src/worker-db-utils';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { sqlBufferToUint8Array, type UITypeAffinity } from '../sqlite-viewer-core/src/utils';
+import { IsCursorIDE } from './util';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
 
@@ -120,6 +121,17 @@ export class VscodeFns {
         viewColumn: vsc.ViewColumn.Beside,
         // preserveFocus: false,
         preview: true,
+      });
+    }
+  }
+
+  async openChat() {
+    if (IsCursorIDE) {
+      await vsc.commands.executeCommand('workbench.action.focusAuxiliaryBar');
+    } else {
+      await vsc.commands.executeCommand('workbench.action.chat.open', {
+        query: `@db Hello!`,
+        mode: "ask",
       });
     }
   }

@@ -120,6 +120,8 @@
         "title": "%sqlite-viewer.commands.enterAccessToken.title%",
         "category": "SQLite Viewer"
       }
+    ],
+    "languageModelTools": [
     ]
   },
   "scripts": {
