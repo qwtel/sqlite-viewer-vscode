@@ -1,6 +1,6 @@
 import * as vsc from 'vscode';
 import { SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
-import { FullExtensionId } from './constants';
+import { FullExtensionId, SidebarLeft, SidebarRight } from './constants';
 
 import type { DbParams } from '../sqlite-viewer-core/src/signals';
 import type { RowId } from '../sqlite-viewer-core/src/worker-db-utils';
@@ -90,7 +90,7 @@ export class VscodeFns {
   }
 
   saveSidebarState(side: 'left'|'right', position: number) {
-    const key = side === 'left' ? 'sidebarLeft' : 'sidebarRight';
+    const key = side === 'left' ? SidebarLeft : SidebarRight;
     return Promise.resolve(this.context.globalState.update(key, position));
   }
 
