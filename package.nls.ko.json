@@ -7,5 +7,9 @@
   "sqlite-viewer.commands.addFileNestingPatterns.title": "SQLite 파일 중첩 패턴 추가",
   "sqlite-viewer.commands.enterLicenseKey.title": "라이선스 키 활성화",
   "sqlite-viewer.commands.removeLicenseKey.title": "라이선스 키 비활성화",
-  "sqlite-viewer.commands.enterAccessToken.title": "오프라인 라이선스 활성화"
+  "sqlite-viewer.commands.enterAccessToken.title": "오프라인 라이선스 활성화",
+  "sqlite-viewer.config.instantCommit.never": "절대",
+  "sqlite-viewer.config.instantCommit.remoteOnly": "원격 전용",
+  "sqlite-viewer.config.instantCommit.always": "항상",
+  "sqlite-viewer.config.instantCommit.markdownDescription": "이 설정을 활성화하면 데이터베이스에 대한 변경 사항이 즉시 커밋됩니다. 비활성화된 경우 사용자가 명시적으로 저장할 때만 변경 사항이 커밋됩니다. 이 설정은 읽기 전용 데이터베이스에는 적용되지 않습니다.\n\n__경고__: 이 설정이 활성화된 경우 실행 취소 및 다시 실행 기능은 \"반전된\" SQLite 문을 통해 구현되며, 이는 항상 동작이 보장되는 것은 아닙니다(예: 다른 프로세스가 동일한 행을 수정한 경우 등)."
 }

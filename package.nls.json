@@ -4,8 +4,12 @@
   "sqlite-viewer.customEditor.readonly.displayName": "SQLite Viewer (read-only)",
   "sqlite-viewer.customEditor.wasm.displayName": "SQLite Viewer (read-only, in-memory)",
   "sqlite-viewer.config.maxFileSize.markdownDescription": "The maximum file size in MB the extension will attempt to load. Set to 0 to disable the limit. The internal limit is 4GB, but platform limits may apply earlier.\n\n__Warning__: Opening large files may cause poor performance, freezes, and system-wide memory pressure.",
-	"sqlite-viewer.commands.addFileNestingPatterns.title": "Add SQLite File Nesting Patterns",
+  "sqlite-viewer.commands.addFileNestingPatterns.title": "Add SQLite File Nesting Patterns",
   "sqlite-viewer.commands.enterLicenseKey.title": "Activate License Key",
   "sqlite-viewer.commands.removeLicenseKey.title": "Deactivate License Key",
-  "sqlite-viewer.commands.enterAccessToken.title": "Offline License Activation"
+  "sqlite-viewer.commands.enterAccessToken.title": "Offline License Activation",
+  "sqlite-viewer.config.instantCommit.never": "Never",
+  "sqlite-viewer.config.instantCommit.remoteOnly": "Remote-Only",
+  "sqlite-viewer.config.instantCommit.always": "Always",
+  "sqlite-viewer.config.instantCommit.markdownDescription": "When this setting is enabled, changes to the database are committed immediately. If disabled, changes are only committed when the user explicitly saves them. This setting is ignored for read-only databases.\n\n__Warning__: When this setting is enabled, undo and redo functionality is achieved through \"inverted\" SQLite statements, which are not guaranteed to work (e.g. another process has modified the same row, etc.)"
 }

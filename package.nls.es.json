@@ -7,5 +7,9 @@
   "sqlite-viewer.commands.addFileNestingPatterns.title": "Agregar Patrones de Anidamiento de Archivos SQLite",
   "sqlite-viewer.commands.enterLicenseKey.title": "Activar Clave de Licencia",
   "sqlite-viewer.commands.removeLicenseKey.title": "Desactivar Clave de Licencia",
-  "sqlite-viewer.commands.enterAccessToken.title": "Activación de Licencia Offline"
+  "sqlite-viewer.commands.enterAccessToken.title": "Activación de Licencia Offline",
+  "sqlite-viewer.config.instantCommit.never": "Nunca",
+  "sqlite-viewer.config.instantCommit.remoteOnly": "Solo remoto",
+  "sqlite-viewer.config.instantCommit.always": "Siempre",
+  "sqlite-viewer.config.instantCommit.markdownDescription": "Cuando esta opción está habilitada, los cambios en la base de datos se confirman inmediatamente. Si está deshabilitada, los cambios solo se confirman cuando el usuario los guarda explícitamente. Esta opción se ignora para bases de datos de solo lectura.\n\n__Advertencia__: Cuando esta opción está habilitada, la funcionalidad de deshacer y rehacer se logra mediante sentencias SQLite \"invertidas\", que no están garantizadas para funcionar (por ejemplo, si otro proceso ha modificado la misma fila, etc.)"
 }

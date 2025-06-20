@@ -9,7 +9,7 @@ import { base64 } from '@scure/base';
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
-import { AccessToken, CopilotChatId, ExtensionId, FistInstallMs, FullExtensionId, LicenseKey, Ns, SidebarLeft, SidebarRight, Title } from './constants';
+import { AccessToken, ConfigurationSection, CopilotChatId, ExtensionId, FistInstallMs, FullExtensionId, LicenseKey, Ns, SidebarLeft, SidebarRight, Title } from './constants';
 import { Disposable, disposeAll } from './dispose';
 import { ESDisposable, IsDesktop, IsVSCode, IsVSCodium, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts, doTry, toDatasetAttrs, themeToCss, uiKindToString, BoolString, toBoolString, IsCursorIDE } from './util';
 import { VscodeFns } from './vscodeFns';
@@ -43,6 +43,7 @@ export type VSCODE_ENV = {
     panelVisible?: BoolString,
     panelActive?: BoolString,
     copilotActive?: BoolString,
+    instantCommit?: BoolString,
 };
 
 const Extension = vsc.extensions.getExtension(FullExtensionId);
@@ -71,11 +72,12 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       : createWebWorker;
 
     const { filename } = getUriParts(uri);
+    const instantCommit = getInstantCommit();
 
     let workerFns, createWorkerDb, dbRemote;
     try {
       ({ workerFns, createWorkerDb } = await createWorkerBundle(extensionUri, reporter));
-      ({ dbRemote, readOnly } = await createWorkerDb(uri, filename, readOnly));
+      ({ dbRemote, readOnly } = await createWorkerDb(uri, filename, readOnly, instantCommit));
     } catch (err) {
       // In case something goes wrong, try to create using the WASM worker
       if (createWorkerBundle !== createWebWorker) {
@@ -94,7 +96,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     }
 
     let history: UndoHistory<SQLiteEdit>|null = null;
-    if (typeof openContext.backupId === 'string') {
+    if (typeof openContext.backupId === 'string' && !instantCommit) {
       const editsUri = vsc.Uri.parse(openContext.backupId);
       const editsBuffer = await vsc.workspace.fs.readFile(editsUri);
       const h = history = UndoHistory.restore(editsBuffer, MaxHistory);
@@ -276,7 +278,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorProvider<SQLiteDocument> {
   readonly webviews = new WebviewCollection();
   protected readonly webviewRemotes = new Map<vsc.WebviewPanel, Caplink.Remote<WebviewFns>>
-  protected readonly hostFns = new Map<SQLiteDocument, VscodeFns>();
+  protected readonly vscodeFnsMaps = new Map<SQLiteDocument, VscodeFns>();
 
   constructor(
     readonly viewType: string,
@@ -298,10 +300,10 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
 
     const listeners = this.setupListeners(document);
 
-    this.hostFns.set(document, new VscodeFns(this, document));
+    this.vscodeFnsMaps.set(document, new VscodeFns(this, document));
 
     document.onDidDispose(() => {
-      this.hostFns.delete(document);
+      this.vscodeFnsMaps.delete(document);
       disposeAll(listeners)
     });
 
@@ -314,7 +316,17 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     listeners.push(vsc.window.onDidChangeActiveColorTheme((theme) => {
       for (const panel of this.webviews.get(document.uri)) {
         const webviewRemote = this.webviewRemotes.get(panel);
-        webviewRemote?.updateColorScheme(themeToCss(theme)).catch(console.warn);
+        webviewRemote?.updateColorScheme(themeToCss(theme)).catch(() => {});
+      }
+    }));
+
+    listeners.push(vsc.workspace.onDidChangeConfiguration(e => {
+      if (e.affectsConfiguration(`${ConfigurationSection}.instantCommit`)) {
+        const instantCommit = getInstantCommit();
+        for (const panel of this.webviews.get(document.uri)) {
+          const webviewRemote = this.webviewRemotes.get(panel);
+          webviewRemote?.updateInstantCommit(instantCommit).catch(() => {});
+        }
       }
     }));
 
@@ -357,7 +369,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     const webviewRemote = Caplink.wrap<WebviewFns>(webviewEndpoint, undefined, { owned: true });
     this.webviewRemotes.set(webviewPanel, webviewRemote);
 
-    const vscodeFns = this.hostFns.get(document)!;
+    const vscodeFns = this.vscodeFnsMaps.get(document)!;
     Caplink.expose(vscodeFns, webviewEndpoint);
 
     webviewPanel.webview.options = { enableScripts: true };
@@ -398,7 +410,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       ? `https://marketplace.visualstudio.com/items?itemName=${FullExtensionId}&ref=vscode`
       : `https://open-vsx.org/extension/${Ns}/${ExtensionId}&ref=vscode`;
 
-    const vscodeEnv = { 
+    const vscodeEnv = {
       uriScheme, appHost, appName, extensionUrl, 
       accessToken: this.accessToken, 
       uiKind: uiKindToString(uiKind),
@@ -409,7 +421,8 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       l10nBundle: doTry(() => base64.encode(v8.serialize(vsc.l10n.bundle))), // XXX: this is a hack to get the l10n bundle into the webview, maybe send as a message instead?
       panelVisible: toBoolString(webviewPanel.visible),
       panelActive: toBoolString(webviewPanel.active),
-      copilotActive: vsc.extensions.getExtension(CopilotChatId)?.isActive || IsCursorIDE ? 'true' : 'false',
+      copilotActive: toBoolString(vsc.extensions.getExtension(CopilotChatId)?.isActive || IsCursorIDE),
+      instantCommit: toBoolString(getInstantCommit()),
     } satisfies VSCODE_ENV;
 
     const lang = vsc.env.language.split('.')[0]?.replace('_', '-') ?? 'en';
@@ -529,4 +542,11 @@ export function registerFileProvider(_context: vsc.ExtensionContext) {
     // onDidChange = this.onDidChangeEmitter.event;
   })();
   return vsc.workspace.registerTextDocumentContentProvider('sqlite-file', sqliteFileProvider);
+}
+
+
+export function getInstantCommit() {
+  const config = vsc.workspace.getConfiguration(ConfigurationSection);
+  const value = config.get<string>('instantCommit', 'never');
+  return value === 'always' || (value === 'remote-only' && RemoteWorkspaceMode)
 }

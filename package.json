@@ -96,6 +96,21 @@
           "exclusiveMinimum": false,
           "default": 200,
           "markdownDescription": "%sqlite-viewer.config.maxFileSize.markdownDescription%"
+        },
+        "sqliteViewer.instantCommit": {
+          "type": "string",
+          "enum": [
+            "never",
+            "remote-only",
+            "always"
+          ],
+          "enumDescriptions": [
+            "%sqlite-viewer.config.instantCommit.never%",
+            "%sqlite-viewer.config.instantCommit.remoteOnly%",
+            "%sqlite-viewer.config.instantCommit.always%"
+          ],
+          "default": "never",
+          "markdownDescription": "%sqlite-viewer.config.instantCommit.markdownDescription%"
         }
       }
     },

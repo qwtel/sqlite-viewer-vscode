@@ -7,5 +7,9 @@
   "sqlite-viewer.commands.addFileNestingPatterns.title": "SQLiteファイルネスティングパターンを追加",
   "sqlite-viewer.commands.enterLicenseKey.title": "ライセンスキーをアクティブ化",
   "sqlite-viewer.commands.removeLicenseKey.title": "ライセンスキーを無効化",
-  "sqlite-viewer.commands.enterAccessToken.title": "オフラインライセンス認証"
+  "sqlite-viewer.commands.enterAccessToken.title": "オフラインライセンス認証",
+  "sqlite-viewer.config.instantCommit.never": "決して",
+  "sqlite-viewer.config.instantCommit.remoteOnly": "リモートのみ",
+  "sqlite-viewer.config.instantCommit.always": "常に",
+  "sqlite-viewer.config.instantCommit.markdownDescription": "この設定を有効にすると、データベースへの変更が即座にコミットされます。無効にすると、ユーザーが明示的に保存した場合のみ変更がコミットされます。この設定は読み取り専用データベースでは無視されます。\n\n__警告__: この設定が有効な場合、元に戻す/やり直しの機能は\"反転した\"SQLiteステートメントによって実現されますが、必ずしも動作が保証されるわけではありません（例: 他のプロセスが同じ行を変更した場合など）。"
 }

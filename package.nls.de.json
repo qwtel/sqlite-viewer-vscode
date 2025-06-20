@@ -7,5 +7,9 @@
   "sqlite-viewer.commands.addFileNestingPatterns.title": "SQLite-Dateiverschachtelungsmuster hinzufügen",
   "sqlite-viewer.commands.enterLicenseKey.title": "Lizenzschlüssel aktivieren",
   "sqlite-viewer.commands.removeLicenseKey.title": "Lizenzschlüssel deaktivieren",
-  "sqlite-viewer.commands.enterAccessToken.title": "Offline-Lizenzaktivierung"
+  "sqlite-viewer.commands.enterAccessToken.title": "Offline-Lizenzaktivierung",
+  "sqlite-viewer.config.instantCommit.never": "Nie",
+  "sqlite-viewer.config.instantCommit.remoteOnly": "Nur Remote",
+  "sqlite-viewer.config.instantCommit.always": "Immer",
+  "sqlite-viewer.config.instantCommit.markdownDescription": "Wenn diese Einstellung aktiviert ist, werden Änderungen an der Datenbank sofort übernommen. Wenn sie deaktiviert ist, werden Änderungen nur übernommen, wenn der Benutzer sie explizit speichert. Diese Einstellung wird für schreibgeschützte Datenbanken ignoriert.\n\n__Warnung__: Wenn diese Einstellung aktiviert ist, wird die Rückgängig-/Wiederholen-Funktionalität durch \"invertierte\" SQLite-Anweisungen erreicht, die nicht garantiert funktionieren (z. B. wenn ein anderer Prozess dieselbe Zeile geändert hat usw.)"
 }

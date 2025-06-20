@@ -1,9 +1,13 @@
 # CHANGELOG
 
+## v25.6.0 (Pre-Release)
+
+[PRO] Added an "Instant Commit" setting that prevents the extension from opening long-running transactions that block other SQLite processes. Use with caution, as undo/redo functionality is limited in this mode.
+
 ## v25.5.4 (Pre-Release)
 _Released on May 9, 2025_
 
-Fix row number alignment
+Fixed visual row number alignment issue
 
 ## v25.5.3 (Pre-Release)
 _Released on May 9, 2025_

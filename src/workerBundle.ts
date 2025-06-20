@@ -7,5 +7,13 @@ export type WorkerLike = { terminate(): void }
 
 export interface WorkerBundle {
   workerFns: Remote<WorkerFns>,
-  createWorkerDb(xUri: Uri, filename: string, readOnly?: boolean): Awaitable<{ dbRemote: Remote<WorkerDb>, readOnly?: boolean }>
+  createWorkerDb(
+    xUri: Uri, 
+    filename: string, 
+    readOnly?: boolean, 
+    instantCommit?: boolean,
+  ): Awaitable<{
+    dbRemote: Remote<WorkerDb>, 
+    readOnly?: boolean,
+  }>
 }
