@@ -29,21 +29,21 @@ export type SQLiteEdit = {
 };
 
 export type VSCODE_ENV = {
-    appName: string, 
-    appHost: string,
-    uriScheme: string, 
-    extensionUrl: string,
-    accessToken?: string,
-    uiKind?: 'desktop'|'web',
-    machineId: string,
-    firstInstall?: string,
-    sidebarLeft?: string
-    sidebarRight?: string
-    l10nBundle?: string,
-    panelVisible?: BoolString,
-    panelActive?: BoolString,
-    copilotActive?: BoolString,
-    instantCommit?: BoolString,
+  appName: string, 
+  appHost: string,
+  uriScheme: string, 
+  extensionUrl: string,
+  accessToken?: string,
+  uiKind?: 'desktop'|'web',
+  machineId: string,
+  firstInstall?: string,
+  sidebarLeft?: string
+  sidebarRight?: string
+  l10nBundle?: string,
+  panelVisible?: BoolString,
+  panelActive?: BoolString,
+  copilotActive?: BoolString,
+  instantCommit?: BoolString,
 };
 
 const Extension = vsc.extensions.getExtension(FullExtensionId);
@@ -54,18 +54,17 @@ const ReadWriteMode = LocalMode || RemoteWorkspaceMode;
 
 const MaxHistory = 100;
 
-export const globalSQLiteDocuments = new Map<string, SQLiteDocument>();
+export const GlobalSQLiteDocuments = new Map<string, SQLiteDocument>();
 
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   static async create(
+    provider: SQLiteReadonlyEditorProvider,
     uri: vsc.Uri,
     openContext: vsc.CustomDocumentOpenContext,
-    extensionUri: vsc.Uri,
-    verified: boolean,
-    readOnly?: boolean,
-    reporter?: TelemetryReporter,
     token?: vsc.CancellationToken,
   ): Promise<SQLiteDocument> {
+    const { reporter, verified, context: { extensionUri } } = provider;
+    let { readOnly } = provider;
 
     const createWorkerBundle = !import.meta.env.VSCODE_BROWSER_EXT && verified && ReadWriteMode // Do not change this line
       ? createProWorker
@@ -111,16 +110,18 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
         readOnly = true;
       }
     }
-
-    return new SQLiteDocument(uri, history, workerFns, createWorkerDb, { dbRemote, readOnly }, reporter);
+    
+    return new SQLiteDocument(provider, uri, history, workerFns, createWorkerDb, { dbRemote, readOnly }, reporter);
   }
 
   getConfiguredMaxFileSize() { return getConfiguredMaxFileSize() }
 
   readonly #uri: vsc.Uri;
   readonly #history: UndoHistory<SQLiteEdit>;
+  readonly #vscodeFns: VscodeFns;
 
   private constructor(
+    provider: SQLiteReadonlyEditorProvider,
     uri: vsc.Uri,
     history: UndoHistory<SQLiteEdit>|null,
     private readonly workerFns: WorkerBundle["workerFns"],
@@ -131,11 +132,13 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     super();
     this.#uri = uri;
     this.#history = history ?? new UndoHistory<SQLiteEdit>(MaxHistory);
-    globalSQLiteDocuments.set(this.uri.path, this);
+    this.#vscodeFns = new VscodeFns(provider, this);
+    GlobalSQLiteDocuments.set(this.uri.path, this);
   }
 
   get uri() { return this.#uri; }
   get uriParts() { return getUriParts(this.#uri); }
+  get vscodeFns() { return this.#vscodeFns; }
 
   readonly #onDidDispose = this._register(new vsc.EventEmitter<void>());
   readonly onDidDispose = this.#onDidDispose.event;
@@ -168,7 +171,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
    * This happens when all editors for it have been closed.
    */
   dispose() {
-    globalSQLiteDocuments.delete(this.uri.path);
+    GlobalSQLiteDocuments.delete(this.uri.path);
     this.workerFns[Symbol.dispose]();
     this.#onDidDispose.fire();
     super.dispose();
@@ -246,12 +249,14 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
   async refreshDb() {
     const oldDbRemote = this.db;
+
     if ((await oldDbRemote.type) === 'wasm') { // XXX: hard-coded refresh for wasm, not sure if this could be put in a better place
       oldDbRemote[Symbol.dispose]();
       const { dbRemote, readOnly } = await this.createWorkerDb(this.uri, this.uriParts.filename);
       this.workerDb = { dbRemote, readOnly };
       return dbRemote;
     }
+
     return oldDbRemote;
   }
 
@@ -278,7 +283,6 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorProvider<SQLiteDocument> {
   readonly webviews = new WebviewCollection();
   protected readonly webviewRemotes = new Map<vsc.WebviewPanel, Caplink.Remote<WebviewFns>>
-  protected readonly vscodeFnsMaps = new Map<SQLiteDocument, VscodeFns>();
 
   constructor(
     readonly viewType: string,
@@ -296,14 +300,11 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     token?: vsc.CancellationToken
   ): Promise<SQLiteDocument> {
 
-    const document = await SQLiteDocument.create(uri, openContext, this.context.extensionUri, this.verified, this.readOnly, this.reporter, token);
+    const document = await SQLiteDocument.create(this, uri, openContext, token);
 
     const listeners = this.setupListeners(document);
 
-    this.vscodeFnsMaps.set(document, new VscodeFns(this, document));
-
     document.onDidDispose(() => {
-      this.vscodeFnsMaps.delete(document);
       disposeAll(listeners)
     });
 
@@ -369,8 +370,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
     const webviewRemote = Caplink.wrap<WebviewFns>(webviewEndpoint, undefined, { owned: true });
     this.webviewRemotes.set(webviewPanel, webviewRemote);
 
-    const vscodeFns = this.vscodeFnsMaps.get(document)!;
-    Caplink.expose(vscodeFns, webviewEndpoint);
+    Caplink.expose(document.vscodeFns, webviewEndpoint);
 
     webviewPanel.webview.options = { enableScripts: true };
     webviewPanel.webview.html = await this.#getHtmlForWebview(webviewPanel);
@@ -382,7 +382,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
   }
 
   async #getHtmlForWebview(webviewPanel: vsc.WebviewPanel): Promise<string> {
-    const webview = webviewPanel.webview;
+    const { webview } = webviewPanel;
     const buildUri = vsc.Uri.joinPath(this.context.extensionUri, 'sqlite-viewer-core', 'vscode', 'build');
     const codiconsUri = vsc.Uri.joinPath(this.context.extensionUri, 'node_modules', 'codicons', 'dist', 'codicon.css');
 
@@ -516,14 +516,16 @@ export function registerFileProvider(_context: vsc.ExtensionContext) {
     async provideTextDocumentContent(cellUri: vsc.Uri, token: vsc.CancellationToken): Promise<string> {
       const [cellFilename, modalId, name, table] = cellUri.path.split('/').reverse().map(decodeURIComponent)
       const documentUri = vsc.Uri.joinPath(cellUri, '../../../..');
-      const document = globalSQLiteDocuments.get(documentUri.path)
+      const document = GlobalSQLiteDocuments.get(documentUri.path)
       if (document) {
-        const workerDb = document.db;
+        const { db: workerDb } = document;
         if (workerDb) {
           // console.log("workerDb", await workerDb.filename, 'readonly?', await workerDb.readOnly, 'type', await workerDb.type)
           const filename = document.uriParts.filename;
           const row = await workerDb.getByRowId({ filename, table, name }, modalId, {}, cancelTokenToAbortSignal(token));
-          const colName = cellFilename.endsWith('.json') ? cellFilename.slice(0, -5) : cellFilename.slice(0, -4)
+          const colName = cellFilename.endsWith('.json') 
+            ? cellFilename.slice(0, -5) 
+            : cellFilename.slice(0, -4)
           const value = row[colName];
           if (typeof value === 'string') {
             if (cellFilename.endsWith('.json')) {
@@ -543,7 +545,6 @@ export function registerFileProvider(_context: vsc.ExtensionContext) {
   })();
   return vsc.workspace.registerTextDocumentContentProvider('sqlite-file', sqliteFileProvider);
 }
-
 
 export function getInstantCommit() {
   const config = vsc.workspace.getConfiguration(ConfigurationSection);

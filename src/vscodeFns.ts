@@ -1,13 +1,14 @@
 import * as vsc from 'vscode';
 import { SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
 import { FullExtensionId, SidebarLeft, SidebarRight } from './constants';
+import { IsCursorIDE } from './util';
 
 import type { DbParams } from '../sqlite-viewer-core/src/signals';
 import type { RowId } from '../sqlite-viewer-core/src/worker-db-utils';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { sqlBufferToUint8Array, type UITypeAffinity } from '../sqlite-viewer-core/src/utils';
-import { IsCursorIDE } from './util';
+import { confirmLargeChanges } from '../sqlite-viewer-core/pro/src/undoHistory';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
 
@@ -82,7 +83,7 @@ export class VscodeFns {
     try {
       await this.provider.enterLicenseKey();
     } catch (err) {
-      vsc.window.showErrorMessage(`'Enter License Key' resulted in an error`, { 
+      vsc.window.showErrorMessage(`'Enter License Key' resulted in an error`, { // XXX: translate
         modal: true, 
         detail: err instanceof Error ? err.message : String(err) 
       });
@@ -134,5 +135,9 @@ export class VscodeFns {
         mode: "ask",
       });
     }
+  }
+
+  confirmLargeChanges() {
+    return confirmLargeChanges();
   }
 }
