@@ -11,5 +11,5 @@
   "sqlite-viewer.config.instantCommit.never": "Nunca",
   "sqlite-viewer.config.instantCommit.remoteOnly": "Apenas remoto",
   "sqlite-viewer.config.instantCommit.always": "Sempre",
-  "sqlite-viewer.config.instantCommit.markdownDescription": "Quando esta configuração está ativada, as alterações no banco de dados são confirmadas imediatamente. Se desativada, as alterações só são confirmadas quando o usuário as salva explicitamente. Esta configuração é ignorada para bancos de dados somente leitura.\n\n__Aviso__: Quando esta configuração está ativada, a funcionalidade de desfazer e refazer é realizada por meio de instruções SQLite \"invertidas\", que não são garantidas para funcionar (por exemplo, se outro processo modificou a mesma linha, etc.)"
+  "sqlite-viewer.config.instantCommit.markdownDescription": "Quando esta configuração está ativada, as alterações no banco de dados são confirmadas imediatamente. Esta configuração é ignorada para bancos de dados somente leitura.\n\n__Aviso__: Quando esta configuração está ativada, a funcionalidade de desfazer e refazer é realizada por meio de instruções SQLite \"invertidas\", que não são garantidas para funcionar (por exemplo, se outro processo modificou a mesma linha, etc.)"
 }

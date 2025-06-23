@@ -164,7 +164,7 @@
     "postpack": "sed -i '' s~https://sqliteviewer\\.app?ref=vscode~https://sqliteviewer.app~g *.md",
     "codium:publish-all": "bun run scripts/ci.ts --tool ovsx --kind publish",
     "l10n-export": "npx @vscode/l10n-dev export -o l10n src sqlite-viewer-core/src sqlite-viewer-core/pro",
-    "reorder-l10n": "bun run scripts/reorder-l10n.ts"
+    "l10n-reorder": "bun run scripts/reorder-l10n.ts"
   },
   "devDependencies": {
     "@txikijs/types": "^24.12.0",

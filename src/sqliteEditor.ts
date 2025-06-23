@@ -230,7 +230,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     await this.checkReadonly();
     const stat = await vsc.workspace.fs.stat(this.uri);
     if (stat.size > this.getConfiguredMaxFileSize()) {
-      throw new Error(vsc.l10n.t('File too large to save as a copy'));
+      throw new Error(vsc.l10n.t('Database too large to save as a copy'));
     }
     const { filename } = this.uriParts;
     const data = await this.dbRemote.exportDb(filename, cancelTokenToAbortSignal(token));

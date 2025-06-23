@@ -11,5 +11,5 @@
   "sqlite-viewer.config.instantCommit.never": "Never",
   "sqlite-viewer.config.instantCommit.remoteOnly": "Remote-Only",
   "sqlite-viewer.config.instantCommit.always": "Always",
-  "sqlite-viewer.config.instantCommit.markdownDescription": "When this setting is enabled, changes to the database are committed immediately. If disabled, changes are only committed when the user explicitly saves them. This setting is ignored for read-only databases.\n\n__Warning__: When this setting is enabled, undo and redo functionality is achieved through \"inverted\" SQLite statements, which are not guaranteed to work (e.g. another process has modified the same row, etc.)"
+  "sqlite-viewer.config.instantCommit.markdownDescription": "When this setting is enabled, changes to the database are committed immediately. This setting is ignored for read-only databases.\n\n__Warning__: When this setting is enabled, undo and redo functionality is achieved through \"inverted\" SQLite statements, which are not guaranteed to work (e.g. another process has modified the same row, etc.)"
 }

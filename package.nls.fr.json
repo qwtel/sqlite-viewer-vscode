@@ -11,5 +11,5 @@
   "sqlite-viewer.config.instantCommit.never": "Jamais",
   "sqlite-viewer.config.instantCommit.remoteOnly": "Distant uniquement",
   "sqlite-viewer.config.instantCommit.always": "Toujours",
-  "sqlite-viewer.config.instantCommit.markdownDescription": "Lorsque ce paramètre est activé, les modifications de la base de données sont immédiatement validées. S'il est désactivé, les modifications ne sont validées que lorsque l'utilisateur les enregistre explicitement. Ce paramètre est ignoré pour les bases de données en lecture seule.\n\n__Avertissement__ : Lorsque ce paramètre est activé, la fonctionnalité d'annulation et de rétablissement est obtenue via des instructions SQLite \"inversées\", qui ne sont pas garanties de fonctionner (par exemple, si un autre processus a modifié la même ligne, etc.)"
+  "sqlite-viewer.config.instantCommit.markdownDescription": "Lorsque ce paramètre est activé, les modifications de la base de données sont immédiatement validées. Ce paramètre est ignoré pour les bases de données en lecture seule.\n\n__Avertissement__ : Lorsque ce paramètre est activé, la fonctionnalité d'annulation et de rétablissement est obtenue via des instructions SQLite \"inversées\", qui ne sont pas garanties de fonctionner (par exemple, si un autre processus a modifié la même ligne, etc.)"
 }
