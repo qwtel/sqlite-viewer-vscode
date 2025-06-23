@@ -44,6 +44,7 @@ export type VSCODE_ENV = {
   panelActive?: BoolString,
   copilotActive?: BoolString,
   instantCommit?: BoolString,
+  remoteWorkspace?: BoolString,
 };
 
 const Extension = vsc.extensions.getExtension(FullExtensionId);
@@ -103,7 +104,8 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       try {
         await dbRemote.applyEdits(h.getUnsavedEdits(), cancelTokenToAbortSignal(token));
       } catch (err) {
-        await vsc.window.showErrorMessage(vsc.l10n.t('[{0}] occurred while trying to apply unsaved changes', err instanceof Error ? err.message : vsc.l10n.t('Unknown error')), { 
+        const errMsg = err instanceof Error ? err.message : vsc.l10n.t('Unknown error')
+        await vsc.window.showErrorMessage(vsc.l10n.t('[{0}] occurred while trying to apply unsaved changes', errMsg), { 
           modal: true, 
           detail: vsc.l10n.t('The document was opened from a backup, but the unsaved changes could not be applied. The document will be opened in read-only mode.')
         });
@@ -423,6 +425,7 @@ export class SQLiteReadonlyEditorProvider implements vsc.CustomReadonlyEditorPro
       panelActive: toBoolString(webviewPanel.active),
       copilotActive: toBoolString(vsc.extensions.getExtension(CopilotChatId)?.isActive || IsCursorIDE),
       instantCommit: toBoolString(getInstantCommit()),
+      remoteWorkspace: toBoolString(RemoteWorkspaceMode),
     } satisfies VSCODE_ENV;
 
     const lang = vsc.env.language.split('.')[0]?.replace('_', '-') ?? 'en';
