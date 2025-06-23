@@ -126,7 +126,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     provider: SQLiteReadonlyEditorProvider,
     uri: vsc.Uri,
     history: UndoHistory<SQLiteEdit>|null,
-    public instantCommit = getInstantCommit(),
+    public instantCommit: boolean,
     private workerDb: { dbRemote: Caplink.Remote<WorkerDb>, readOnly?: boolean },
     private readonly workerFns: WorkerBundle["workerFns"],
     private readonly createWorkerDb: WorkerBundle["createWorkerDb"],
@@ -332,18 +332,19 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
 
   protected setupListeners(document: SQLiteDocument) {
     this._register(vsc.window.onDidChangeActiveColorTheme((theme) => {
+      const value = themeToCss(theme)
       for (const panel of this.webviews.get(document.uri)) {
         const webviewRemote = this.webviewRemotes.get(panel);
-        webviewRemote?.updateColorScheme(themeToCss(theme)).catch(() => {});
+        webviewRemote?.updateColorScheme(value).catch(() => {});
       }
     }));
 
     this._register(vsc.workspace.onDidChangeConfiguration(e => {
       if (!e.affectsConfiguration(`${ConfigurationSection}.instantCommit`)) return;
-      document.instantCommit = getInstantCommit();
+      const value = document.instantCommit = getInstantCommit();
       for (const panel of this.webviews.get(document.uri)) {
         const webviewRemote = this.webviewRemotes.get(panel);
-        webviewRemote?.updateInstantCommit(document.instantCommit).catch(() => {});
+        webviewRemote?.updateInstantCommit(value).catch(() => {});
       }
     }));
   }
@@ -559,7 +560,7 @@ export function registerFileProvider(_context: vsc.ExtensionContext) {
   return vsc.workspace.registerTextDocumentContentProvider('sqlite-file', sqliteFileProvider);
 }
 
-export function getInstantCommit() {
+function getInstantCommit() {
   const config = vsc.workspace.getConfiguration(ConfigurationSection);
   const value = config.get<string>('instantCommit', 'never');
   return value === 'always' || (value === 'remote-only' && RemoteWorkspaceMode)

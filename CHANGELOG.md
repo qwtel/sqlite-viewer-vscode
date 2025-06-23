@@ -2,7 +2,10 @@
 
 ## v25.6.0 (Pre-Release)
 
-[PRO] Added an "Instant Commit" setting that prevents the extension from opening long-running transactions that block other SQLite processes. Use with caution, as undo/redo functionality is limited in this mode.
+- [PRO] Added an "Instant Commit" setting that prevents the extension from opening long-running transactions that block other SQLite processes. Use with caution, as undo/redo functionality is limited in this mode.
+- [PRO] Added "Instant Commit" toggle to viewer UI to temporarily toggle the instant commit feature per database. Note that this toggle is only visible if the global setting applies to the given file.
+- Updated SQLite and SQLite WASM to 3.50.1
+- Various other changes and fixes
 
 ## v25.5.4 (Pre-Release)
 _Released on May 9, 2025_
