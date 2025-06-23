@@ -44,7 +44,7 @@ export class VscodeFns {
     const { document } = this;
     if (this.webviews.has(document.uri)) {
       this.reporter.sendTelemetryEvent("open");
-      return document.db;
+      return document.dbRemote;
     }
     throw new Error("Document not found in webviews");
   }
@@ -139,5 +139,9 @@ export class VscodeFns {
 
   confirmLargeChanges() {
     return confirmLargeChanges();
+  }
+
+  updateInstantCommit(value: boolean) {
+    this.document.instantCommit = value;
   }
 }
