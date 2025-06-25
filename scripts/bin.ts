@@ -42,7 +42,7 @@ const targetToZigTriple = Object.freeze({
 });
 
 const outDir = resolve('out')
-const tmpDir = resolve('tmp')
+const tmpDir = resolve('.tmp')
 
 export const compileBin = async (targetArg?: string) => {
   if (targetArg && !(targets.includes(targetArg as any))) {
