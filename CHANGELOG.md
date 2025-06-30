@@ -1,8 +1,12 @@
 # CHANGELOG
 
+## v25.6.1 (Pre-Release)
+- Added forward and backward button
+- Moved 'Expand All' button inside the sidebar (only visible on hover; same as VS Code explorer)
+- Section headers in the left sidebar are now sticky
+
 ## v25.6.0 (Pre-Release)
 _Released on June 23, 2025_
-
 
 - [PRO] Added an "Instant Commit" setting that prevents the extension from opening long-running transactions that block other SQLite processes. Use with caution, as undo/redo functionality is limited in this mode.
 - [PRO] Added "Instant Commit" toggle to viewer UI to temporarily toggle the instant commit feature per database. Note that this toggle is only visible if the global setting applies to the given file.
