@@ -4,6 +4,7 @@
 - Added forward and backward button
 - Moved 'Expand All' button inside the sidebar (only visible on hover; same as VS Code explorer)
 - Section headers in the left sidebar are now sticky
+- Updated various dependencies
 
 ## v25.6.0 (Pre-Release)
 _Released on June 23, 2025_

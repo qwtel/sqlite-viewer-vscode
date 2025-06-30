@@ -179,7 +179,7 @@
     "@scure/base": "^1.2.6",
     "@vscode/codicons": "^0.0.36",
     "@vscode/extension-telemetry": "=0.9.8",
-    "@vscode/vsce": "^3.5.0",
+    "@vscode/vsce": "^3.6.0",
     "@worker-tools/typed-event-target": "^1.0.0",
     "@workers/typed-event-target": "npm:@jsr/workers__typed-event-target@^1.0.0",
     "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.5.6",
