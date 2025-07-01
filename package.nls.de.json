@@ -3,7 +3,7 @@
   "sqlite-viewer.customEditor.view.displayName": "SQLite Viewer (automatisch erkannt)",
   "sqlite-viewer.customEditor.readonly.displayName": "SQLite Viewer (schreibgeschützt)",
   "sqlite-viewer.customEditor.wasm.displayName": "SQLite Viewer (schreibgeschützt, im Arbeitsspeicher)",
-  "sqlite-viewer.config.maxFileSize.markdownDescription": "Die maximale Dateigröße in MB, die die Erweiterung zu laden versucht. Auf 0 setzen, um das Limit zu deaktivieren. Das interne Limit beträgt 4 GB, aber Plattformbeschränkungen können früher gelten.\n\n__Warnung__: Das Öffnen großer Dateien kann zu schlechter Performance, Einfrieren und systemweiten Speicherproblemen führen.",
+  "sqlite-viewer.config.maxFileSize.markdownDescription": "Die maximale Dateigröße in MB, die die Erweiterung zu laden versucht. Auf 0 setzen, um das Limit zu deaktivieren. Das interne Limit beträgt 4 GB, aber Plattformbeschränkungen können früher gelten.\n\n__Warnung__: Das Öffnen großer Dateien kann zu schlechter Performance, Einfrieren und systemweiten Speicherproblemen führen.\n\n[Upgrade auf PRO](https://vscode.sqliteviewer.app), um alle Größenbeschränkungen zu entfernen und zusätzliche Funktionen freizuschalten.",
   "sqlite-viewer.commands.addFileNestingPatterns.title": "SQLite-Dateiverschachtelungsmuster hinzufügen",
   "sqlite-viewer.commands.enterLicenseKey.title": "Lizenzschlüssel aktivieren",
   "sqlite-viewer.commands.removeLicenseKey.title": "Lizenzschlüssel deaktivieren",

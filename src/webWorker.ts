@@ -12,8 +12,6 @@ import type { WorkerBundle } from './workerBundle';
 import { ConfigurationSection } from './constants';
 // import type { Credentials } from './credentials';
 
-export const TooLargeErrorMsg = vsc.l10n.t("File too large. You can increase this limit in the settings under 'Sqlite Viewer: Max File Size'.");
-
 export const MB = 2 ** 20;
 
 export function getConfiguredMaxFileSize() {
@@ -42,9 +40,9 @@ export async function createWebWorker(
     workerFns,
     async createWorkerDb(xUri, filename) {
       const [data, walData] = await readFile(xUri, reporter);
-      if (data == null) {
-        throw new Error(TooLargeErrorMsg);
-      }
+      // if (data == null) {
+      //   throw new Error(`TooLargeError: ${TooLargeErrorMsg}`);
+      // }
       const args = {
         data,
         walData,

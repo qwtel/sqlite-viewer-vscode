@@ -3,7 +3,7 @@
   "sqlite-viewer.customEditor.view.displayName": "SQLite Viewer (자동 감지)",
   "sqlite-viewer.customEditor.readonly.displayName": "SQLite Viewer (읽기 전용)",
   "sqlite-viewer.customEditor.wasm.displayName": "SQLite Viewer (읽기 전용, 메모리 내)",
-  "sqlite-viewer.config.maxFileSize.markdownDescription": "확장 프로그램이 로드하려고 시도하는 최대 파일 크기(MB)입니다. 제한을 비활성화하려면 0으로 설정하십시오. 내부 제한은 4GB이지만 플랫폼 제한은 더 일찍 적용될 수 있습니다.\n\n__경고__: 큰 파일을 열면 성능 저하, 프리징 및 시스템 전체 메모리 문제가 발생할 수 있습니다.",
+  "sqlite-viewer.config.maxFileSize.markdownDescription": "확장 프로그램이 로드하려고 시도하는 최대 파일 크기(MB)입니다. 제한을 비활성화하려면 0으로 설정하십시오. 내부 제한은 4GB이지만 플랫폼 제한은 더 일찍 적용될 수 있습니다.\n\n__경고__: 큰 파일을 열면 성능 저하, 프리징 및 시스템 전체 메모리 문제가 발생할 수 있습니다.\n\n[PRO로 업그레이드](https://vscode.sqliteviewer.app)하여 모든 크기 제한을 제거하고 추가 기능을 잠금 해제하세요.",
   "sqlite-viewer.commands.addFileNestingPatterns.title": "SQLite 파일 중첩 패턴 추가",
   "sqlite-viewer.commands.enterLicenseKey.title": "라이선스 키 활성화",
   "sqlite-viewer.commands.removeLicenseKey.title": "라이선스 키 비활성화",
