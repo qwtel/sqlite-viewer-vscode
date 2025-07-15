@@ -112,6 +112,14 @@ This distribution also includes software licensed under the following terms:
 `tabster`: [MIT]
 > Copyright (c) Microsoft Corporation.
 
+`sql-formatter`: [MIT]
+> Copyright (c) 2016-2020 ZeroTurnaround LLC
+> Copyright (c) 2020-2021 George Leslie-Waksman and other contributors
+> Copyright (c) 2021-Present inferrinizzard and other contributors
+
+`txiki.js`: [MIT]
+> Copyright (c) 2019-present Saúl Ibarra Corretgé <s@saghul.net>
+
 SQLite : [Public Domain](https://sqlite.org/copyright.html)
 
 [MIT]: https://mit-license.org

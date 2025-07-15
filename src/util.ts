@@ -15,6 +15,8 @@ export const IsCursorIDE = vsc.env.appName.includes("Cursor") || vsc.env.uriSche
 
 export const IsDesktop = vsc.env.appHost === "desktop";
 
+export const lang = vsc.env.language.split('.')[0]?.replace('_', '-') ?? 'en';
+
 export class WebviewCollection {
   private readonly _webviews = new Set<{
     readonly resource: string;

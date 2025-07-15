@@ -11,7 +11,7 @@ import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-
 
 import { AccessToken, ConfigurationSection, CopilotChatId, ExtensionId, FistInstallMs, FullExtensionId, LicenseKey, Ns, SidebarLeft, SidebarRight, Title } from './constants';
 import { Disposable, disposeAll } from './dispose';
-import { ESDisposable, IsDesktop, IsVSCode, IsVSCodium, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts, doTry, toDatasetAttrs, themeToCss, uiKindToString, BoolString, toBoolString, IsCursorIDE } from './util';
+import { ESDisposable, IsDesktop, IsVSCode, IsVSCodium, WebviewCollection, WebviewStream, cancelTokenToAbortSignal, cspUtil, getShortMachineId, getUriParts, doTry, toDatasetAttrs, themeToCss, uiKindToString, BoolString, toBoolString, IsCursorIDE, lang } from './util';
 import { VscodeFns } from './vscodeFns';
 import { WorkerBundle } from './workerBundle';
 import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
@@ -440,8 +440,6 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
       instantCommit: toBoolString(document.instantCommit),
       remoteWorkspace: toBoolString(RemoteWorkspaceMode),
     } satisfies VSCODE_ENV;
-
-    const lang = vsc.env.language.split('.')[0]?.replace('_', '-') ?? 'en';
 
     const preparedHtml = html
       .replace('<html lang="en"', `<html lang="${lang}"`)
