@@ -134,6 +134,11 @@
         "command": "sqlite-viewer.enterAccessToken",
         "title": "%sqlite-viewer.commands.enterAccessToken.title%",
         "category": "SQLite Viewer"
+      },
+      {
+        "command": "sqlite-viewer.exportTable",
+        "title": "%sqlite-viewer.commands.exportTable.title%",
+        "category": "SQLite Viewer"
       }
     ],
     "languageModelTools": []

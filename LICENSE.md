@@ -108,6 +108,9 @@ SQLite : [Public Domain](https://sqlite.org/copyright.html)
 > Copyright (c) 2020-2021 George Leslie-Waksman and other contributors
 > Copyright (c) 2021-Present inferrinizzard and other contributors
 
+`txiki.js`: [MIT]
+> Copyright (c) 2019-present Saúl Ibarra Corretgé <s@saghul.net>
+
 [MIT]: https://mit-license.org
 [Apache-2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
 [BSD-3-Clause]: https://choosealicense.com/licenses/bsd-3-clause/

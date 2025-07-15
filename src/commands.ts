@@ -1,6 +1,7 @@
 import * as vsc from 'vscode';
 import * as jose from 'jose';
 import TelemetryReporter from '@vscode/extension-telemetry';
+
 import { AccessToken, JWTPublicKeySPKI, LicenseKey } from './constants';
 import { activateProviders } from './extension';
 import { getShortMachineId } from './util';
@@ -9,6 +10,8 @@ const licenseKeyRegex = /[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9
 const legacyLicenseKeyRegex = /[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i;
 
 const { l10n } = vsc;
+
+export { exportTableCommand } from '../sqlite-viewer-core/pro/src/exportCommand';
 
 export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
   const licenseKey = await vsc.window.showInputBox({

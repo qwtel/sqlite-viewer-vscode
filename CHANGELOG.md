@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v25.7.0 (Pre-Release)
+### Export Dialog
+
+### Fixes
+- Fixed an issue related to snapping the left sidebar into minimum position
+
 ## v25.6.1 (Pre-Release)
 _Released on June 30, 2025_
 

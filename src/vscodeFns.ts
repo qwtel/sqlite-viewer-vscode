@@ -1,6 +1,6 @@
 import * as vsc from 'vscode';
 import { SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
-import { FullExtensionId, SidebarLeft, SidebarRight } from './constants';
+import { ExtensionId, FullExtensionId, SidebarLeft, SidebarRight } from './constants';
 import { IsCursorIDE } from './util';
 
 import type { DbParams } from '../sqlite-viewer-core/src/signals';
@@ -143,5 +143,9 @@ export class VscodeFns {
 
   updateInstantCommit(value: boolean) {
     this.document.instantCommit = value;
+  }
+
+  async exportTable(filename: string, tableName: string, columns: string[], dbOptions?: any, tableStore?: any, exportOptions?: any, extras?: any) {
+    await vsc.commands.executeCommand(`${ExtensionId}.exportTable`, filename, tableName, columns, dbOptions, tableStore, exportOptions, extras);
   }
 }

@@ -150,6 +150,9 @@ export function getUriParts(uri: vsc.Uri) {
   return { dirname, filename, basename, extname };
 }
 
+export const isAbortError = (e: unknown): e is Error =>
+  e instanceof Error && (e.name === 'AbortError' || e.message.startsWith('AbortError'));
+
 export function cancelTokenToAbortSignal(token?: vsc.CancellationToken): AbortSignal|undefined {
   if (token == null) return;
   const ctrl = new AbortController();
@@ -209,3 +212,14 @@ export function uiKindToString(uiKind: vsc.UIKind) {
 
 export type BoolString = 'true'|'false';
 export const toBoolString = (x?: boolean|null): BoolString|undefined => x === true ? 'true' : x === false ? 'false' : undefined;
+
+export function concat(chunks: Uint8Array[]) {
+  const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return result;
+}

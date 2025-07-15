@@ -1,10 +1,12 @@
 import * as vsc from 'vscode';
 import TelemetryReporter from '@vscode/extension-telemetry';
-import { calcDaysSinceIssued, deleteLicenseKeyCommand, enterAccessTokenCommand, enterLicenseKeyCommand, getPayload, refreshAccessToken, verifyToken } from './commands';
+import { calcDaysSinceIssued, deleteLicenseKeyCommand, enterAccessTokenCommand, enterLicenseKeyCommand, getPayload, refreshAccessToken, verifyToken, exportTableCommand } from './commands';
 import { assignESDispose, IsVSCode } from './util';
 import { AccessToken, ExtensionId, FileNestingPatternsAdded, FistInstallMs, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString, Title } from './constants';
 import { disposeAll } from './dispose';
 import { registerFileProvider, registerProvider } from './sqliteEditor';
+
+import { setGlobalOutputChannel } from '../sqlite-viewer-core/pro/src/exportCommand';
 
 export async function activate(context: vsc.ExtensionContext) {
   const reporter = new TelemetryReporter(TelemetryConnectionString);
@@ -25,6 +27,10 @@ export async function activate(context: vsc.ExtensionContext) {
   );
   context.subscriptions.push(
     vsc.commands.registerCommand(`${ExtensionId}.enterAccessToken`, () => enterAccessTokenCommand(context, reporter)),
+  );
+  context.subscriptions.push(
+    vsc.commands.registerCommand(`${ExtensionId}.exportTable`, (filename: string, tableName: string, columns: string[], dbOptions?: any, tableStore?: any, exportOptions?: any, extras?: any) => 
+      exportTableCommand(context, reporter, filename, tableName, columns, dbOptions, tableStore, exportOptions, extras)),
   );
 
   context.globalState.setKeysForSync(SyncedKeys);
@@ -64,6 +70,10 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
   const subs = [];
   const outputChannel = verified ? vsc.window.createOutputChannel(Title, 'sql') : null;
   outputChannel && subs.push(outputChannel)
+  
+  // Set global reference to output channel for export logging
+  setGlobalOutputChannel(outputChannel);
+  
   subs.push(registerProvider(`${ExtensionId}.view`, context, reporter, outputChannel, { verified, accessToken }));
   subs.push(registerProvider(`${ExtensionId}.option`, context, reporter, outputChannel, { verified, accessToken }));
   subs.push(registerProvider(`${ExtensionId}.readonly`, context, reporter, outputChannel, { verified, accessToken, readOnly: true }));
