@@ -141,6 +141,17 @@ export class VscodeFns {
     return confirmLargeChanges();
   }
 
+  async confirmLargeSelection(openExportDialog: () => void) {
+    const answer = await vsc.window.showWarningMessage(vsc.l10n.t('Large Selection Warning'), {
+      detail: vsc.l10n.t('You are attempting to select more than 50,000 rows. Large selections may impact performance. Do you want to open the export menu instead?'),
+      modal: true,
+    }, ...[{ title: vsc.l10n.t('Export data'), value: 'export' }, { title: vsc.l10n.t('Continue'), value: 'continue' }]);
+    if (answer?.value === 'export') {
+      openExportDialog();
+    }
+    return answer?.value === 'continue';
+  }
+
   updateInstantCommit(value: boolean) {
     this.document.instantCommit = value;
   }
