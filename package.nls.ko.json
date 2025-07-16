@@ -8,6 +8,7 @@
   "sqlite-viewer.commands.enterLicenseKey.title": "라이선스 키 활성화",
   "sqlite-viewer.commands.removeLicenseKey.title": "라이선스 키 비활성화",
   "sqlite-viewer.commands.enterAccessToken.title": "오프라인 라이선스 활성화",
+  "sqlite-viewer.commands.exportTable.title": "테이블 내보내기",
   "sqlite-viewer.config.instantCommit.never": "절대",
   "sqlite-viewer.config.instantCommit.remoteOnly": "원격 전용",
   "sqlite-viewer.config.instantCommit.always": "항상",

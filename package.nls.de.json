@@ -8,6 +8,7 @@
   "sqlite-viewer.commands.enterLicenseKey.title": "Lizenzschlüssel aktivieren",
   "sqlite-viewer.commands.removeLicenseKey.title": "Lizenzschlüssel deaktivieren",
   "sqlite-viewer.commands.enterAccessToken.title": "Offline-Lizenzaktivierung",
+  "sqlite-viewer.commands.exportTable.title": "Tabelle exportieren",
   "sqlite-viewer.config.instantCommit.never": "Nie",
   "sqlite-viewer.config.instantCommit.remoteOnly": "Nur Remote",
   "sqlite-viewer.config.instantCommit.always": "Immer",
