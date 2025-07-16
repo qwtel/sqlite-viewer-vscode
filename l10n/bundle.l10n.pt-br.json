@@ -1,6 +1,6 @@
 {
   "Large Selection Warning": "Aviso de Seleção Grande",
-  "You are attempting to select more than 50,000 rows. Large selections may impact performance. Do you want to open the export menu instead?": "Você está tentando selecionar mais de 50.000 linhas. Seleções grandes podem impactar o desempenho. Você gostaria de abrir o menu de exportação em vez disso?",
+  "You are attempting to select more than 10,000 rows. Large selections may impact performance. Do you want to open the export menu instead?": "Você está tentando selecionar mais de 10.000 linhas. Seleções grandes podem impactar o desempenho. Você gostaria de abrir o menu de exportação em vez disso?",
   "Export data": "Exportar dados",
   "Continue": "Continuar",
   "[{0}] occurred while trying to open '{1}'": "[{0}] ocorreu ao tentar abrir '{1}'",

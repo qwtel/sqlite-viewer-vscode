@@ -143,7 +143,7 @@ export class VscodeFns {
 
   async confirmLargeSelection(openExportDialog: () => void) {
     const answer = await vsc.window.showWarningMessage(vsc.l10n.t('Large Selection Warning'), {
-      detail: vsc.l10n.t('You are attempting to select more than 50,000 rows. Large selections may impact performance. Do you want to open the export menu instead?'),
+      detail: vsc.l10n.t('You are attempting to select more than 10,000 rows. Large selections may impact performance. Do you want to open the export menu instead?'),
       modal: true,
     }, ...[{ title: vsc.l10n.t('Export data'), value: 'export' }, { title: vsc.l10n.t('Continue'), value: 'continue' }]);
     if (answer?.value === 'export') {
@@ -156,7 +156,7 @@ export class VscodeFns {
     this.document.instantCommit = value;
   }
 
-  async exportTable(filename: string, tableName: string, columns: string[], dbOptions?: any, tableStore?: any, exportOptions?: any, extras?: any) {
-    await vsc.commands.executeCommand(`${ExtensionId}.exportTable`, filename, tableName, columns, dbOptions, tableStore, exportOptions, extras);
+  async exportTable(dbParams: DbParams, columns: string[], dbOptions?: any, tableStore?: any, exportOptions?: any, extras?: any) {
+    await vsc.commands.executeCommand(`${ExtensionId}.exportTable`, dbParams, columns, dbOptions, tableStore, exportOptions, extras);
   }
 }

@@ -6,6 +6,12 @@ import { AccessToken, ExtensionId, FileNestingPatternsAdded, FistInstallMs, Full
 import { disposeAll } from './dispose';
 import { registerFileProvider, registerProvider } from './sqliteEditor';
 
+export type DbParams = {
+  filename: string,
+  table: string,
+  name: string,
+}
+
 export let GlobalOutputChannel: vsc.OutputChannel|null = null;
 
 export async function activate(context: vsc.ExtensionContext) {
@@ -29,8 +35,8 @@ export async function activate(context: vsc.ExtensionContext) {
     vsc.commands.registerCommand(`${ExtensionId}.enterAccessToken`, () => enterAccessTokenCommand(context, reporter)),
   );
   context.subscriptions.push(
-    vsc.commands.registerCommand(`${ExtensionId}.exportTable`, (filename: string, tableName: string, columns: string[], dbOptions?: any, tableStore?: any, exportOptions?: any, extras?: any) => 
-      exportTableCommand(context, reporter, filename, tableName, columns, dbOptions, tableStore, exportOptions, extras)),
+    vsc.commands.registerCommand(`${ExtensionId}.exportTable`, (dbParams: DbParams, columns: string[], dbOptions?: any, tableStore?: any, exportOptions?: any, extras?: any) => 
+      exportTableCommand(context, reporter, dbParams, columns, dbOptions, tableStore, exportOptions, extras)),
   );
 
   context.globalState.setKeysForSync(SyncedKeys);

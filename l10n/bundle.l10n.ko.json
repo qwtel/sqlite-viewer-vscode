@@ -1,6 +1,6 @@
 {
   "Large Selection Warning": "대량 선택 경고",
-  "You are attempting to select more than 50,000 rows. Large selections may impact performance. Do you want to open the export menu instead?": "50,000개 이상의 행을 선택하려고 합니다. 대량 선택은 성능에 영향을 줄 수 있습니다. 대신 내보내기 메뉴를 열겠습니까?",
+  "You are attempting to select more than 10,000 rows. Large selections may impact performance. Do you want to open the export menu instead?": "10,000개 이상의 행을 선택하려고 합니다. 대량 선택은 성능에 영향을 줄 수 있습니다. 대신 내보내기 메뉴를 열겠습니까?",
   "Export data": "데이터 내보내기",
   "Continue": "계속",
   "[{0}] occurred while trying to open '{1}'": "'{1}'을(를) 여는 중 ({0}) 오류가 발생했습니다",
