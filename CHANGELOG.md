@@ -1,10 +1,20 @@
 # CHANGELOG
 
 ## v25.7.0 (Pre-Release)
-### Export Dialog
+### [PRO] Export Dialog
+Introduced a new export command for saving table data in multiple formats.
+This feature is designed as an alternative to the selection/clipboard-based export, especially for larger tables. 
+Exported data is written directly to a file. 
+
+You can launch the export either as a standalone command from the Command Palette or through a modal dialog within the viewer. The modal dialog supports sorting and filtering, just like the clipboard export.
+
+While this method can handle larger datasets than the clipboard export, it is still limited by JS' performance and the overhead of data marshalling. For exporting large tables (1M+ rows), a dedicated export tool is recommended.
 
 ### Fixes
-- Fixed an issue related to snapping the left sidebar into minimum position
+- [PRO] Fixed a bug that prevented images from being embedded in exported data.
+- [PRO] The cutoff for inlined BLOBs can now be configured from the export dialog (also affects clipboard export) and now defaults to 10KB.
+- Fixed an issue where the left sidebar could not be snapped to its minimum position.
+- Added a warning when attempting to select more than 10,000 rows.
 
 ## v25.6.1 (Pre-Release)
 _Released on June 30, 2025_
