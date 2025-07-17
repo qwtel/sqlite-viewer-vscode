@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## v25.7.0 (Pre-Release)
+_Released on July 17, 2025_
+
 ### [PRO] Export Dialog
 Introduced a new export command for saving table data in multiple formats.
 This feature is designed as an alternative to the selection/clipboard-based export, especially for larger tables. 
