@@ -111,6 +111,12 @@ SQLite : [Public Domain](https://sqlite.org/copyright.html)
 `txiki.js`: [MIT]
 > Copyright (c) 2019-present Saúl Ibarra Corretgé <s@saghul.net>
 
+`@vscode/extension-telemetry`: [MIT]
+> Copyright (c) Microsoft Corporation. 
+
+`@vscode/vscode-languagedetection`: [MIT]
+> Copyright (c) Microsoft Corporation. 
+
 [MIT]: https://mit-license.org
 [Apache-2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
 [BSD-3-Clause]: https://choosealicense.com/licenses/bsd-3-clause/

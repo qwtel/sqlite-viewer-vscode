@@ -210,7 +210,7 @@
   "Showing date in human readable format": "Showing date in human readable format",
   "Showing date relative to now": "Showing date relative to now",
   "Showing date in SQLite's ISO-like format": "Showing date in SQLite's ISO-like format",
-  "Showing raw date value (as stored in database)": "Showing raw date value (as stored in database)",
+  "Showing raw date value": "Showing raw date value",
   "Toggle Left Side Bar": "Toggle Left Side Bar",
   "Toggle Right Side Bar": "Toggle Right Side Bar",
   "Reset Filters": "Reset Filters",

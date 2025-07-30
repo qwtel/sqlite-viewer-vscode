@@ -23,6 +23,9 @@ const config = {
   bundle: true,
   minify: !DEV,
   sourcemap: DEV,
+  loader: {
+    '.bin': 'file',
+  },
 } satisfies BuildOptions;
 
 const baseConfig = {

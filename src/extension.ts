@@ -4,7 +4,8 @@ import { calcDaysSinceIssued, deleteLicenseKeyCommand, enterAccessTokenCommand, 
 import { IsVSCode } from './util';
 import { AccessToken, ExtensionId, FileNestingPatternsAdded, FistInstallMs, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString, Title } from './constants';
 import { disposeAll } from './dispose';
-import { registerFileProvider, registerProvider } from './sqliteEditor';
+import { registerEditorProvider } from './sqliteEditorProvider';
+import { registerUriHandler } from '../sqlite-viewer-core/pro/src/fileProvider';
 
 export type DbParams = {
   filename: string,
@@ -77,10 +78,11 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
   const channel = GlobalOutputChannel = verified ? vsc.window.createOutputChannel(Title, 'sql') : null;
   channel && subs.push(channel)
   
-  subs.push(registerProvider(`${ExtensionId}.view`, context, reporter, channel, { verified, accessToken }));
-  subs.push(registerProvider(`${ExtensionId}.option`, context, reporter, channel, { verified, accessToken }));
-  subs.push(registerProvider(`${ExtensionId}.readonly`, context, reporter, channel, { verified, accessToken, readOnly: true }));
-  subs.push(registerFileProvider(context));
+  subs.push(registerEditorProvider(`${ExtensionId}.view`, context, reporter, channel, { verified, accessToken }));
+  subs.push(registerEditorProvider(`${ExtensionId}.option`, context, reporter, channel, { verified, accessToken }));
+  subs.push(registerEditorProvider(`${ExtensionId}.readonly`, context, reporter, channel, { verified, accessToken, readOnly: true }));
+
+  subs.push(registerUriHandler(context, { verified, accessToken }));
 
   for (const sub of subs) globalProviderSubs.add(sub);
   context.subscriptions.push(...subs);

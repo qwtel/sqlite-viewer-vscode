@@ -22,6 +22,7 @@ export class WebviewCollection {
     readonly resource: string;
     readonly webviewPanel: vsc.WebviewPanel;
   }>();
+  private readonly _idMap = new Map<string, vsc.WebviewPanel>();
 
   public *get(uri: vsc.Uri): IterableIterator<vsc.WebviewPanel> {
     const key = uri.toString();
@@ -32,13 +33,18 @@ export class WebviewCollection {
     }
   }
 
+  public getByWebviewId(id: string): vsc.WebviewPanel | undefined {
+    return this._idMap.get(id);
+  }
+
   public has(uri: vsc.Uri): boolean {
     return !this.get(uri).next().done;
   }
 
-  public add(uri: vsc.Uri, webviewPanel: vsc.WebviewPanel) {
+  public add(uri: vsc.Uri, webviewPanel: vsc.WebviewPanel, id: string) {
     const entry = { resource: uri.toString(), webviewPanel };
     this._webviews.add(entry);
+    this._idMap.set(id, webviewPanel);
 
     webviewPanel.onDidDispose(() => {
       this._webviews.delete(entry);
@@ -146,25 +152,37 @@ export const cspUtil = {
   }
 } as const;
 
-const PathRegExp = /(?<dirname>.*)\/(?<filename>(?<basename>.*)(?<extname>\.[^.]+)?)$/
+const PathRegExp = /(?<dirname>.*)\/(?<filename>(?<basename>[^/]*?)(?<extname>\.[^/.]+)?)$/
 export function getUriParts(uri: vsc.Uri) {
-  const { dirname, filename, basename, extname } = decodeURI(uri.toString()).match(PathRegExp)?.groups ?? {}
-  return { dirname, filename, basename, extname };
+  const { dirname = '', filename = '', basename = '', extname = '' } = uri.toString().match(PathRegExp)?.groups ?? {}
+  return { 
+    dirname: decodeURIComponent(dirname), 
+    filename: decodeURIComponent(filename), 
+    basename: decodeURIComponent(basename), 
+    extname: decodeURIComponent(extname),
+  };
 }
 
 export const isAbortError = (e: unknown): e is Error =>
   e instanceof Error && (e.name === 'AbortError' || e.message.startsWith('AbortError'));
 
-export function cancelTokenToAbortSignal(token?: vsc.CancellationToken): AbortSignal|undefined {
-  if (token == null) return;
+export function cancelTokenToAbortSignal<T extends vsc.CancellationToken|null|undefined>(token: T): T extends null ? undefined : AbortSignal {
+  if (token == null) return undefined as any;
   const ctrl = new AbortController();
   if (token.isCancellationRequested) ctrl.abort(); 
   else token.onCancellationRequested(() => ctrl.abort());
-  return ctrl.signal;
+  return ctrl.signal as any;
 }
 
 export const encodeUtf8 = TextEncoder.prototype.encode.bind(new TextEncoder());
-export const getShortMachineId = async () => base58.encode(new Uint8Array(await crypto.subtle.digest('SHA-256', encodeUtf8(vsc.env.machineId))).subarray(0, 6));
+export const shortHash = async (str: string) => base58.encode(new Uint8Array(await crypto.subtle.digest('SHA-256', encodeUtf8(str))).subarray(0, 6));
+export const getShortMachineId = async () => shortHash(vsc.env.machineId);
+
+export const generateSQLiteDocumentKey = async (uri: vsc.Uri): Promise<string> => {
+  const { basename, extname } = getUriParts(uri);
+  const pathHash = await shortHash(uri.path);
+  return `${basename}-${pathHash}${extname}`;
+};
 
 export type ESDisposable = {
   [Symbol.dispose](): void

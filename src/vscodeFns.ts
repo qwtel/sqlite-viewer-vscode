@@ -1,13 +1,21 @@
 import * as vsc from 'vscode';
-import { SQLiteDocument, SQLiteEdit, SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditor';
-import { ExtensionId, FullExtensionId, SidebarLeft, SidebarRight } from './constants';
+import * as path from 'path';
+
+import { SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditorProvider';
+import { ExtensionId, FullExtensionId, SidebarLeft, SidebarRight, UriScheme } from './constants';
 import { IsCursorIDE } from './util';
 
+import type { SQLiteDocument, SQLiteEdit } from './sqliteDocument';
 import type { DbParams } from '../sqlite-viewer-core/src/signals';
+import type { SqlValue } from '../sqlite-viewer-core/src/worker-db';
 import type { RowId } from '../sqlite-viewer-core/src/worker-db-utils';
+import type { FileTypeResult } from '../sqlite-viewer-core/src/file-type';
+import type { MessageItem, MessageOptions, ToastService } from '../sqlite-viewer-core/src/interfaces';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
-import { sqlBufferToUint8Array, type UITypeAffinity } from '../sqlite-viewer-core/src/utils';
+import { determineColumnTypes, sqlBufferToUint8Array, type UITypeAffinity } from '../sqlite-viewer-core/src/utils';
+
+import { determineCellExtension } from '../sqlite-viewer-core/pro/src/fileProvider';
 import { confirmLargeChanges } from '../sqlite-viewer-core/pro/src/undoHistory';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
@@ -30,7 +38,7 @@ export type RegularInit = {
 /**
  * Functions exposed by the vscode host, to be called from within the webview via Comlink
  */
-export class VscodeFns {
+export class VscodeFns implements ToastService {
   constructor(
     private readonly provider: SQLiteEditorProvider|SQLiteReadonlyEditorProvider, 
     private readonly document: SQLiteDocument,
@@ -61,13 +69,13 @@ export class VscodeFns {
     throw new Error("Document not found in webviews");
   }
 
-  async downloadBlob(data: Uint8Array|Int8Array|ArrayBuffer, download: string, metaKey: boolean) {
+  async downloadBlob(data: Uint8Array|Int8Array|ArrayBuffer, download: string, preserveFocus: boolean) {
     const { document } = this;
     const { dirname } = document.uriParts;
-    const dlUri = vsc.Uri.parse(`${dirname}/${download}`);
+    const dlUri = vsc.Uri.joinPath(vsc.Uri.parse(dirname), download);
 
     await vsc.workspace.fs.writeFile(dlUri, sqlBufferToUint8Array(data));
-    if (!metaKey) await vsc.commands.executeCommand('vscode.open', dlUri);
+    if (!preserveFocus) await vsc.commands.executeCommand('vscode.open', dlUri);
     return;
   }
   
@@ -99,30 +107,49 @@ export class VscodeFns {
     return this.provider.outputChannel ? Caplink.proxy(this.provider.outputChannel) : null;
   }
 
-  async showInformationMessage<T extends string|vsc.MessageItem>(message: string, options?: vsc.MessageOptions, ...items: T[]): Promise<T | undefined> {
+  async showInformationToast<T extends string|MessageItem>(message: string, options?: MessageOptions, ...items: T[]): Promise<T | undefined> {
     return await vsc.window.showInformationMessage(message, options, ...items as any[]);
   }
 
-  async showWarningMessage<T extends string|vsc.MessageItem>(message: string, options?: vsc.MessageOptions, ...items: T[]): Promise<T | undefined> {
+  async showWarningToast<T extends string|MessageItem>(message: string, options?: MessageOptions, ...items: T[]): Promise<T | undefined> {
     return await vsc.window.showWarningMessage(message, options, ...items as any[]);
   }
 
-  async showErrorMessage<T extends string|vsc.MessageItem>(message: string, options?: vsc.MessageOptions, ...items: T[]): Promise<T | undefined> {
+  async showErrorToast<T extends string|MessageItem>(message: string, options?: MessageOptions, ...items: T[]): Promise<T | undefined> {
     return await vsc.window.showErrorMessage(message, options, ...items as any[]);
   }
 
-  async openCellEditor(params: DbParams, rowId: RowId, colName: string, uiTypeAffinity?: UITypeAffinity) {
+  async openCellEditor(params: DbParams, rowId: RowId, colName?: string, colTypes: Partial<ReturnType<typeof determineColumnTypes>> = {}, { 
+    value, type, webviewId, rowCount
+  }: { 
+    value?: SqlValue, 
+    type?: FileTypeResult,
+    webviewId?: string,
+    rowCount?: number,
+  } = {}) {
     const { document } = this;
     if (document.uri.scheme !== 'untitled') {
-      const cellFilename = colName + (uiTypeAffinity === 'JSON' ? '.json' : '.txt');
-      const cellParts = [params.table, params.name, String(rowId), cellFilename].map(x => x.replaceAll('/', '%2F').replaceAll('\\', '%5C'));
-      const cellUri = vsc.Uri.joinPath(document.uri, ...cellParts).with({ scheme: 'sqlite-file' })
-      // console.log('Opening cell editor:', cellUri.toString());
-      await vsc.window.showTextDocument(cellUri, { 
-        viewColumn: vsc.ViewColumn.Beside,
-        // preserveFocus: false,
-        preview: true,
-      });
+      let cellParts;
+
+      if (rowId === '__create__.sql') {
+        cellParts = [params.table, params.name, '__create__.sql'];
+      } else {
+        const extname = await determineCellExtension(colTypes, value, type);
+        const cellFilename = colName + extname;
+        
+        // Get the range folder info for this ROWID
+        const rangeInfo = await document.dbRemote.getRangeFolderForRowId(params, rowId, rowCount ?? 0);
+        if (rangeInfo.needsRangeFolder) {
+          cellParts = [params.table, params.name, rangeInfo.rangeFolder!, String(rowId), cellFilename];
+        } else {
+          cellParts = [params.table, params.name, String(rowId), cellFilename];
+        }
+      }
+      
+      const encodedParts = cellParts.map(x => x.replaceAll(path.sep, encodeURIComponent(path.sep)));
+      const cellUri = vsc.Uri.joinPath(vsc.Uri.parse(await document.key), ...encodedParts).with({ scheme: UriScheme, query: `webview-id=${webviewId}` })
+
+      await vsc.commands.executeCommand('vscode.open', cellUri, vsc.ViewColumn.Two);
     }
   }
 
