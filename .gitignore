@@ -12,4 +12,4 @@ _sqlite-viewer-app
 sqlite-viewer-app
 mySolidTest
 deno
-src/file-type-supported.ts
+src/vendor/file-type-supported.ts

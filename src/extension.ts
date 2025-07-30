@@ -5,7 +5,7 @@ import { IsVSCode } from './util';
 import { AccessToken, ExtensionId, FileNestingPatternsAdded, FistInstallMs, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString, Title } from './constants';
 import { disposeAll } from './dispose';
 import { registerEditorProvider } from './sqliteEditorProvider';
-import { registerUriHandler } from '../sqlite-viewer-core/pro/src/fileProvider';
+import { registerUriHandler } from '../sqlite-viewer-core/pro/src/uriHandler';
 
 export type DbParams = {
   filename: string,

@@ -15,7 +15,7 @@ import type { MessageItem, MessageOptions, ToastService } from '../sqlite-viewer
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { determineColumnTypes, sqlBufferToUint8Array, type UITypeAffinity } from '../sqlite-viewer-core/src/utils';
 
-import { determineCellExtension } from '../sqlite-viewer-core/pro/src/fileProvider';
+import { determineCellExtension } from '../sqlite-viewer-core/pro/src/uriHandler';
 import { confirmLargeChanges } from '../sqlite-viewer-core/pro/src/undoHistory';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
