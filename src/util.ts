@@ -1,5 +1,5 @@
 import * as vsc from 'vscode';
-import { base58 } from '@scure/base';
+import { base58, base64urlnopad } from '@scure/base';
 import { Disposable } from './dispose';
 import { ReadableStream, WritableStream } from './o/stream/web';
 import { crypto } from './o/crypto';
@@ -152,8 +152,8 @@ export const cspUtil = {
   }
 } as const;
 
-const PathRegExp = /(?<dirname>.*)\/(?<filename>(?<basename>[^/]*?)(?<extname>\.[^/.]+)?)$/
-export function getUriParts(uri: vsc.Uri) {
+const PathRegExp = /((?<dirname>.*)\/)?(?<filename>(?<basename>[^/]*?)(?<extname>\.[^/.]+)?)$/
+export function getUriParts(uri: string|vsc.Uri) {
   const { dirname = '', filename = '', basename = '', extname = '' } = uri.toString().match(PathRegExp)?.groups ?? {}
   return { 
     dirname: decodeURIComponent(dirname), 
@@ -176,12 +176,13 @@ export function cancelTokenToAbortSignal<T extends vsc.CancellationToken|null|un
 
 export const encodeUtf8 = TextEncoder.prototype.encode.bind(new TextEncoder());
 export const shortHash = async (str: string) => base58.encode(new Uint8Array(await crypto.subtle.digest('SHA-256', encodeUtf8(str))).subarray(0, 6));
+export const hash64 = async (str: string, n = 6) => base64urlnopad.encode(new Uint8Array(await crypto.subtle.digest('SHA-256', encodeUtf8(str))).subarray(0, n));
 export const getShortMachineId = async () => shortHash(vsc.env.machineId);
 
 export const generateSQLiteDocumentKey = async (uri: vsc.Uri): Promise<string> => {
   const { basename, extname } = getUriParts(uri);
-  const pathHash = await shortHash(uri.path);
-  return `${basename}${extname} [${pathHash}]`;
+  const pathHash = await hash64(uri.path);
+  return `${basename}${extname} <${pathHash}>`;
 };
 
 export type ESDisposable = {
