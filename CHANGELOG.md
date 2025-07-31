@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## v25.8.0 (Pre-Release)
+### [PRO] Edit in VS Code
+You can now edit individual cell values in a tab in VS Code, making full use of VS Code's text editing features, installed extensions (Vim mode!), 
+syntax highlighting, and more. This should be particularly useful when editing JSON(B) columns. 
+
+You can access this feature through the "Edit in VS Code to the Side" icon button in the top right corner of a text area (visible on hover).
+There is now also a VS Code setting to configure the behavior of a cell double-click, allowing you to open it in the new VS Code tab feature instead of the built-in modal dialog.
+
+This feature also makes use of VS Code's text syntax detection feature to open tabs with appropriate formatting pre-applied. This can be useful when storing HTML responses or Markdown content in SQLite.
+
+For improved ergonomics, the behavior of the SQLite Viewer sidebar has been modified to auto-close when space is running low (i.e., when a VS Code tab opens to the side) and to auto-show when it becomes available again.
+
+### Changes
+- [PRO] UTC/local time zone toggle is now always visible in column headers
+- Improved queries for tables without `ROWID` and multiple primary keys
+- Using BLOBs as primary keys in tables without `ROWID` now works, provided they are small (<= 48 bytes).
+- Added a "Copy to clipboard" button to text areas that allows copying values to the clipboard without text cutoff limits
+- Added an ellipsis "…" to the end of text values that were cut off due to size
+- "Click to select" on text fields should be a little less finicky now
+- Improved responsive sidebar handling with better width management
+- Added "Open in VS Code" functionality to the Table Info SQL field
+- Improved error handling, so that the sidebar is still accessible when an error occurs
+- [PRO] Fixed invalid output when exporting a table with exactly 1 row as a JSON object
+
 ## v25.7.0 (Pre-Release)
 _Released on July 17, 2025_
 
