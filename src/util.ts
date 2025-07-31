@@ -181,7 +181,7 @@ export const getShortMachineId = async () => shortHash(vsc.env.machineId);
 export const generateSQLiteDocumentKey = async (uri: vsc.Uri): Promise<string> => {
   const { basename, extname } = getUriParts(uri);
   const pathHash = await shortHash(uri.path);
-  return `${basename}-${pathHash}${extname}`;
+  return `${basename}${extname} [${pathHash}]`;
 };
 
 export type ESDisposable = {
