@@ -7,7 +7,7 @@ import modelJson from '@vscode/vscode-languagedetection/model/model.json' with {
 // @ts-ignore
 import modelWeights from '@vscode/vscode-languagedetection/model/group1-shard1of1.bin';
 
-const ExpectedRelativeConfidence = 0.2;
+const ExpectedRelativeConfidence = 0.4;
 
 // Language detection service using VS Code's ML models
 export class LanguageDetectionService {
