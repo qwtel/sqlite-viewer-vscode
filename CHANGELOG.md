@@ -24,6 +24,9 @@ For improved ergonomics, the behavior of the SQLite Viewer sidebar has been modi
 - Improved error handling, so that the sidebar is still accessible when an error occurs
 - [PRO] Fixed invalid output when exporting a table with exactly 1 row as a JSON object
 
+### Known Issues
+- Exporting from within the viewer is broken when multiples DBs of the same name are open (export from the command pallette not affected)
+
 ## v25.7.0 (Pre-Release)
 _Released on July 17, 2025_
 
