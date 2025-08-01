@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## v25.8.0 (Pre-Release)
+_Released on August 1, 2025_
+
 ### [PRO] Edit in VS Code
 You can now edit individual cell values in a tab in VS Code, making full use of VS Code's text editing features, installed extensions (Vim mode!), 
 syntax highlighting, and more. This should be particularly useful when editing JSON(B) columns. 
