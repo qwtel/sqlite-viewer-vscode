@@ -12,5 +12,8 @@
   "sqlite-viewer.config.instantCommit.never": "Nie",
   "sqlite-viewer.config.instantCommit.remoteOnly": "Nur Remote",
   "sqlite-viewer.config.instantCommit.always": "Immer",
-  "sqlite-viewer.config.instantCommit.markdownDescription": "Wenn diese Einstellung aktiviert ist, werden Änderungen an der Datenbank sofort übernommen. Diese Einstellung wird für schreibgeschützte Datenbanken ignoriert.\n\n__Warnung__: Wenn diese Einstellung aktiviert ist, wird die Rückgängig-/Wiederholen-Funktionalität durch \"invertierte\" SQLite-Anweisungen erreicht, die nicht garantiert funktionieren (z. B. wenn ein anderer Prozess dieselbe Zeile geändert hat usw.)"
+  "sqlite-viewer.config.instantCommit.markdownDescription": "Wenn diese Einstellung aktiviert ist, werden Änderungen an der Datenbank sofort übernommen. Diese Einstellung wird für schreibgeschützte Datenbanken ignoriert.\n\n__Warnung__: Wenn diese Einstellung aktiviert ist, wird die Rückgängig-/Wiederholen-Funktionalität durch \"invertierte\" SQLite-Anweisungen erreicht, die nicht garantiert funktionieren (z. B. wenn ein anderer Prozess dieselbe Zeile geändert hat usw.)",
+  "sqlite-viewer.config.doubleClickBehavior.modal": "Modal-Dialog",
+  "sqlite-viewer.config.doubleClickBehavior.vscode": "VS Code Editor",
+  "sqlite-viewer.config.doubleClickBehavior.markdownDescription": "Steuert das Verhalten beim Doppelklicken auf eine Zelle in der Tabellenansicht.\n\n- **Modal-Dialog**: Öffnet die Zeile in einem integrierten Modal-Dialog (Standard)\n- **VS Code Editor**: Öffnet den Zellenwert in einem separaten VS Code Editor-Tab (PRO-Funktion)"
 }

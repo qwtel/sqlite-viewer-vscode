@@ -23,6 +23,7 @@ For improved ergonomics, the behavior of the SQLite Viewer sidebar has been modi
 - Added "Open in VS Code" functionality to the Table Info SQL field
 - Improved error handling, so that the sidebar is still accessible when an error occurs
 - [PRO] Fixed invalid output when exporting a table with exactly 1 row as a JSON object
+- [PRO] Fixed a bug that prevented deleting rows in tables without `ROWID`
 
 ### Known Issues
 - Exporting from within the viewer is broken when multiples DBs of the same name are open (export from the command pallette not affected)

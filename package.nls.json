@@ -15,5 +15,5 @@
   "sqlite-viewer.config.instantCommit.markdownDescription": "When this setting is enabled, changes to the database are committed immediately. This setting is ignored for read-only databases.\n\n__Warning__: When this setting is enabled, undo and redo functionality is achieved through \"inverted\" SQLite statements, which are not guaranteed to work (e.g. another process has modified the same row, etc.)",
   "sqlite-viewer.config.doubleClickBehavior.modal": "Modal Dialog",
   "sqlite-viewer.config.doubleClickBehavior.vscode": "VS Code Editor",
-  "sqlite-viewer.config.doubleClickBehavior.markdownDescription": "Controls the behavior when double-clicking on a cell in the table view.\n\n- **Modal Dialog**: Opens the row in an integrated modal dialog (default)\n- **VS Code Editor**: Opens the cell value in a separate VS Code editor tab (PRO feature)\n\n__Note__: The VS Code Editor option is only available for PRO users."
+  "sqlite-viewer.config.doubleClickBehavior.markdownDescription": "Controls the behavior when double-clicking on a cell in the table view.\n\n- **Modal Dialog**: Opens the row in an integrated modal dialog (default)\n- **VS Code Editor**: Opens the cell value in a separate VS Code editor tab (PRO feature)"
 }

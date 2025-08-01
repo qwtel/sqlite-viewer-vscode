@@ -12,5 +12,8 @@
   "sqlite-viewer.config.instantCommit.never": "Nunca",
   "sqlite-viewer.config.instantCommit.remoteOnly": "Apenas remoto",
   "sqlite-viewer.config.instantCommit.always": "Sempre",
-  "sqlite-viewer.config.instantCommit.markdownDescription": "Quando esta configuração está ativada, as alterações no banco de dados são confirmadas imediatamente. Esta configuração é ignorada para bancos de dados somente leitura.\n\n__Aviso__: Quando esta configuração está ativada, a funcionalidade de desfazer e refazer é realizada por meio de instruções SQLite \"invertidas\", que não são garantidas para funcionar (por exemplo, se outro processo modificou a mesma linha, etc.)"
+  "sqlite-viewer.config.instantCommit.markdownDescription": "Quando esta configuração está ativada, as alterações no banco de dados são confirmadas imediatamente. Esta configuração é ignorada para bancos de dados somente leitura.\n\n__Aviso__: Quando esta configuração está ativada, a funcionalidade de desfazer e refazer é realizada por meio de instruções SQLite \"invertidas\", que não são garantidas para funcionar (por exemplo, se outro processo modificou a mesma linha, etc.)",
+  "sqlite-viewer.config.doubleClickBehavior.modal": "Caixa de Diálogo Modal",
+  "sqlite-viewer.config.doubleClickBehavior.vscode": "Editor do VS Code",
+  "sqlite-viewer.config.doubleClickBehavior.markdownDescription": "Controla o comportamento ao clicar duas vezes em uma célula na visualização da tabela.\n\n- **Caixa de Diálogo Modal**: Abre a linha em uma caixa de diálogo modal integrada (padrão)\n- **Editor do VS Code**: Abre o valor da célula em uma aba separada do editor do VS Code (recurso PRO)"
 }
