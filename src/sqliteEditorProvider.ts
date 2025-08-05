@@ -209,7 +209,7 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
       .replace('<!--HEAD-->', `
         <meta http-equiv="Content-Security-Policy" content="${cspStr}">
         <meta name="color-scheme" content="${themeToCss(vsc.window.activeColorTheme)}">
-        <meta id="__VSCODE_ENV__" ${toDatasetAttrs(vscodeEnv)}>
+        <meta id="vscode-env" ${toDatasetAttrs(vscodeEnv)}>
         <link rel="stylesheet" href="${webview.asWebviewUri(codiconsUri)}" crossorigin/>
       `)
       .replace('<!--BODY-->', ``)
