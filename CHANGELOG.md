@@ -1,4 +1,7 @@
 # CHANGELOG
+## v25.8.1 (Pre-Release)
+- [PRO] Removed per-cell datetime formats. The datetime format is now guessed per column.
+- [PRO] Datetime format is now always shown in the header cell and its behavior is now the same as the one in the sidebar.
 
 ## v25.8.0 (Pre-Release)
 _Released on August 1, 2025_

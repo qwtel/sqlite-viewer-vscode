@@ -8,6 +8,7 @@ import { base64 } from '@scure/base';
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
+import { crypto } from './o/crypto';
 import { ConfigurationSection, CopilotChatId, ExtensionId, FistInstallMs, FullExtensionId, Ns, SidebarLeft, SidebarRight } from './constants';
 import { Disposable } from './dispose';
 import { IsVSCode, IsVSCodium, WebviewCollection, WebviewStream, cspUtil, doTry, toDatasetAttrs, themeToCss, uiKindToString, BoolString, toBoolString, IsCursorIDE, lang } from './util';
@@ -17,6 +18,7 @@ import { ReadWriteMode, RemoteWorkspaceMode, SQLiteDocument, getInstantCommit } 
 
 export type VSCODE_ENV = {
   webviewId: string,
+  browserExt?: BoolString,
   appName: string, 
   appHost: string,
   uriScheme: string, 
@@ -182,6 +184,7 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
 
     const vscodeEnv = {
       webviewId,
+      browserExt: toBoolString(!!import.meta.env.VSCODE_BROWSER_EXT),
       uriScheme, appHost, appName, extensionUrl, 
       accessToken: this.accessToken, 
       uiKind: uiKindToString(uiKind),

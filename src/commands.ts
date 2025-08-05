@@ -21,7 +21,9 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
     password: false,
     ignoreFocusOut: true,
     validateInput: (value) => {
-      return licenseKeyRegex.test(value) || legacyLicenseKeyRegex.test(value) ? null : l10n.t('License key must be in the format {0}', 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
+      return licenseKeyRegex.test(value) || legacyLicenseKeyRegex.test(value) 
+        ? null 
+        : l10n.t('License key must be in the format {0}', 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX');
     },
   });
   if (!licenseKey) return;
