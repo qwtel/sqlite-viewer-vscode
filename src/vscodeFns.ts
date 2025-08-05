@@ -186,4 +186,9 @@ export class VscodeFns implements ToastService {
   async exportTable(dbParams: DbParams, columns: string[], dbOptions?: any, tableStore?: any, exportOptions?: any, extras?: any) {
     await vsc.commands.executeCommand(`${ExtensionId}.exportTable`, dbParams, columns, dbOptions, tableStore, exportOptions, extras);
   }
+
+  async readWorkspaceFileUri(uriString: string): Promise<Uint8Array> {
+    const uri = vsc.Uri.parse(uriString);
+    return await vsc.workspace.fs.readFile(uri);
+  }
 }
