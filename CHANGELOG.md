@@ -1,7 +1,17 @@
 # CHANGELOG
 ## v25.8.1 (Pre-Release)
+### [PRO] Drop File as BLOB
+You can now drag and drop a file into the sidebar or modal fieldset to upload its content as a `BLOB` in the corresponding column. This is an alternative to the file picker and not limited to `BLOB` columns.
+This works with both OS files from the File Explorer/Finder as well as VS Code files from the file tree.
+
+### Changes
 - [PRO] Removed per-cell datetime formats. The datetime format is now guessed per column.
 - [PRO] Datetime format is now always shown in the header cell and its behavior is now the same as the one in the sidebar.
+- [PRO] Fixed editing cell values in VS Code when column names include `/`.
+
+### Known Issues
+- Poor performance for uploading larger files
+- Missing loading indicators when undoing file uploads
 
 ## v25.8.0 (Pre-Release)
 _Released on August 1, 2025_
