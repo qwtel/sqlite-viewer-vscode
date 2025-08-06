@@ -153,8 +153,7 @@
         "title": "%sqlite-viewer.commands.exportTable.title%",
         "category": "SQLite Viewer"
       }
-    ],
-    "languageModelTools": []
+    ]
   },
   "scripts": {
     "clean": "rm -rf out && rm -rf sqlite-viewer-core/vscode/build",
