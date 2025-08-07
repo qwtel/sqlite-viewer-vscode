@@ -1,5 +1,7 @@
 # CHANGELOG
 ## v25.8.1 (Pre-Release)
+_Released on August 7, 2025_
+
 ### [PRO] Drop File as BLOB
 You can now drag and drop a file into the sidebar or modal fieldset to upload its content as a `BLOB` in the corresponding column. This is an alternative to the file picker and not limited to `BLOB` columns.
 This works with both OS files from the File Explorer/Finder as well as VS Code files from the file tree.
