@@ -15,6 +15,7 @@ Beware that this feature is still experimental and has a few sharp edges:
 
 ### Fixes
 - [PRO] Editing a `BLOB` value in a VS Code Tab (using a hex editor extension) should now correctly store it as a `BLOB` value in SQLite instead of incorrectly coercing to UTF-8.
+- [PRO] Fixed file upload UI not showing correctly when dropping a file onto a field in the 'New Row' dialog
 
 ## v25.8.1 (Pre-Release)
 _Released on August 7, 2025_
