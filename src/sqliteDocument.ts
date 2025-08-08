@@ -1,6 +1,6 @@
 
 import type TelemetryReporter from '@vscode/extension-telemetry';
-import type { WorkerDb, SqlValue, RowObject } from '../sqlite-viewer-core/src/worker-db';
+import type { WorkerDb, DbEdit, DbStatement } from '../sqlite-viewer-core/src/worker-db';
 import type { SQLiteReadonlyEditorProvider } from './sqliteEditorProvider';
 
 import * as vsc from 'vscode';
@@ -18,13 +18,7 @@ import { createWebWorker, getConfiguredMaxFileSize } from './webWorker';
 import { createProWorker } from '../sqlite-viewer-core/pro/src/proWorker';
 import { UndoHistory } from '../sqlite-viewer-core/pro/src/undoHistory';
 
-export type SQLiteEdit = {
-  label: string,
-  query: string,
-  values: SqlValue[],
-  undoQuery?: string,
-  undoValues: SqlValue[],
-};
+export type SQLiteEdit = { label: string } & DbEdit;
 
 const Extension = vsc.extensions.getExtension(FullExtensionId);
 
