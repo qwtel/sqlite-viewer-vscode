@@ -63,13 +63,13 @@ export class ContentCache implements vsc.Disposable {
     }, 60_000);
   }
 
-  set(uri: string, content: string): void {
-    setTimeout(() => this.#cleanupStaleEntries(), 0);
-    this.#cache.set(uri, content);
+  set(uri: vsc.Uri, content: string): void {
+    this.#cleanupStaleEntries();
+    this.#cache.set(uri.toString(), content);
   }
 
-  get(uri: string): string|null {
-    return this.#cache.get(uri) ?? null;
+  get(uri: vsc.Uri): string|null {
+    return this.#cache.get(uri.toString()) ?? null;
   }
 
   #cleanupStaleEntries(): void {
