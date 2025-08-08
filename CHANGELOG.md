@@ -1,8 +1,25 @@
 # CHANGELOG
+## v25.8.2 (Pre-Release)
+### [PRO] JSON Patch
+Updating JSON values will now attempt to update the structure sparsely using SQLite's built-in `json_patch` and `jsonb_patch` utilities. 
+This can be useful when another process has modified the JSON value while manually editing the value through the extension UI.
+Rather than overwriting the entire JSON value, only the properties that changed in the edit will be applied, preserving non-conflicting external changes. 
+
+This should be particularly useful when [editing values in a VS Code tab](#pro-edit-in-vs-code) and the [Instant Commit](#v2560-pre-release) setting.
+
+Beware that this feature is still experimental and has a few sharp edges:
+- Conflicts will still be resolved in favor of last-write, same as in the case of non-JSON values. 
+- This is subject to the limitations of SQLite's [patch functions](https://www.sqlite.org/json1.html#jpatch), specifically with respect to arrays, which are overwritten in whole.
+- For textual `JSON` values, it will only attempt the new patch behavior if both values are strict RFC-8259 JSON values. SQLite supports a more relaxed standard for JSON, which also allows code comments. Applying patches through `json_patch` would not preserve these. 
+`JSONB` columns do not have this limitation.
+
+### Fixes
+- [PRO] Editing a `BLOB` value in a VS Code Tab (using a hex editor extension) should now correctly store it as a `BLOB` value in SQLite instead of incorrectly coercing to UTF-8.
+
 ## v25.8.1 (Pre-Release)
 _Released on August 7, 2025_
 
-### [PRO] Drop File as BLOB
+### [PRO] Drag & Drop File as BLOB
 You can now drag and drop a file into the sidebar or modal fieldset to upload its content as a `BLOB` in the corresponding column. This is an alternative to the file picker and not limited to `BLOB` columns.
 This works with both OS files from the File Explorer/Finder as well as VS Code files from the file tree.
 

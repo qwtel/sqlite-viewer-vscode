@@ -94,6 +94,10 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
         }
       }
     }));
+
+    // Listen for when this document gains focus to trigger pending saves
+    this._register(vsc.window.onDidChangeActiveTextEditor(editor => {
+    }));
   }
 
   *#getWebviewRemotes(uri: vsc.Uri): Generator<Caplink.Remote<WebviewFns>> {
@@ -110,7 +114,7 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
     this.webviewRemotes.delete(webviewPanel);
   }
 
-  #mkWebviewPanelDidChangeViewState = (webviewPanel: vsc.WebviewPanel) => (e: vsc.WebviewPanelOnDidChangeViewStateEvent) => {
+  #mkWebviewPanelDidChangeViewState = (webviewPanel: vsc.WebviewPanel, document: SQLiteDocument) => (e: vsc.WebviewPanelOnDidChangeViewStateEvent) => {
     const webviewRemote = this.webviewRemotes.get(webviewPanel);
     if (webviewRemote) {
       webviewRemote.updateViewState({
@@ -118,6 +122,11 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
         active: e.webviewPanel.active,
         // viewColumn: e.webviewPanel.viewColumn,
       }).catch(() => {})
+    }
+    // If the webview panel is active and there is a pending save, save the document
+    document.hasActiveEditor = e.webviewPanel.active;
+    if (e.webviewPanel.active && document.pendingSave) {
+      document.forceSave().catch(() => {});
     }
   }
 
@@ -147,7 +156,9 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
     webviewPanel.webview.options = { enableScripts: true };
     webviewPanel.webview.html = await this.#getHtmlForWebview(webviewPanel, document, webviewId);
 
-    webviewPanel.onDidChangeViewState(this.#mkWebviewPanelDidChangeViewState(webviewPanel)),
+    document.hasActiveEditor = webviewPanel.active;
+
+    webviewPanel.onDidChangeViewState(this.#mkWebviewPanelDidChangeViewState(webviewPanel, document)),
     webviewPanel.onDidDispose(this.#mkWebviewPanelDidDispose(webviewPanel));
 
     vsc.extensions.onDidChange(this.#mkExtensionsDidChange(webviewPanel));

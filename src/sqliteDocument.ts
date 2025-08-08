@@ -237,9 +237,28 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
   async #maybeSave() {
     try {
       if (this.instantCommit) {
-        await vsc.commands.executeCommand('workbench.action.files.save');
+        if (this.#hasActiveEditor) {
+          await this.forceSave();
+        } else {
+          this.#pendingSave = true;
+        }
       }
     } catch {}
+  }
+
+  #hasActiveEditor = false;
+  set hasActiveEditor(value: boolean) {
+    this.#hasActiveEditor = value;
+  }
+
+  #pendingSave = false;
+  get pendingSave() { 
+    return this.#pendingSave
+  }
+
+  async forceSave() {
+    this.#pendingSave = false;
+    await vsc.commands.executeCommand('workbench.action.files.save');
   }
 
   get dbRemote() {

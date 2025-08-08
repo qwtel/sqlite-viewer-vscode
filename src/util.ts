@@ -52,6 +52,51 @@ export class WebviewCollection {
   }
 }
 
+/** Cache for text editor contents with cleanup of stale entries */
+export class ContentCache implements vsc.Disposable {
+  #cache = new Map<string, string>();
+  #cleanupInterval: NodeJS.Timeout|null;
+
+  constructor() {
+    this.#cleanupInterval = setInterval(() => {
+      this.#cleanupStaleEntries();
+    }, 60_000);
+  }
+
+  set(uri: string, content: string): void {
+    setTimeout(() => this.#cleanupStaleEntries(), 0);
+    this.#cache.set(uri, content);
+  }
+
+  get(uri: string): string|null {
+    return this.#cache.get(uri) ?? null;
+  }
+
+  #cleanupStaleEntries(): void {
+    try {
+      const openDocuments = vsc.workspace.textDocuments;
+      const openUris = new Set<string>(openDocuments.map(doc => doc.uri.toString()));
+      for (const cachedUri of [...this.#cache.keys()]) {
+        if (!openUris.has(cachedUri)) {
+          this.#cache.delete(cachedUri);
+        }
+      }
+    } catch {}
+  }
+
+  clear(): void {
+    this.#cache.clear();
+  }
+
+  dispose(): void {
+    if (this.#cleanupInterval) {
+      clearInterval(this.#cleanupInterval);
+      this.#cleanupInterval = null;
+    }
+    this.#cache.clear();
+  }
+}
+
 /**
  * Wraps a VSCode webview and returns a readable and writable stream pair.
  * This can be used to overlay another binary protocol on top of the webview's message passing, such as my own `postmessage-over-wire`.

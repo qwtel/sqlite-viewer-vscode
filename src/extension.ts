@@ -75,6 +75,7 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
   }
 
   const subs = [];
+
   const channel = GlobalOutputChannel = verified ? vsc.window.createOutputChannel(Title, 'sql') : null;
   channel && subs.push(channel)
   
@@ -82,7 +83,7 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
   subs.push(registerEditorProvider(`${ExtensionId}.option`, context, reporter, channel, { verified, accessToken }));
   subs.push(registerEditorProvider(`${ExtensionId}.readonly`, context, reporter, channel, { verified, accessToken, readOnly: true }));
 
-  subs.push(registerUriHandler(context, { verified, accessToken }));
+  subs.push(...registerUriHandler(context, { verified, accessToken }));
 
   for (const sub of subs) globalProviderSubs.add(sub);
   context.subscriptions.push(...subs);
