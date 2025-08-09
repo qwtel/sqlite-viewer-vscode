@@ -7,13 +7,12 @@ import { IsCursorIDE } from './util';
 
 import type { SQLiteDocument, SQLiteEdit } from './sqliteDocument';
 import type { DbParams } from '../sqlite-viewer-core/src/signals';
-import type { SqlValue } from '../sqlite-viewer-core/src/worker-db';
-import type { RowId } from '../sqlite-viewer-core/src/worker-db-utils';
+import type { SqlValue, RowId } from '../sqlite-viewer-core/src/worker-db';
 import type { FileTypeResult } from '../sqlite-viewer-core/src/file-type';
 import type { MessageItem, MessageOptions, ToastService } from '../sqlite-viewer-core/src/interfaces';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
-import { determineColumnTypes, sqlBufferToUint8Array, type UITypeAffinity } from '../sqlite-viewer-core/src/utils';
+import { determineColumnTypes, SqlBuffer, sqlBufferToUint8Array, UITypeAffinity } from '../sqlite-viewer-core/src/utils';
 
 import { determineCellExtension } from '../sqlite-viewer-core/pro/src/uriHandler';
 import { confirmLargeChanges } from '../sqlite-viewer-core/pro/src/undoHistory';
@@ -69,7 +68,7 @@ export class VscodeFns implements ToastService {
     throw new Error("Document not found in webviews");
   }
 
-  async downloadBlob(data: Uint8Array|Int8Array|ArrayBuffer, download: string, preserveFocus: boolean) {
+  async downloadBlob(data: SqlBuffer, download: string, preserveFocus: boolean) {
     const { document } = this;
     const { dirname } = document.uriParts;
     const dlUri = vsc.Uri.joinPath(vsc.Uri.parse(dirname), download);

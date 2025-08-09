@@ -241,8 +241,8 @@ export const assignESDispose = <T extends vsc.Disposable>(ch: T): T & ESDisposab
 export function doTry<T extends (...args: any) => any>(fn: T): ReturnType<T>|undefined {
   try {
     return fn();
-  } catch (err) {
-    console.error(`[${Title}]`, err instanceof Error ? err.message : String(err));
+  } catch (err){
+    import.meta.env.DEV && console.warn(`[${Title}]`, err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -250,7 +250,7 @@ export async function doTryAsync<T extends (...args: any) => Promise<any>>(fn: T
   try {
     return await fn();
   } catch (err) {
-    console.error(`[${Title}]`, err instanceof Error ? err.message : String(err));
+    import.meta.env.DEV && console.warn(`[${Title}]`, err instanceof Error ? err.message : String(err));
   }
 }
 

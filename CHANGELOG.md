@@ -16,6 +16,8 @@ Beware that this feature is still experimental and has a few sharp edges:
 ### Fixes
 - [PRO] Editing a `BLOB` value in a VS Code Tab (using a hex editor extension) should now correctly store it as a `BLOB` value in SQLite instead of incorrectly coercing to UTF-8.
 - [PRO] Fixed file upload UI not showing correctly when dropping a file onto a field in the 'New Row' dialog
+- [PRO] Fixed a bug that made entering numeric values in the 'New Row' dialog difficult
+- [PRO] JSON/B input field are now rendered correctly in 'New Row' dialog
 
 ## v25.8.1 (Pre-Release)
 _Released on August 7, 2025_
@@ -38,7 +40,7 @@ _Released on August 1, 2025_
 
 ### [PRO] Edit in VS Code
 You can now edit individual cell values in a tab in VS Code, making full use of VS Code's text editing features, installed extensions (Vim mode!), 
-syntax highlighting, and more. This should be particularly useful when editing JSON(B) columns. 
+syntax highlighting, and more. This should be particularly useful when editing JSON/B columns. 
 
 You can access this feature through the "Edit in VS Code to the Side" icon button in the top right corner of a text area (visible on hover).
 There is now also a VS Code setting to configure the behavior of a cell double-click, allowing you to open it in the new VS Code tab feature instead of the built-in modal dialog.
@@ -552,7 +554,7 @@ Improved column filtering:
 - Added a button to invert a column filter
 - Added a button to filter a column for non-nullish (`NULL` or empty string) values. You can combine it with the invert button to filter for nullish values instead.
 - Typing `NULL` or `''` into the column filter will now filter by null or empty string values respectively.
-- Changed representation of empty strings from `""` to `''`. This is to match the filter values above and to distinguish it from the legitimate search target `""`, which can come up in combination with JSON(B) columns. If you need to search for the exact string sequence `''`, use escape characters: `\'\'`.
+- Changed representation of empty strings from `""` to `''`. This is to match the filter values above and to distinguish it from the legitimate search target `""`, which can come up in combination with JSON/B columns. If you need to search for the exact string sequence `''`, use escape characters: `\'\'`.
 - Fixed a bug that caused column filters to not properly reset when deleting the contents of the search box
 
 Experimental support for Views:
