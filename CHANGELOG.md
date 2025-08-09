@@ -12,6 +12,7 @@ Beware that this feature is still experimental and has a few sharp edges:
 - This is subject to the limitations of SQLite's [patch functions](https://www.sqlite.org/json1.html#jpatch), specifically with respect to arrays, which are overwritten in whole.
 - For textual `JSON` values, it will only attempt the new patch behavior if both values are strict RFC-8259 JSON values. SQLite supports a more relaxed standard for JSON, which also allows code comments. Applying patches through `json_patch` would not preserve these. 
 `JSONB` columns do not have this limitation.
+- This feature is not available for batch updates
 
 ### Fixes
 - [PRO] Editing a `BLOB` value in a VS Code Tab (using a hex editor extension) should now correctly store it as a `BLOB` value in SQLite instead of incorrectly coercing to UTF-8.
