@@ -1,5 +1,7 @@
 # CHANGELOG
 ## v25.8.2 (Pre-Release)
+_Released on August 9, 2025_
+
 ### [PRO] JSON Patch
 Updating JSON values will now attempt to update the structure sparsely using SQLite's built-in `json_patch` and `jsonb_patch` utilities. 
 This can be useful when another process has modified the JSON value while manually editing the value through the extension UI.
