@@ -15,10 +15,12 @@ Beware that this feature is still experimental and has a few sharp edges:
 - This feature is not available for batch updates
 
 ### Fixes
-- [PRO] Editing a `BLOB` value in a VS Code Tab (using a hex editor extension) should now correctly store it as a `BLOB` value in SQLite instead of incorrectly coercing to UTF-8.
 - [PRO] Fixed file upload UI not showing correctly when dropping a file onto a field in the 'New Row' dialog
 - [PRO] Fixed a bug that made entering numeric values in the 'New Row' dialog difficult
 - [PRO] JSON/B input field are now rendered correctly in 'New Row' dialog
+
+### Known Issues
+- Editing `BLOB`s with the 'Edit in VS Code' feature and the Hex Editor extension will write incorrect results back to the db.
 
 ## v25.8.1 (Pre-Release)
 _Released on August 7, 2025_
