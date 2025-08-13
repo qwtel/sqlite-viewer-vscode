@@ -1,28 +1,38 @@
 # CHANGELOG
+## v25.8.3 (Pre-Release)
+### [PRO] Datetime Improvements
+Columns containing date/time values can now be displayed as `DATE`/`TIME` columns, no matter what their declared column type is. 
+This is especially helpful for `STRICT` tables, where date/times must be declared as either `TEXT`, `INTEGER`, or `REAL`.
+
+You can enable the datetime UI for a column by clicking the column type icon in the header row.
+
+### Changes
+- The UTC toggle and format toggle have been moved to the left of the type icon in the header row to prevent layout shifts when changing the column type.
+- Changed default timezone to UTC
+
 ## v25.8.2 (Pre-Release)
 _Released on August 9, 2025_
 
 ### [PRO] JSON Patch
 Updating JSON values will now attempt to update the structure sparsely using SQLite's built-in `json_patch` and `jsonb_patch` utilities. 
-This can be useful when another process has modified the JSON value while manually editing the value through the extension UI.
+This can be useful when another process has modified the JSON value while you are manually editing the value through the extension UI.
 Rather than overwriting the entire JSON value, only the properties that changed in the edit will be applied, preserving non-conflicting external changes. 
 
-This should be particularly useful when [editing values in a VS Code tab](#pro-edit-in-vs-code) and the [Instant Commit](#v2560-pre-release) setting.
+This should be particularly useful when [editing values in a VS Code tab](#pro-edit-in-vs-code) and with the [Instant Commit](#v2560-pre-release) setting.
 
-Beware that this feature is still experimental and has a few sharp edges:
-- Conflicts will still be resolved in favor of last-write, same as in the case of non-JSON values. 
+Be aware that this feature is still experimental and has a few sharp edges:
+- Conflicts will still be resolved in favor of last-write, the same as with non-JSON values. 
 - This is subject to the limitations of SQLite's [patch functions](https://www.sqlite.org/json1.html#jpatch), specifically with respect to arrays, which are overwritten in whole.
 - For textual `JSON` values, it will only attempt the new patch behavior if both values are strict RFC-8259 JSON values. SQLite supports a more relaxed standard for JSON, which also allows code comments. Applying patches through `json_patch` would not preserve these. 
-`JSONB` columns do not have this limitation.
-- This feature is not available for batch updates
+- This feature is not available for batch updates.
 
 ### Fixes
-- [PRO] Fixed file upload UI not showing correctly when dropping a file onto a field in the 'New Row' dialog
-- [PRO] Fixed a bug that made entering numeric values in the 'New Row' dialog difficult
-- [PRO] JSON/B input field are now rendered correctly in 'New Row' dialog
+- [PRO] Fixed file upload UI not showing correctly when dropping a file onto a field in the 'New Row' dialog.
+- [PRO] Fixed a bug that made entering numeric values in the 'New Row' dialog difficult.
+- [PRO] JSON/B input fields are now rendered correctly in the 'New Row' dialog.
 
 ### Known Issues
-- Editing `BLOB`s with the 'Edit in VS Code' feature and the Hex Editor extension will write incorrect results back to the db.
+- Editing `BLOB`s with the 'Edit in VS Code' feature and the Hex Editor extension will write incorrect results back to the database.
 
 ## v25.8.1 (Pre-Release)
 _Released on August 7, 2025_
