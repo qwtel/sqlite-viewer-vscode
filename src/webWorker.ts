@@ -25,10 +25,10 @@ function roundToNearestOOM(num: number) {
   return 2 ** Math.round(Math.log2(num));
 }
 
-export async function createWebWorker(
+export function createWebWorker(
   extensionUri: vsc.Uri,
   reporter?: TelemetryReporter,
-): Promise<WorkerBundle> {
+): WorkerBundle {
   const workerPath = import.meta.env.VSCODE_BROWSER_EXT
     ? vsc.Uri.joinPath(extensionUri, 'out', 'worker-browser.js').toString()
     : path.resolve(__dirname, "./worker.js")
@@ -38,7 +38,7 @@ export async function createWebWorker(
 
   return {
     workerFns,
-    async createWorkerDb(xUri, filename) {
+    async importDb(xUri, filename) {
       const [data, walData] = await readFile(xUri, reporter);
       // if (data == null) {
       //   throw new Error(`TooLargeError: ${TooLargeErrorMsg}`);
@@ -52,10 +52,7 @@ export async function createWebWorker(
         },
         readOnly: true,
       };
-      const transfer = [
-        ...data ? [data.buffer as ArrayBuffer] : [],
-        ...walData ? [walData.buffer as ArrayBuffer] : [],
-      ];
+      const transfer = [data?.buffer, walData?.buffer].filter(x => !!x);
       const dbRemote = await workerFns.importDb(filename, Caplink.transfer(args, transfer));
       return { dbRemote, readOnly: true };
     }

@@ -48,26 +48,28 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     const { reporter, verified, context: { extensionUri } } = provider;
     let { readOnly } = provider;
 
-    const createWorkerBundle = !import.meta.env.VSCODE_BROWSER_EXT && verified && ReadWriteMode // Do not change this line
+    const createWorker = !import.meta.env.VSCODE_BROWSER_EXT && verified && ReadWriteMode // Do not change this line
       ? createProWorker
       : createWebWorker;
 
     const { filename } = getUriParts(uri);
     const instantCommit = getInstantCommit();
 
-    let workerFns, createWorkerDb, dbRemote;
+    let workerFns, importDb, dbRemote;
     try {
-      ({ workerFns, createWorkerDb } = await createWorkerBundle(extensionUri, reporter));
-      ({ dbRemote, readOnly } = await createWorkerDb(uri, filename, readOnly, instantCommit));
+      ({ workerFns, importDb } = createWorker(extensionUri, reporter));
+      ({ dbRemote, readOnly } = await importDb(uri, filename, readOnly, instantCommit));
     } catch (err) {
       // In case something goes wrong, try to create using the WASM worker
-      if (createWorkerBundle !== createWebWorker) {
+      if (createWorker !== createWebWorker) {
         try {
-          ({ workerFns, createWorkerDb } = await createWebWorker(extensionUri, reporter));
-          ({ dbRemote, readOnly } = await createWorkerDb(uri, filename, readOnly));
-          if (err instanceof Error) vsc.window.showWarningMessage(vsc.l10n.t("[{0}] occurred while trying to open '{1}'", err.message, filename), {
-            detail: vsc.l10n.t('The document could not be opened using SQLite Viewer PRO and will be opened in read-only mode instead.'),
-          }); 
+          ({ workerFns, importDb } = createWebWorker(extensionUri, reporter));
+          ({ dbRemote, readOnly } = await importDb(uri, filename, readOnly));
+          if (err instanceof Error) {
+            vsc.window.showWarningMessage(vsc.l10n.t("[{0}] occurred while trying to open '{1}'", err.message, filename), {
+              detail: vsc.l10n.t('The document could not be opened using SQLite Viewer PRO and will be opened in read-only mode instead.'),
+            }); 
+          }
         } catch (err2) {
           throw new AggregateError([err, err2], vsc.l10n.t('Failed to open database'));
         }
@@ -94,7 +96,8 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       }
     }
     
-    return new SQLiteDocument(provider, uri, history, instantCommit, { dbRemote, readOnly }, workerFns, createWorkerDb, reporter);
+    const importedDb = { dbRemote, readOnly };
+    return new SQLiteDocument(provider, uri, history, instantCommit, importedDb, workerFns, importDb, reporter);
   }
 
   getConfiguredMaxFileSize() { return getConfiguredMaxFileSize() }
@@ -109,7 +112,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     public instantCommit: boolean,
     private workerDb: { dbRemote: Caplink.Remote<WorkerDb>, readOnly?: boolean },
     private readonly workerFns: WorkerBundle["workerFns"],
-    private readonly createWorkerDb: WorkerBundle["createWorkerDb"],
+    private readonly createWorkerDb: WorkerBundle["importDb"],
     private readonly reporter?: TelemetryReporter,
   ) {
     super();
