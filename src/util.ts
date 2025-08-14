@@ -118,8 +118,11 @@ export class WebviewStream extends Disposable {
         this._register(this.webviewPanel.webview.onDidReceiveMessage(data => {
           // const [header, code, port1, port2, tl, payload] = cborDecoder.decode(data);
           // console.log("Receiving...", [header, code, port1?.toString(16), port2?.toString(16), tl, payload && { byteLength: payload?.byteLength }])
-          if (data instanceof Uint8Array)
+          if (data instanceof Uint8Array) {
             controller.enqueue(data);
+          } else {
+            controller.error(new Error(`Expected Uint8Array, got ${typeof data}`));
+          }
         }));
         this._register(this.webviewPanel.onDidDispose(() => {
           this.#cleanup(new DOMException('Underlying webviewPanel disposed', 'AbortError'))
@@ -134,12 +137,12 @@ export class WebviewStream extends Disposable {
       start: (controller) => {
         this.#writableController = controller;
       },
-      write: (chunk, controller) => {
+      write: async (chunk, controller) => {
         try {
           const { buffer, byteOffset, byteLength } = chunk;
           // const [header, code, port1, port2, tl, payload] = cborDecoder.decode(chunk);
           // console.log("Sending...", [header, code, port1?.toString(16), port2?.toString(16), tl, payload && { byteLength: payload?.byteLength }])
-          this.webviewPanel.webview.postMessage({ buffer, byteOffset, byteLength });
+          await this.webviewPanel.webview.postMessage({ buffer, byteOffset, byteLength });
         } catch (err) {
           // const [header, code, port1, port2, tl, payload] = cborDecoder.decode(chunk);
           // console.log("could not send", [header, code, port1?.toString(16), port2?.toString(16), tl, payload && { byteLength: payload?.byteLength }])
@@ -160,7 +163,10 @@ export class WebviewStream extends Disposable {
     super.dispose();
     if (!this.#readableClosed) {
       this.#readableClosed = true;
-      this.#readableController[reason ? 'error' : 'close'](reason);
+      if (reason != null)
+        this.#readableController.error(reason);
+      else
+        this.#readableController.close();
     }
     if (!this.#writableClosed) {
       this.#writableClosed = true;
