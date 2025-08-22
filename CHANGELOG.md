@@ -9,6 +9,7 @@ You can enable the datetime UI for a column by clicking the column type icon in 
 ### Changes
 - The UTC toggle and format toggle have been moved to the left of the type icon in the header row to prevent layout shifts when changing the column type.
 - Changed default timezone to UTC
+- [PRO] Fixed a bug in the export feature that caused invalid JSON when table size was a multiple of batch size
 
 ## v25.8.2 (Pre-Release)
 _Released on August 9, 2025_
