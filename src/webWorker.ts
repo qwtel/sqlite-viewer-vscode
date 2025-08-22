@@ -33,8 +33,8 @@ export function createWebWorker(
     ? vsc.Uri.joinPath(extensionUri, 'out', 'worker-browser.js').toString()
     : path.resolve(__dirname, "./worker.js")
 
-  const worker = new Worker(workerPath);
-  const workerFns = Caplink.wrap<WorkerFns>(nodeEndpoint(worker), undefined, { owned: true });
+  const worker = nodeEndpoint(new Worker(workerPath));
+  const workerFns = Caplink.wrap<WorkerFns>(worker, null, { owned: true });
 
   return {
     workerFns,
