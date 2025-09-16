@@ -1,5 +1,7 @@
 # CHANGELOG
 ## v25.9.0 (Pre-Release)
+_Released on September 16, 2025_
+
 ### [PRO] Datetime Improvements
 Columns containing date/time values can now be displayed as `DATE`/`TIME` columns, regardless of their declared column type. 
 This is especially helpful for `STRICT` tables, where date/time values must be declared as either `TEXT`, `INTEGER`, or `REAL`.
