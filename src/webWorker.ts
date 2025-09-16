@@ -68,7 +68,7 @@ async function readFile(uri: vsc.Uri, reporter?: TelemetryReporter): Promise<[da
 
   const walUri = uri.with({ path: uri.path + '-wal' })
 
-  const stat = await vsc.workspace.fs.stat(uri)
+  const stat = await Promise.resolve(vsc.workspace.fs.stat(uri)).catch(() => ({ size: 0 }))
   if (stat.size > 200 * MB) {
     reporter?.sendTelemetryEvent("fileTooLarge", {}, { size: roundToNearestOOM(stat.size / MB) });
   }
@@ -77,7 +77,7 @@ async function readFile(uri: vsc.Uri, reporter?: TelemetryReporter): Promise<[da
   }
 
   return Promise.all([
-    vsc.workspace.fs.readFile(uri),
+    Promise.resolve(vsc.workspace.fs.readFile(uri)),
     Promise.resolve(vsc.workspace.fs.readFile(walUri)).catch(() => null),
   ]);
 }
