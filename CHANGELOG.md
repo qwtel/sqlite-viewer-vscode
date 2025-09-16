@@ -13,6 +13,7 @@ You can enable the datetime UI for a column by clicking the column type icon in 
 ### Fixes
 - [PRO] Fixed a bug that corrupted the undo history and prevented saving the document when deleting rows.
 - [PRO] Fixed a bug in the export feature that caused invalid JSON when the table size was a multiple of the batch size.
+- Fixed a bug that prevented a manually closed sidebar from opening when resizing.
 
 ## v25.8.2 (Pre-Release)
 _Released on August 9, 2025_
