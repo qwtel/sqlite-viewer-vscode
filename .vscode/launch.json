@@ -21,6 +21,24 @@
       "env": {
         "DEV": "1",
       }
+    },
+    {
+      "name": "Run Extension (Web)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceRoot}",
+        "--extensionDevelopmentKind=web",
+      ],
+      "outFiles": [
+        "${workspaceFolder}/out/**/*.js"
+      ],
+      "preLaunchTask": "compile",
+      "env": {
+        "DEV": "1"
+      }
     }
   ]
 }

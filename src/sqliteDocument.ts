@@ -1,6 +1,6 @@
 
 import type TelemetryReporter from '@vscode/extension-telemetry';
-import type { WorkerDb, DbEdit, DbStatement } from '../sqlite-viewer-core/src/worker-db';
+import type { WorkerDb, DbEdit } from '../sqlite-viewer-core/src/worker-db';
 import type { SQLiteReadonlyEditorProvider } from './sqliteEditorProvider';
 
 import * as vsc from 'vscode';
