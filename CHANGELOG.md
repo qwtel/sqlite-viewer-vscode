@@ -1,15 +1,18 @@
 # CHANGELOG
-## v25.8.3 (Pre-Release)
+## v25.9.0 (Pre-Release)
 ### [PRO] Datetime Improvements
-Columns containing date/time values can now be displayed as `DATE`/`TIME` columns, no matter what their declared column type is. 
-This is especially helpful for `STRICT` tables, where date/times must be declared as either `TEXT`, `INTEGER`, or `REAL`.
+Columns containing date/time values can now be displayed as `DATE`/`TIME` columns, regardless of their declared column type. 
+This is especially helpful for `STRICT` tables, where date/time values must be declared as either `TEXT`, `INTEGER`, or `REAL`.
 
 You can enable the datetime UI for a column by clicking the column type icon in the header row.
 
 ### Changes
-- The UTC toggle and format toggle have been moved to the left of the type icon in the header row to prevent layout shifts when changing the column type.
-- Changed default timezone to UTC
-- [PRO] Fixed a bug in the export feature that caused invalid JSON when table size was a multiple of batch size
+- [PRO] The UTC toggle and format toggle have been moved to the left of the type icon in the header row to prevent layout shifts when changing the column type.
+- [PRO] Changed the default timezone to UTC.
+
+### Fixes
+- [PRO] Fixed a bug that corrupted the undo history and prevented saving the document when deleting rows.
+- [PRO] Fixed a bug in the export feature that caused invalid JSON when the table size was a multiple of the batch size.
 
 ## v25.8.2 (Pre-Release)
 _Released on August 9, 2025_
