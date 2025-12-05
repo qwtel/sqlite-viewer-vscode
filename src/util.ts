@@ -217,6 +217,11 @@ export function getUriParts(uri: string|vsc.Uri) {
 export const isAbortError = (e: unknown): e is Error =>
   e instanceof Error && (e.name === 'AbortError' || e.message.startsWith('AbortError'));
 
+export const ignoreAbortError = (e: unknown): void => {
+  if (isAbortError(e)) return;
+  throw e;
+}
+
 export function cancelTokenToAbortSignal<T extends vsc.CancellationToken|null|undefined>(token: T): T extends null ? undefined : AbortSignal {
   if (token == null) return undefined as any;
   const ctrl = new AbortController();

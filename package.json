@@ -185,27 +185,27 @@
   },
   "devDependencies": {
     "@types/vscode": "=1.83.1",
-    "bun-types": "^1.2.22",
-    "esbuild": "^0.25.10",
+    "bun-types": "^1.3.2",
+    "esbuild": "^0.27.0",
     "esbuild-plugin-alias": "^0.2.1",
     "esbuild-plugin-polyfill-node": "^0.3.0",
-    "ovsx": "^0.10.5",
-    "typescript": "^5.9.2"
+    "ovsx": "^0.10.6",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@scure/base": "^1.2.6",
-    "@vscode/codicons": "^0.0.40",
+    "@scure/base": "^2.0.0",
+    "@vscode/codicons": "^0.0.42",
     "@vscode/extension-telemetry": "=0.9.8",
-    "@vscode/vsce": "^3.6.1",
+    "@vscode/vsce": "^3.7.0",
     "@vscode/vscode-languagedetection": "^1.0.22",
     "@worker-tools/typed-event-target": "^1.0.0",
     "@workers/typed-event-target": "npm:@jsr/workers__typed-event-target@^1.0.0",
     "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.5.6",
-    "file-type": "^21.0.0",
+    "file-type": "^21.1.0",
     "jose": "=5.10.0",
     "json-merge-patch": "^1.0.2",
     "json5": "^2.2.3",
-    "sql-formatter": "^15.6.9",
+    "sql-formatter": "^15.6.10",
     "whatwg-stream-to-async-iter": "^0.6.2"
   }
 }

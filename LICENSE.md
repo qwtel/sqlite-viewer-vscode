@@ -134,6 +134,9 @@ SQLite : [Public Domain](https://sqlite.org/copyright.html)
 > 
 > [others]: https://github.com/json5/json5/contributors
 
+`immutable`: [MIT]
+> Copyright (c) 2014-present, Lee Byron and other contributors.
+
 [MIT]: https://mit-license.org
 [Apache-2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
 [BSD-3-Clause]: https://choosealicense.com/licenses/bsd-3-clause/
