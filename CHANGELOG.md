@@ -1,4 +1,16 @@
 # CHANGELOG
+## v25.12.0 (Pre-Release)
+_Released on December 6, 2025_
+
+Release Candidate for bumping features from the pre-release branch to mainline. 
+
+### Changes
+- Updated icons to new VS Code icon set
+
+### Fixes
+- Includes a fix for `Promise.withResolvers` is not a function
+- Includes a potential fix for new tabs opening when using in VS Code for Web
+
 ## v25.9.0 (Pre-Release)
 _Released on September 16, 2025_
 
