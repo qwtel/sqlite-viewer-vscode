@@ -1,3 +1,4 @@
+import "./polyfills"
 import * as vsc from 'vscode';
 import TelemetryReporter from '@vscode/extension-telemetry';
 import { calcDaysSinceIssued, deleteLicenseKeyCommand, enterAccessTokenCommand, enterLicenseKeyCommand, getPayload, refreshAccessToken, verifyToken, exportTableCommand } from './commands';
