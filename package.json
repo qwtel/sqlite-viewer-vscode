@@ -194,6 +194,7 @@
   },
   "dependencies": {
     "@scure/base": "^2.0.0",
+    "@std/encoding": "npm:@jsr/std__encoding",
     "@vscode/codicons": "^0.0.43",
     "@vscode/extension-telemetry": "=0.9.8",
     "@vscode/vsce": "^3.7.1",

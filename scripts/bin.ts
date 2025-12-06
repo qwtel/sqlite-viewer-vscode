@@ -2,6 +2,7 @@
 
 import { $ } from "bun";
 import fs from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 
 import URL from 'url';
 import path from 'path'
@@ -29,7 +30,7 @@ const targets = [
   "web",
 ] as const;
 
-const targetToZigTriple = Object.freeze({
+const targetToZigTriple: Record<BuildTarget, string> = Object.freeze({
   "win32-x64": "x86_64-windows",
   "win32-arm64" : "aarch64-windows",
   "linux-x64" : "x86_64-linux-gnu",
@@ -45,12 +46,14 @@ const outDir = resolve('out')
 const tmpDir = resolve('.tmp')
 
 export const compileBin = async (targetArg?: string) => {
+  const hostTarget = detectHostTarget();
+
   if (targetArg && !(targets.includes(targetArg as any))) {
     throw new Error(`Invalid target: ${targetArg}. Must be one of: ${targets.join(', ')}`);
   }
   if (!targetArg) {
-    console.warn("Assuming target: darwin-arm64");
-    targetArg = "darwin-arm64"; // FIXME: make host platform
+    console.warn(`Assuming target: ${hostTarget}`);
+    targetArg = hostTarget;
   }
 
   const target = targetArg as typeof targets[number];
@@ -68,12 +71,12 @@ export const compileBin = async (targetArg?: string) => {
   await fs.rmdir(outBinDir, { recursive: true }).catch(() => {});
   await fs.mkdir(outBinDir, { recursive: true });
 
-  if (!Bun.env.TJS_ZIG_OUT) throw new Error('TJS_ZIG_OUT not set');
-
   if (target === 'web') return;
 
-  const tjsPath = path.join(Bun.env.TJS_ZIG_OUT, DEV ? 'bin' : 'aarch64-macos', 'tjs'); // XXX: hardcoded macOS for now
-  const exePath = path.join(Bun.env.TJS_ZIG_OUT, DEV ? 'bin' : targetToZigTriple[target], 'tjs' + ext)
+  const zigOutDir = Bun.env.TJS_ZIG_OUT ?? resolve('zig-build-txiki/zig-out');
+
+  const tjsPath = path.join(zigOutDir, DEV ? 'bin' : targetToZigTriple[hostTarget], 'tjs');
+  const exePath = path.join(zigOutDir, DEV ? 'bin' : targetToZigTriple[target], 'tjs' + ext)
       
   console.log({
     exePath, 
@@ -90,4 +93,28 @@ if (import.meta.main) {
     console.error(err.message);
     process.exit(1);
   });
+}
+
+type BuildTarget = Exclude<typeof targets[number], 'web'>;
+
+function detectHostTarget(): BuildTarget {
+  const platform = process.platform;
+  const arch = process.arch;
+  const isMusl = platform === 'linux' && (existsSync('/etc/alpine-release') || process.env.LIBC === 'musl');
+
+  if (platform === 'darwin') {
+    if (arch === 'arm64') return 'darwin-arm64';
+    if (arch === 'x64') return 'darwin-x64';
+  }
+  if (platform === 'win32') {
+    if (arch === 'arm64') return 'win32-arm64';
+    if (arch === 'x64') return 'win32-x64';
+  }
+  if (platform === 'linux') {
+    if (arch === 'arm') return 'linux-armhf';
+    if (arch === 'arm64') return isMusl ? 'alpine-arm64' : 'linux-arm64';
+    if (arch === 'x64') return isMusl ? 'alpine-x64' : 'linux-x64';
+  }
+
+  throw new Error(`Unsupported host platform: ${platform}-${arch}`);
 }
