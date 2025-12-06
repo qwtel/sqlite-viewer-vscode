@@ -1,5 +1,7 @@
 # CHANGELOG
 ## v25.12.0 (Pre-Release)
+_Released on December 6, 2025_
+
 Release Candidate for bumping features from the pre-release branch to mainline. 
 
 ### Changes
