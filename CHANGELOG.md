@@ -15,6 +15,12 @@ In order to avoid spamming VS Code's undo history with selections, the selection
 - Using `focusBorder` as a fallback focus outline for themes that don't define `list.focusOutline` (e.g. Catpuccin)
 - Fixed row selection borders missing in high contrast themes
 
+## v25.12.1 (Pre-Release)
+_Released on December 7, 2025_
+
+- [PRO] Fixed an issue that caused the standard icon (blue) to be displayed instead of the PRO icon
+- Fixed a potential crash when reloading a database
+
 ## v25.12.0 (Pre-Release)
 _Released on December 6, 2025_
 
