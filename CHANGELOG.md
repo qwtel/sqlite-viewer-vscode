@@ -1,5 +1,7 @@
 # CHANGELOG
 ## v25.12.1 (Pre-Release)
+_Released on December 7, 2025_
+
 - [PRO] Fixed an issue that caused the standard icon (blue) to be displayed instead of the PRO icon
 - Fixed a potential crash when reloading a database
 
