@@ -1,4 +1,20 @@
 # CHANGELOG
+## v25.12.x (Pre-Release)
+
+### Improved keyboard selection
+You can now select multiple rows using the keyboard by holding down shift while moving up/down using arrow keys. 
+You can also select/unselect individual rows by pressing the Space key. 
+Pressing Enter while a cell is selected will trigger the same action as double clicking the cell.
+Pressing Escape will unselect all rows.
+
+<!-- Row selection now has a undo history. You can now use keyboard shortcuts to revert to a previous row selection. This should be useful when accidentally deselecting. 
+In order to avoid spamming VS Code's undo history with selections, the selection history is kept separate and cleared when a real document edit takes place. It's -->
+
+### Fixes
+- Fixed selected row background color missing in certain themes like Catpuccin
+- Using `focusBorder` as a fallback focus outline for themes that don't define `list.focusOutline` (e.g. Catpuccin)
+- Fixed row selection borders missing in high contrast themes
+
 ## v25.12.0 (Pre-Release)
 _Released on December 6, 2025_
 
