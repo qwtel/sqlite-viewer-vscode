@@ -1,4 +1,11 @@
 # CHANGELOG
+## v25.12.2 (Pre-Release)
+
+### Fixes
+- Fixed selected row background color missing in certain themes like Catpuccin
+- Improved focus outline visibility in themes that don't define `list.focusOutline` by falling back to `focusBorder` (e.g. Catpuccin)
+- Fixed row selection borders missing in high contrast themes
+
 ## v25.12.1 (Pre-Release)
 _Released on December 7, 2025_
 
