@@ -1,13 +1,16 @@
 # CHANGELOG
 ## v25.12.2 (Pre-Release)
 ### Improved theme integration
-The extension should now work better with a variety of themes.
+The extension should now adjust better to many popular themes, but unexpected changes or even regressions are possible.
 
-- Fixed selected row background color missing in certain themes like Catpuccin
-- Changed border color to use the panel border instead of tab border for better compatibility with various themes
-- Added a fallback 50% opacity "muted" color for themes that don't define `list.deemphasizedForeground`.
-- Fixed invisible focus outline in some themes that don't define `list.focusOutline` by falling back to `focusBorder` (e.g. Catpuccin)
+- Fixed missing background color for selected rows in certain themes like Catpuccin
+- Changed most border colors to use the `sideBar.border` instead of `tab.border`, which closer matches the intent of most themes.
+- Fixed an issue where a "border" (= gap) would appear in themes that set the border color to transparent .
+- Changed muted color to always use 50% opacity of regular text instead of `list.deemphasizedForeground`, as many themes don't provide a good value for it.
+  High contrast themes are exempt from this.
+- Fixed invisible focus outline in themes that don't define `list.focusOutline` by falling back to alternative theme colors suitable for outlines.
 - Fixed row selection borders missing in high contrast themes
+- Improved row hover state in high contrast themes
 - Improved checkout page theme integration
 
 ## v25.12.1 (Pre-Release)
