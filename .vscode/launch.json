@@ -23,7 +23,23 @@
       }
     },
     {
-      "name": "Run Extension (Web)",
+      "name": "Run Extension (with extensions)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceRoot}"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/out/**/*.js"
+      ],
+      "preLaunchTask": "compile",
+      "env": {
+        "DEV": "1",
+      }
+    },
+    {
+      "name": "Run Extension (Web, no extensions)",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",

@@ -15,6 +15,39 @@ In order to avoid spamming VS Code's undo history with selections, the selection
 - Using `focusBorder` as a fallback focus outline for themes that don't define `list.focusOutline` (e.g. Catpuccin)
 - Fixed row selection borders missing in high contrast themes
 
+## v25.12.3 (Pre-Release)
+_Released on December 13, 2025_
+
+### Improved theme integration
+The extension should now adjust better to many popular themes, but unexpected changes or even regressions are possible.
+
+- Fixed missing background color for selected rows in certain themes like Catppuccin.
+- Changed most border colors to use `sideBar.border` instead of `tab.border`, which more closely matches the intent of most themes.
+- Fixed an issue where a "border" (i.e., gap) would appear in themes that set the border color to transparent.
+- Changed muted color to always use 50% opacity of regular text instead of `list.deemphasizedForeground`, as many themes don't provide a good value for it.
+  High-contrast themes are exempt from this.
+- Fixed invisible focus outline in themes that don't define `list.focusOutline` by falling back to alternative theme colors suitable for outlines.
+- Fixed row selection borders missing in high-contrast themes.
+- Improved row hover state in high-contrast themes.
+- Improved checkout page theme integration.
+
+## v25.12.2
+_Released on December 13, 2025_
+
+Promoted version 25.12.1 to main channel. If you encounter any issues, you can revert to the prior stable version, v0.10.6.
+
+Major new features from the pre-release branch are included in this update:
+
+- [[PRO] Date/Time Support](#pro-datetime-support)
+- [[PRO] Basic Batch Updates](#pro-basic-batch-updates)
+- [[PRO] Improved Logging](#pro-improved-logging)
+- [[PRO] Pragma Editor](#pro-pragma-editor)
+- [[PRO] Export Dialog](#pro-export-dialog)
+- [[PRO] Edit in VS Code](#pro-edit-in-vs-code)
+- [[PRO] Drag & Drop File as BLOB](#pro-drag--drop-file-as-blob)
+- [[PRO] JSON Patch](#pro-json-patch)
+- [[PRO] Datetime Improvements](#pro-datetime-improvements)
+
 ## v25.12.1 (Pre-Release)
 _Released on December 7, 2025_
 

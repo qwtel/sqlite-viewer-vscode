@@ -1,6 +1,6 @@
 import "./polyfills"
 import * as vsc from 'vscode';
-import TelemetryReporter from '@vscode/extension-telemetry';
+import { TelemetryReporter } from '@vscode/extension-telemetry';
 import { calcDaysSinceIssued, deleteLicenseKeyCommand, enterAccessTokenCommand, enterLicenseKeyCommand, getPayload, refreshAccessToken, verifyToken, exportTableCommand } from './commands';
 import { IsVSCode } from './util';
 import { AccessToken, ExtensionId, FileNestingPatternsAdded, FistInstallMs, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString, Title } from './constants';

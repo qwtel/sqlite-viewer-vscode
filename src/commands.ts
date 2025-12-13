@@ -1,6 +1,6 @@
 import * as vsc from 'vscode';
 import * as jose from 'jose';
-import TelemetryReporter from '@vscode/extension-telemetry';
+import type { TelemetryReporter } from '@vscode/extension-telemetry';
 
 import { AccessToken, JWTPublicKeySPKI, LicenseKey } from './constants';
 import { activateProviders } from './extension';

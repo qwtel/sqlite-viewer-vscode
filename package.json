@@ -3,7 +3,7 @@
   "name": "sqlite-viewer",
   "displayName": "SQLite Viewer",
   "description": "SQLite Viewer for VS Code",
-  "version": "25.12.1",
+  "version": "25.12.3",
   "publisher": "qwtel",
   "private": true,
   "license": "LICENSE.md",
@@ -185,7 +185,7 @@
   },
   "devDependencies": {
     "@types/vscode": "=1.83.1",
-    "bun-types": "^1.3.3",
+    "bun-types": "^1.3.4",
     "esbuild": "^0.27.1",
     "esbuild-plugin-alias": "^0.2.1",
     "esbuild-plugin-polyfill-node": "^0.3.0",
@@ -195,8 +195,8 @@
   "dependencies": {
     "@scure/base": "^2.0.0",
     "@std/encoding": "npm:@jsr/std__encoding",
-    "@vscode/codicons": "^0.0.43",
-    "@vscode/extension-telemetry": "=0.9.8",
+    "@vscode/codicons": "^0.0.44",
+    "@vscode/extension-telemetry": "^1.2.0",
     "@vscode/vsce": "^3.7.1",
     "@vscode/vscode-languagedetection": "^1.0.22",
     "@worker-tools/typed-event-target": "^1.0.0",
@@ -206,7 +206,7 @@
     "jose": "=5.10.0",
     "json-merge-patch": "^1.0.2",
     "json5": "^2.2.3",
-    "sql-formatter": "^15.6.10",
+    "sql-formatter": "^15.6.11",
     "whatwg-stream-to-async-iter": "^0.6.2"
   }
 }

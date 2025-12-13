@@ -1,7 +1,7 @@
 import type { WorkerFns } from '../sqlite-viewer-core/src/worker-db';
+import type { TelemetryReporter } from '@vscode/extension-telemetry';
 
 import * as vsc from 'vscode';
-import TelemetryReporter from '@vscode/extension-telemetry';
 import path from 'path';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
@@ -27,7 +27,7 @@ function roundToNearestOOM(num: number) {
 
 export function createWebWorker(
   extensionUri: vsc.Uri,
-  reporter?: TelemetryReporter,
+  _reporter?: TelemetryReporter,
 ): WorkerBundle {
   const workerPath = import.meta.env.VSCODE_BROWSER_EXT
     ? vsc.Uri.joinPath(extensionUri, 'out', 'worker-browser.js').toString()
@@ -39,7 +39,7 @@ export function createWebWorker(
   return {
     workerFns,
     async importDb(xUri, filename) {
-      const [data, walData] = await readFile(xUri, reporter);
+      const [data, walData] = await readFile(xUri);
       // if (data == null) {
       //   throw new Error(`TooLargeError: ${TooLargeErrorMsg}`);
       // }
@@ -59,7 +59,7 @@ export function createWebWorker(
   }
 }
 
-async function readFile(uri: vsc.Uri, reporter?: TelemetryReporter): Promise<[data: Uint8Array|null, walData?: Uint8Array|null]> {
+async function readFile(uri: vsc.Uri): Promise<[data: Uint8Array|null, walData?: Uint8Array|null]> {
   if (uri.scheme === 'untitled') {
     return [new Uint8Array(), null];
   }
@@ -69,9 +69,6 @@ async function readFile(uri: vsc.Uri, reporter?: TelemetryReporter): Promise<[da
   const walUri = uri.with({ path: uri.path + '-wal' })
 
   const stat = await Promise.resolve(vsc.workspace.fs.stat(uri)).catch(() => ({ size: 0 }))
-  if (stat.size > 200 * MB) {
-    reporter?.sendTelemetryEvent("fileTooLarge", {}, { size: roundToNearestOOM(stat.size / MB) });
-  }
   if (maxFileSize !== 0 && stat.size > maxFileSize) {
     return [null, null];
   }
