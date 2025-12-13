@@ -1,5 +1,7 @@
 # CHANGELOG
 ## v25.12.2
+_Released on December 13, 2025_
+
 Promoted version 25.12.1 to main channel. If you encounter any issues, you can revert to the prior stable version, v0.10.6.
 
 Major new features from the pre-release branch are included in this update:
