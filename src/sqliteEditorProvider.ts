@@ -1,4 +1,4 @@
-import type TelemetryReporter from '@vscode/extension-telemetry';
+import type { TelemetryReporter } from '@vscode/extension-telemetry';
 import type { WebviewFns } from '../sqlite-viewer-core/src/file-system';
 
 import * as vsc from 'vscode';
