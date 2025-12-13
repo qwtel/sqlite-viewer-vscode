@@ -1,5 +1,7 @@
 # CHANGELOG
 ## v25.12.3 (Pre-Release)
+_Released on December 13, 2025_
+
 ### Improved theme integration
 The extension should now adjust better to many popular themes, but unexpected changes or even regressions are possible.
 
