@@ -9,9 +9,11 @@ import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
 import { crypto } from './o/crypto';
-import { ConfigurationSection, CopilotChatId, ExtensionId, FistInstallMs, FullExtensionId, Ns, SidebarLeft, SidebarRight } from './constants';
+import { ConfigurationSection, CopilotChatId, ExtensionId, FistInstallMs, FullExtensionId, Ns, SidebarLeft, SidebarRight, DefaultCheckConstraintPresets, DefaultForeignKeyClausePresets, DefaultValueExpressionPresets } from './constants';
+// Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
+// import { ..., DefaultCustomColumnTypes } from './constants';
 import { Disposable } from './dispose';
-import { IsVSCode, IsVSCodium, WebviewCollection, WebviewStream, cspUtil, doTry, toDatasetAttrs, themeToCss, uiKindToString, BoolString, toBoolString, IsCursorIDE, lang } from './util';
+import { IsVSCode, IsVSCodium, WebviewCollection, WebviewStream, cspUtil, doTry, toDatasetAttrs, themeToCss, uiKindToString, BoolString, toBoolString, IsCursorIDE, lang, toPOJO } from './util';
 
 import { enterLicenseKeyCommand } from './commands';
 import { ReadWriteMode, RemoteWorkspaceMode, SQLiteDocument, getInstantCommit } from './sqliteDocument';
@@ -19,9 +21,9 @@ import { ReadWriteMode, RemoteWorkspaceMode, SQLiteDocument, getInstantCommit } 
 export type VSCODE_ENV = {
   webviewId: string,
   browserExt?: BoolString,
-  appName: string, 
+  appName: string,
   appHost: string,
-  uriScheme: string, 
+  uriScheme: string,
   extensionUrl: string,
   accessToken?: string,
   uiKind?: 'desktop'|'web',
@@ -36,6 +38,11 @@ export type VSCODE_ENV = {
   instantCommit?: BoolString,
   remoteWorkspace?: BoolString,
   doubleClickBehavior?: string,
+  checkConstraintPresets?: string,
+  foreignKeyClausePresets?: string,
+  defaultValueExpressionPresets?: string,
+  // Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
+  // customColumnTypes?: string,
 };
 
 export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.CustomReadonlyEditorProvider<SQLiteDocument> {
@@ -80,6 +87,8 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
     }));
 
     this._register(vsc.workspace.onDidChangeConfiguration(e => {
+      const config = vsc.workspace.getConfiguration(ConfigurationSection);
+
       if (e.affectsConfiguration(`${ConfigurationSection}.instantCommit`)) {
         const value = document.instantCommit = getInstantCommit();
         for (const remote of this.#getWebviewRemotes(document.uri)) {
@@ -93,6 +102,35 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
           remote.updateDoubleClickBehavior(value).catch(console.warn);
         }
       }
+
+      if (e.affectsConfiguration(`${ConfigurationSection}.checkConstraintPresets`)) {
+        const presets = toPOJO(config.get('checkConstraintPresets', DefaultCheckConstraintPresets));
+        for (const remote of this.#getWebviewRemotes(document.uri)) {
+          remote.updateCheckConstraintPresets(presets).catch(console.warn);
+        }
+      }
+
+      if (e.affectsConfiguration(`${ConfigurationSection}.foreignKeyClausePresets`)) {
+        const presets = toPOJO(config.get('foreignKeyClausePresets', DefaultForeignKeyClausePresets));
+        for (const remote of this.#getWebviewRemotes(document.uri)) {
+          remote.updateForeignKeyClausePresets(presets).catch(console.warn);
+        }
+      }
+
+      if (e.affectsConfiguration(`${ConfigurationSection}.defaultValueExpressionPresets`)) {
+        const presets = toPOJO(config.get('defaultValueExpressionPresets', DefaultValueExpressionPresets));
+        for (const remote of this.#getWebviewRemotes(document.uri)) {
+          remote.updateDefaultValueExpressionPresets(presets).catch(console.warn);
+        }
+      }
+
+      // Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
+      // if (e.affectsConfiguration(`${ConfigurationSection}.customColumnTypes`)) {
+      //   const types = toPOJO(config.get('customColumnTypes', DefaultCustomColumnTypes));
+      //   for (const remote of this.#getWebviewRemotes(document.uri)) {
+      //     remote.updateCustomColumnTypes(types).catch(console.warn);
+      //   }
+      // }
     }));
 
     // Listen for when this document gains focus to trigger pending saves
@@ -193,11 +231,17 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
       ? `https://marketplace.visualstudio.com/items?itemName=${FullExtensionId}&ref=vscode`
       : `https://open-vsx.org/extension/${Ns}/${ExtensionId}&ref=vscode`;
 
+    const config = vsc.workspace.getConfiguration(ConfigurationSection);
+    const checkConstraintPresets = config.get('checkConstraintPresets', DefaultCheckConstraintPresets);
+    const foreignKeyClausePresets = config.get('foreignKeyClausePresets', DefaultForeignKeyClausePresets);
+    const defaultValueExpressionPresets = config.get('defaultValueExpressionPresets', DefaultValueExpressionPresets);
+    // Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
+    // const customColumnTypes = config.get('customColumnTypes', DefaultCustomColumnTypes);
     const vscodeEnv = {
       webviewId,
       browserExt: toBoolString(!!import.meta.env.VSCODE_BROWSER_EXT),
-      uriScheme, appHost, appName, extensionUrl, 
-      accessToken: this.accessToken, 
+      uriScheme, appHost, appName, extensionUrl,
+      accessToken: this.accessToken,
       uiKind: uiKindToString(uiKind),
       machineId: vsc.env.machineId,
       firstInstall: doTry(() => new Date(this.context.globalState.get<number>(FistInstallMs) ?? Date.now()).toISOString()),
@@ -210,6 +254,11 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
       instantCommit: toBoolString(document.instantCommit),
       remoteWorkspace: toBoolString(RemoteWorkspaceMode),
       doubleClickBehavior: document.doubleClickBehavior,
+      checkConstraintPresets: doTry(() => base64.encode(v8.serialize(toPOJO(checkConstraintPresets)))),
+      foreignKeyClausePresets: doTry(() => base64.encode(v8.serialize(toPOJO(foreignKeyClausePresets)))),
+      defaultValueExpressionPresets: doTry(() => base64.encode(v8.serialize(toPOJO(defaultValueExpressionPresets)))),
+      // Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
+      // customColumnTypes: doTry(() => base64.encode(v8.serialize(toPOJO(customColumnTypes)))),
     } satisfies VSCODE_ENV;
 
     const preparedHtml = html

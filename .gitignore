@@ -1,6 +1,7 @@
 node_modules
 out
 .tmp
+.cursor
 exampleFiles
 *.vsix
 *.zip
@@ -13,3 +14,4 @@ sqlite-viewer-app
 mySolidTest
 deno
 src/vendor/file-type-supported.ts
+/TODO*

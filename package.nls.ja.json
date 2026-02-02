@@ -15,5 +15,13 @@
   "sqlite-viewer.config.instantCommit.markdownDescription": "この設定を有効にすると、データベースへの変更が即座にコミットされます。この設定は読み取り専用データベースでは無視されます。\n\n__警告__: この設定が有効な場合、元に戻す/やり直しの機能は\"反転した\"SQLiteステートメントによって実現されますが、必ずしも動作が保証されるわけではありません（例: 他のプロセスが同じ行を変更した場合など）。",
   "sqlite-viewer.config.doubleClickBehavior.modal": "モーダルダイアログ",
   "sqlite-viewer.config.doubleClickBehavior.vscode": "VS Codeエディター",
-  "sqlite-viewer.config.doubleClickBehavior.markdownDescription": "テーブルビューでセルをダブルクリックしたときの動作を制御します。\n\n- **モーダルダイアログ**: 統合されたモーダルダイアログで行を開く（デフォルト）\n- **VS Codeエディター**: セルの値を別のVS Codeエディタータブで開く（PRO機能）"
+  "sqlite-viewer.config.doubleClickBehavior.markdownDescription": "テーブルビューでセルをダブルクリックしたときの動作を制御します。\n\n- **モーダルダイアログ**: 統合されたモーダルダイアログで行を開く（デフォルト）\n- **VS Codeエディター**: セルの値を別のVS Codeエディタータブで開く（PRO機能）",
+  "sqlite-viewer.config.checkConstraintPresets.description": "列作成用のカスタムCHECK制約プリセット。キー＝ドロップダウンに表示するラベル、値＝SQL式（\"{column}\"プレースホルダーを使用）",
+  "sqlite-viewer.config.foreignKeyClausePresets.description": "列作成用のカスタム外部キー句プリセット。各項目はSQL句です",
+  "sqlite-viewer.config.customColumnTypes.description": "組み込みの型に追加するカスタム列型。各型でUIアフィニティとcodiconアイコンを指定できます。",
+  "sqlite-viewer.config.customColumnTypes.value.description": "SQL型名（例: 'MARKDOWN', 'UUID'）",
+  "sqlite-viewer.config.customColumnTypes.uiAffinity.description": "特別な処理用のUIアフィニティ（表示するUIコントロールを決定）",
+  "sqlite-viewer.config.customColumnTypes.codicon.description": "Codiconクラス名（例: 'codicon-markdown', 'codicon-tag'）",
+  "sqlite-viewer.config.customColumnTypes.extname.description": "ファイル拡張子（例: '.md', '.txt'）",
+  "sqlite-viewer.config.customColumnTypes.mimeType.description": "MIMEタイプ（例: 'text/markdown', 'text/plain'）"
 }

@@ -15,5 +15,13 @@
   "sqlite-viewer.config.instantCommit.markdownDescription": "When this setting is enabled, changes to the database are committed immediately. This setting is ignored for read-only databases.\n\n__Warning__: When this setting is enabled, undo and redo functionality is achieved through \"inverted\" SQLite statements, which are not guaranteed to work (e.g. another process has modified the same row, etc.)",
   "sqlite-viewer.config.doubleClickBehavior.modal": "Modal Dialog",
   "sqlite-viewer.config.doubleClickBehavior.vscode": "VS Code Editor",
-  "sqlite-viewer.config.doubleClickBehavior.markdownDescription": "Controls the behavior when double-clicking on a cell in the table view.\n\n- **Modal Dialog**: Opens the row in an integrated modal dialog (default)\n- **VS Code Editor**: Opens the cell value in a separate VS Code editor tab (PRO feature)"
+  "sqlite-viewer.config.doubleClickBehavior.markdownDescription": "Controls the behavior when double-clicking on a cell in the table view.\n\n- **Modal Dialog**: Opens the row in an integrated modal dialog (default)\n- **VS Code Editor**: Opens the cell value in a separate VS Code editor tab (PRO feature)",
+  "sqlite-viewer.config.checkConstraintPresets.description": "Custom check constraint presets for column creation. Key = label shown in dropdown, Value = SQL expression (use \"{column}\" placeholder)",
+  "sqlite-viewer.config.foreignKeyClausePresets.description": "Custom foreign key clause presets for column creation. Each item is a SQL clause",
+  "sqlite-viewer.config.customColumnTypes.description": "Custom column types to add to the built-in types. Each type can specify a UI affinity and codicon icon.",
+  "sqlite-viewer.config.customColumnTypes.value.description": "The SQL type name (e.g., 'MARKDOWN', 'UUID')",
+  "sqlite-viewer.config.customColumnTypes.uiAffinity.description": "UI affinity for special handling (determines what UI controls are shown)",
+  "sqlite-viewer.config.customColumnTypes.codicon.description": "Codicon class name (e.g., 'codicon-markdown', 'codicon-tag')",
+  "sqlite-viewer.config.customColumnTypes.extname.description": "File extension (e.g., '.md', '.txt')",
+  "sqlite-viewer.config.customColumnTypes.mimeType.description": "MIME type (e.g., 'text/markdown', 'text/plain')"
 }

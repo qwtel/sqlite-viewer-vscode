@@ -15,5 +15,13 @@
   "sqlite-viewer.config.instantCommit.markdownDescription": "Lorsque ce paramètre est activé, les modifications de la base de données sont immédiatement validées. Ce paramètre est ignoré pour les bases de données en lecture seule.\n\n__Avertissement__ : Lorsque ce paramètre est activé, la fonctionnalité d'annulation et de rétablissement est obtenue via des instructions SQLite \"inversées\", qui ne sont pas garanties de fonctionner (par exemple, si un autre processus a modifié la même ligne, etc.)",
   "sqlite-viewer.config.doubleClickBehavior.modal": "Boîte de dialogue modale",
   "sqlite-viewer.config.doubleClickBehavior.vscode": "Éditeur VS Code",
-  "sqlite-viewer.config.doubleClickBehavior.markdownDescription": "Contrôle le comportement lors du double-clic sur une cellule dans la vue de tableau.\n\n- **Boîte de dialogue modale**: Ouvre la ligne dans une boîte de dialogue modale intégrée (par défaut)\n- **Éditeur VS Code**: Ouvre la valeur de la cellule dans un onglet d'éditeur VS Code séparé (fonctionnalité PRO)"
+  "sqlite-viewer.config.doubleClickBehavior.markdownDescription": "Contrôle le comportement lors du double-clic sur une cellule dans la vue de tableau.\n\n- **Boîte de dialogue modale**: Ouvre la ligne dans une boîte de dialogue modale intégrée (par défaut)\n- **Éditeur VS Code**: Ouvre la valeur de la cellule dans un onglet d'éditeur VS Code séparé (fonctionnalité PRO)",
+  "sqlite-viewer.config.checkConstraintPresets.description": "Préréglages personnalisés de contrainte CHECK pour la création de colonnes. Clé = libellé affiché dans la liste déroulante, Valeur = expression SQL (utiliser le placeholder \"{column}\")",
+  "sqlite-viewer.config.foreignKeyClausePresets.description": "Préréglages personnalisés de clause de clé étrangère pour la création de colonnes. Chaque élément est une clause SQL",
+  "sqlite-viewer.config.customColumnTypes.description": "Types de colonne personnalisés à ajouter aux types intégrés. Chaque type peut spécifier une affinité UI et une icône codicon.",
+  "sqlite-viewer.config.customColumnTypes.value.description": "Le nom du type SQL (ex. 'MARKDOWN', 'UUID')",
+  "sqlite-viewer.config.customColumnTypes.uiAffinity.description": "Affinité UI pour un traitement spécial (détermine quels contrôles UI sont affichés)",
+  "sqlite-viewer.config.customColumnTypes.codicon.description": "Nom de classe Codicon (ex. 'codicon-markdown', 'codicon-tag')",
+  "sqlite-viewer.config.customColumnTypes.extname.description": "Extension de fichier (ex. '.md', '.txt')",
+  "sqlite-viewer.config.customColumnTypes.mimeType.description": "Type MIME (ex. 'text/markdown', 'text/plain')"
 }

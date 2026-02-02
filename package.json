@@ -3,7 +3,7 @@
   "name": "sqlite-viewer",
   "displayName": "SQLite Viewer",
   "description": "SQLite Viewer for VS Code",
-  "version": "25.12.3",
+  "version": "26.2.0-dev.3",
   "publisher": "qwtel",
   "private": true,
   "license": "LICENSE.md",
@@ -124,6 +124,58 @@
           ],
           "default": "modal",
           "markdownDescription": "%sqlite-viewer.config.doubleClickBehavior.markdownDescription%"
+        },
+        "sqliteViewer.checkConstraintPresets": {
+          "type": "object",
+          "description": "%sqlite-viewer.config.checkConstraintPresets.description%",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {
+            "Valid datetime": "datetime(\"{column}\") IS NOT NULL",
+            "Valid date": "date(\"{column}\") IS NOT NULL",
+            "Valid JSON": "json_valid(\"{column}\")",
+            "Valid JSONB": "json_valid(\"{column}\", 0x04)",
+            "Positive number": "\"{column}\" > 0",
+            "Max length (255)": "length(\"{column}\") <= 255",
+            "Email (simple)": "\"{column}\" LIKE '%@%.%'",
+            "Enum/In list": "\"{column}\" IN ('value1', 'value2')"
+          },
+          "order": 10
+        },
+        "sqliteViewer.foreignKeyClausePresets": {
+          "type": "array",
+          "description": "%sqlite-viewer.config.foreignKeyClausePresets.description%",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "ON DELETE CASCADE",
+            "ON DELETE SET NULL",
+            "ON DELETE CASCADE ON UPDATE CASCADE",
+            "ON DELETE SET NULL ON UPDATE CASCADE",
+            "ON DELETE RESTRICT",
+            "ON UPDATE CASCADE",
+            "ON UPDATE SET NULL"
+          ],
+          "order": 11
+        },
+        "sqliteViewer.defaultValueExpressionPresets": {
+          "type": "object",
+          "description": "Custom default value expression presets for column creation. Key = label shown in dropdown, Value = SQL expression",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "default": {
+            "Current timestamp": "CURRENT_TIMESTAMP",
+            "Current date": "CURRENT_DATE",
+            "Unix timestamp": "strftime('%s', 'now')",
+            "UUID (random)": "lower(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-' || '4' || substr(hex(randomblob(2)), 2) || '-' || substr('89ab', 1 + (abs(random()) % 4), 1) || substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6)))",
+            "Random positive integer": "abs(random())",
+            "Random BLOB (16 bytes)": "randomblob(16)",
+            "Empty JSONB object": "jsonb('{}')"
+          },
+          "order": 12
         }
       }
     },
@@ -158,15 +210,14 @@
   "scripts": {
     "clean": "rm -rf out && rm -rf sqlite-viewer-core/vscode/build",
     "vscode:prepublish": "npm run $([ -z \"$VSCODE_EXT_SKIP_BUILD\" ] && echo build || echo compile:bin)",
-    "compile:ext": "npm run compile:ext:cp & npm run compile:ext:js & wait",
-    "compile:ext:cp": "cp -r node_modules/@vscode/codicons node_modules/codicons",
+    "compile:ext": "npm run compile:ext:js",
     "compile:ext:js": "bun run scripts/esbuild.ts",
     "compile:app": "cd sqlite-viewer-core && npm run build-vscode",
     "compile:tjs": "cd sqlite-viewer-core && npm run build-tjs",
     "compile:bin": "npm run compile:tjs && bun run scripts/bin.ts",
     "compile": "$([ -n \"$DEV\" ] && npm run build:zig:bin || true) && npm run clean && npm run compile:bin && npm run compile:ext && npm run compile:app",
-    "build:zig:bin": "cd zig-build-txiki && zig@14 build --summary all",
-    "build:zig:matrix": "cd zig-build-txiki && zig@14 build --summary all -Dno-wasm -Doptimize=ReleaseSmall -Dmatrix",
+    "build:zig:bin": "cd zig-build-txiki && zig build --summary all",
+    "build:zig:matrix": "cd zig-build-txiki && zig build --summary all -Dno-wasm -Doptimize=ReleaseSmall -Dmatrix",
     "build:zig": "npm run build:zig:bin && npm run build:zig:matrix",
     "build": "npm run build:zig && npm run compile",
     "postinstall": "npm run build:zig && bun run scripts/copy-file-type-supported.ts",
@@ -185,27 +236,32 @@
   },
   "devDependencies": {
     "@types/vscode": "=1.83.1",
-    "bun-types": "^1.3.4",
-    "esbuild": "^0.27.1",
+    "bun-types": "^1.3.8",
+    "esbuild": "^0.27.2",
     "esbuild-plugin-alias": "^0.2.1",
     "esbuild-plugin-polyfill-node": "^0.3.0",
-    "ovsx": "^0.10.7",
+    "ovsx": "^0.10.8",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@scure/base": "^2.0.0",
+    "@std/encoding": "npm:@jsr/std__encoding",
     "@vscode/codicons": "^0.0.44",
-    "@vscode/extension-telemetry": "^1.2.0",
+    "codicons": "npm:@vscode/codicons@^0.0.44",
+    "@vscode/extension-telemetry": "^1.4.0",
     "@vscode/vsce": "^3.7.1",
-    "@vscode/vscode-languagedetection": "^1.0.22",
+    "@vscode/vscode-languagedetection": "^1.0.23",
     "@worker-tools/typed-event-target": "^1.0.0",
     "@workers/typed-event-target": "npm:@jsr/workers__typed-event-target@^1.0.0",
     "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.5.6",
-    "file-type": "^21.1.1",
+    "file-type": "^21.3.0",
     "jose": "=5.10.0",
     "json-merge-patch": "^1.0.2",
     "json5": "^2.2.3",
-    "sql-formatter": "^15.6.11",
+    "sql-formatter": "^15.7.0",
     "whatwg-stream-to-async-iter": "^0.6.2"
+  },
+  "overrides": {
+    "js-yaml": "4.1.1"
   }
 }

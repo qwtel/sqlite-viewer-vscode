@@ -1,4 +1,57 @@
 # CHANGELOG
+## v26.2.0 (Pre-Release)
+
+### [PRO] Table and Column Creation
+You can add columns to existing tables, drop columns or entire tables, and edit column definitions when the table is empty.
+
+- **Add column**: New columns can be added to any table from the column header. Tables that already contain rows use `ALTER TABLE ... ADD COLUMN`; empty tables may be recreated to apply the change.
+- **Drop column**: Columns can be removed from a table via the trash icon next to each column in the table info panel. Uses `ALTER TABLE ... DROP COLUMN`.
+- **Drop table**: An entire table can be dropped from the database via the "Drop table" action in the table info panel.
+- **Edit column (empty tables)**: For tables with no rows, you can edit column name, type, and constraints (NOT NULL, UNIQUE, default, check, foreign key, etc.) and reorder columns. The table is recreated so all schema changes are applied.
+
+### [PRO] Antifreeze Update
+Long-running SQLite operations are now automatically cancelled when you navigate to a different view, so the UI stays responsive.
+
+### Improved Keyboard Selection
+You can now select multiple rows using the keyboard by holding down shift while moving up/down using arrow keys. 
+
+Pressing Enter while a cell is selected will trigger the same action as double clicking it.
+Pressing Escape will unselect all rows.
+- [PRO] Pressing Backspace while a data cell is focused sets that cell to NULL via the same update path as the cell editor. Pressing Delete (or Cmd/Ctrl+Backspace) deletes the selected row(s).
+
+### Row Selection Undo History
+Row selection now has a undo history. You can now use standard keyboard shortcuts to revert to a previous row selection. This should be useful when accidentally deselecting. 
+
+In order to avoid clogging up VS Code's undo history, the selection history is kept separate and cleared when a real document edit takes place.
+
+### [PRO] Text Input Undo History
+Text fields in the app now have their own local undo and redo history. This means you can use standard shortcuts to undo or redo changes made while editing an input, independent of the database history.
+
+### Additions
+- [PRO] When deleting row(s) fails due to a foreign key constraint, the error toast now offers a button to enable defer foreign keys and retry the delete.
+- Now showing row numbers for each table in the table explorer
+- [PRO] Added dedicated UI for inputting booleans
+- [PRO] Added filter search box to the pragma editor
+- [PRO] Can now insert empty rows iff all columns have default values or are nullable
+- [PRO] Can now open empty files with the viewer and they will be initialized as a SQLite databases 
+
+### Changes
+- Any column type with "bool" in the name will now be interpreted as boolean
+- [PRO] Database transaction now is closed (via `COMMIT` or `ROLLBACK`) when you return to the last saved state via undo/redo
+
+### Fixes
+- When resizing columns, shrinking them no longer shrinks viewport along with it
+- Fixed tabbing to 'Copy to Clipboard' button in text areas
+- Fixed dropped tables showing up in the sidebar even after refresh
+- [PRO] Fixed an issue related to undoing row inserts in tables that have Row IDs.
+- [PRO] Fixed incorrect bindings in undo statements when deleting rows containing null values
+- [PRO] Fixed issues relating to undo/redo after file save
+
+### Theming
+- Fixed selected row background color missing in certain themes like Catpuccin
+- Using `focusBorder` as a fallback focus outline for themes that don't define `list.focusOutline` (e.g. Catpuccin)
+- Fixed row selection borders missing in high contrast themes
+
 ## v25.12.3 (Pre-Release)
 _Released on December 13, 2025_
 

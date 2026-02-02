@@ -35,3 +35,45 @@ hixfUOoecMEXQ2c2wy95T/JgmiRh9MxPTdRwoSO1Ub1nVFII2s1d8E2RCw==
 `.trim();
 
 export const CopilotChatId = 'github.copilot-chat';
+
+// Default presets for column creation
+export const DefaultCheckConstraintPresets: Record<string, string> = {
+  "Valid datetime": "datetime(\"{column}\") IS NOT NULL",
+  "Valid date": "date(\"{column}\") IS NOT NULL",
+  "Valid JSON": "json_valid(\"{column}\")",
+  "Valid JSONB": "json_valid(\"{column}\", 0x04)",
+  "Positive number": "\"{column}\" > 0",
+  "Max length (255)": "length(\"{column}\") <= 255",
+  "Email (simple)": "\"{column}\" LIKE '%@%.%'",
+  "Enum/In list": "\"{column}\" IN ('value1', 'value2')"
+};
+
+export const DefaultForeignKeyClausePresets: string[] = [
+  "ON DELETE CASCADE",
+  "ON DELETE SET NULL",
+  "ON DELETE CASCADE ON UPDATE CASCADE",
+  "ON DELETE SET NULL ON UPDATE CASCADE",
+  "ON DELETE RESTRICT",
+  "ON UPDATE CASCADE",
+  "ON UPDATE SET NULL"
+];
+
+export const DefaultValueExpressionPresets: Record<string, string> = {
+  "Current timestamp": "CURRENT_TIMESTAMP",
+  "Current date": "CURRENT_DATE",
+  "Unix timestamp": "strftime('%s', 'now')",
+  "UUID (random)": "lower(hex(randomblob(4)) || '-' || hex(randomblob(2)) || '-' || '4' || substr(hex(randomblob(2)), 2) || '-' || substr('89ab', 1 + (abs(random()) % 4), 1) || substr(hex(randomblob(2)), 2) || '-' || hex(randomblob(6)))",
+  "Random positive integer": "abs(random())",
+  "Random BLOB (16 bytes)": "randomblob(16)",
+  "Empty JSONB object": "jsonb('{}')",
+};
+
+// Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
+// export interface CustomColumnType {
+//   value: string;
+//   uiAffinity: string;
+//   codicon: string;
+// }
+
+// Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
+// export const DefaultCustomColumnTypes: CustomColumnType[] = [];

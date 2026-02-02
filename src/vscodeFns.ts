@@ -3,6 +3,8 @@ import * as path from 'path';
 
 import { SQLiteEditorProvider, SQLiteReadonlyEditorProvider } from './sqliteEditorProvider';
 import { ExtensionId, FullExtensionId, SidebarLeft, SidebarRight, UriScheme } from './constants';
+// Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
+// import { ..., type CustomColumnType } from './constants';
 import { IsCursorIDE } from './util';
 
 import type { SQLiteDocument, SQLiteEdit } from './sqliteDocument';
@@ -15,7 +17,7 @@ import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { determineColumnTypes, SqlBuffer, sqlBufferToUint8Array, UITypeAffinity } from '../sqlite-viewer-core/src/utils';
 
 import { determineCellExtension } from '../sqlite-viewer-core/pro/src/uriHandler';
-import { confirmLargeChanges } from '../sqlite-viewer-core/pro/src/undoHistory';
+import { confirmLargeChanges, confirmAlterTable, confirmDropTable } from '../sqlite-viewer-core/pro/src/undoHistory';
 
 type Uint8ArrayLike = { buffer: ArrayBufferLike, byteOffset: number, byteLength: number };
 
@@ -130,23 +132,43 @@ export class VscodeFns implements ToastService {
     if (document.uri.scheme !== 'untitled') {
       let cellParts;
 
-      if (rowId === '__create__.sql') {
-        cellParts = [params.table, params.name, '__create__.sql'];
+      if (rowId === '__create-table__') {
+        cellParts = [params.table, params.name, 'create-table.sql'];
       } else {
         const extname = await determineCellExtension(colTypes, value, type);
         const cellFilename = colName + extname;
-        
+
         // Get the range folder info for this ROWID
         const rangeInfo = await document.dbRemote.getRangeFolderForRowId(params, rowId, rowCount ?? 0);
         if (rangeInfo.needsRangeFolder) {
-          cellParts = [params.table, params.name, rangeInfo.rangeFolder!, String(rowId), cellFilename];
+          // NEW: Add /r/ prefix before range folder
+          cellParts = [params.table, params.name, 'r', rangeInfo.rangeFolder!, String(rowId), cellFilename];
         } else {
-          cellParts = [params.table, params.name, String(rowId), cellFilename];
+          // NEW: Add /r/ prefix before rowId
+          cellParts = [params.table, params.name, 'r', String(rowId), cellFilename];
         }
       }
       
       const encodedParts = cellParts.map(x => x.replaceAll(path.sep, encodeURIComponent(path.sep)));
       const cellUri = vsc.Uri.joinPath(vsc.Uri.parse(await document.key), ...encodedParts).with({ scheme: UriScheme, query: `webview-id=${webviewId}` })
+
+      await vsc.commands.executeCommand('vscode.open', cellUri, vsc.ViewColumn.Two);
+    }
+  }
+
+  async openColumnFieldEditor(params: DbParams, colName: string, fieldName: string, colTypes: Partial<ReturnType<typeof determineColumnTypes>> = {}, {
+    webviewId,
+    isSQL,
+  }: {
+    webviewId?: string,
+    isSQL?: boolean,
+  } = {}) {
+    const { document } = this;
+    if (document.uri.scheme !== 'untitled') {
+      const extname = isSQL ? '.sql' : await determineCellExtension(colTypes);
+      const cellParts = [params.table, params.name, 'c', colName, fieldName + extname];
+      const encodedParts = cellParts.map(x => x.replaceAll(path.sep, encodeURIComponent(path.sep)));
+      const cellUri = vsc.Uri.joinPath(vsc.Uri.parse(await document.key), ...encodedParts).with({ scheme: UriScheme, query: `webview-id=${webviewId}` });
 
       await vsc.commands.executeCommand('vscode.open', cellUri, vsc.ViewColumn.Two);
     }
@@ -165,6 +187,14 @@ export class VscodeFns implements ToastService {
 
   confirmLargeChanges() {
     return confirmLargeChanges();
+  }
+
+  confirmAlterTable() {
+    return confirmAlterTable();
+  }
+
+  confirmDropTable() {
+    return confirmDropTable();
   }
 
   async confirmLargeSelection(openExportDialog: () => void) {
@@ -190,4 +220,33 @@ export class VscodeFns implements ToastService {
     const uri = vsc.Uri.parse(uriString);
     return await vsc.workspace.fs.readFile(uri);
   }
+
+  async openSettings(query: string) {
+    await vsc.commands.executeCommand('workbench.action.openSettings', query);
+  }
+
+  async executeUndoCommand(n = 1) {
+    for (let i = 0; i < n; i++) await vsc.commands.executeCommand('undo');
+  }
+
+  async executeRedoCommand(n = 1) {
+    for (let i = 0; i < n; i++) await vsc.commands.executeCommand('redo');
+  }
+
+  updateCheckConstraintPresets(presets: Record<string, string>) {
+    // Placeholder, in case we ever need to update the presets from within the webview
+  }
+
+  updateForeignKeyClausePresets(presets: Record<string, string>) {
+    // Placeholder, in case we ever need to update the presets from within the webview
+  }
+
+  updateDefaultValueExpressionPresets(presets: Record<string, string>) {
+    // Placeholder, in case we ever need to update the presets from within the webview
+  }
+
+  // Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
+  // updateCustomColumnTypes(types: CustomColumnType[]) {
+  //   // Placeholder, in case we ever need to update the column types from within the webview
+  // }
 }
