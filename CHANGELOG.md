@@ -7,7 +7,7 @@ You can add columns to existing tables, drop columns or entire tables, and edit 
 - **Add column**: New columns can be added to any table from the column header. Tables that already contain rows use `ALTER TABLE ... ADD COLUMN`; empty tables may be recreated to apply the change.
 - **Drop column**: Columns can be removed from a table via the trash icon next to each column in the table info panel. Uses `ALTER TABLE ... DROP COLUMN`.
 - **Drop table**: An entire table can be dropped from the database via the "Drop table" action in the table info panel.
-- **Edit column (empty tables)**: For tables with no rows, you can edit column name, type, and constraints (NOT NULL, UNIQUE, default, check, foreign key, etc.) and reorder columns. The table is recreated so all schema changes are applied.
+- **Edit column (empty tables)**: For tables with no rows, you can edit column name, type, and constraints (`NOT NULL`, `UNIQUE`, defaults, check, foreign key, etc.) and reorder columns. The table is recreated so all schema changes are applied.
 
 ### [PRO] Antifreeze Update
 Long-running SQLite operations are now automatically cancelled when you navigate to a different view, so the UI stays responsive.
@@ -17,7 +17,7 @@ You can now select multiple rows using the keyboard by holding down shift while 
 
 Pressing Enter while a cell is selected will trigger the same action as double clicking it.
 Pressing Escape will unselect all rows.
-- [PRO] Pressing Backspace while a data cell is focused sets that cell to NULL via the same update path as the cell editor. Pressing Delete (or Cmd/Ctrl+Backspace) deletes the selected row(s).
+- [PRO] Pressing Backspace while a data cell is focused sets that cell to `NULL` via the same update path as the cell editor. Pressing Delete (or Cmd/Ctrl+Backspace) deletes the selected row(s).
 
 ### Row Selection Undo History
 Row selection now has a undo history. You can now use standard keyboard shortcuts to revert to a previous row selection. This should be useful when accidentally deselecting. 
@@ -46,6 +46,7 @@ Text fields in the app now have their own local undo and redo history. This mean
 - [PRO] Fixed an issue related to undoing row inserts in tables that have Row IDs.
 - [PRO] Fixed incorrect bindings in undo statements when deleting rows containing null values
 - [PRO] Fixed issues relating to undo/redo after file save
+- [PRO] Fixed an issue in instant commit mode that occurred when trying to redo operations that can't be undone
 
 ### Theming
 - Fixed selected row background color missing in certain themes like Catpuccin
