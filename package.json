@@ -95,7 +95,8 @@
           "maximum": 4000,
           "exclusiveMinimum": false,
           "default": 200,
-          "markdownDescription": "%sqlite-viewer.config.maxFileSize.markdownDescription%"
+          "markdownDescription": "%sqlite-viewer.config.maxFileSize.markdownDescription%",
+          "order": 9
         },
         "sqliteViewer.instantCommit": {
           "type": "string",
@@ -110,7 +111,8 @@
             "%sqlite-viewer.config.instantCommit.always%"
           ],
           "default": "remote-only",
-          "markdownDescription": "%sqlite-viewer.config.instantCommit.markdownDescription%"
+          "markdownDescription": "%sqlite-viewer.config.instantCommit.markdownDescription%",
+          "order": 1
         },
         "sqliteViewer.doubleClickBehavior": {
           "type": "string",
@@ -123,7 +125,8 @@
             "%sqlite-viewer.config.doubleClickBehavior.vscode%"
           ],
           "default": "modal",
-          "markdownDescription": "%sqlite-viewer.config.doubleClickBehavior.markdownDescription%"
+          "markdownDescription": "%sqlite-viewer.config.doubleClickBehavior.markdownDescription%",
+          "order": 2
         },
         "sqliteViewer.checkConstraintPresets": {
           "type": "object",

@@ -1,7 +1,21 @@
 # CHANGELOG
+## v26.2.1 (Pre-Release)
+
+### Additions
+- [PRO] When adding columns to an empty table that references another table's composite primary key, the table now uses a single table-level `FOREIGN KEY` constraint instead of inline `REFERENCES` on each column
+
+### Fixes
+- Add Table, Add Column, Drop Table, and drop column actions are now disabled when the database is read-only instead of throwing an error
+- 'Without Row ID' and 'Strict' options in the table info panel are now disabled when using the Free Version
+- [PRO] Fixes a bug when adding a `PRIMARY KEY` column without specifying a column type 
+- [PRO] Dropping a column that is part of a composite primary key no longer fails
+- [PRO] Fixed renaming of columns that are part of a composite primary key
+- [PRO] Fixed reordering columns when renaming in an empty table
+- [PRO] Fixed JSONB default values when adding or editing columns
+- [PRO] Fixed over-escaping of quotes in generated SQL in certain instances
+
 ## v26.2.0 (Pre-Release)
 _Released on February 3, 2026_
-
 
 ### [PRO] Table and Column Creation
 You can add columns to existing tables, drop columns or entire tables, and edit column definitions when the table is empty.
