@@ -40,6 +40,7 @@ Text fields in the app now have their own local undo and redo history. This mean
 - [PRO] Database transaction now is closed (via `COMMIT` or `ROLLBACK`) when you return to the last saved state via undo/redo
 
 ### Fixes
+- Fixed an issue that prevented dialog modals from opening after clicking an external link
 - When resizing columns, shrinking them no longer shrinks viewport along with it
 - Fixed tabbing to 'Copy to Clipboard' button in text areas
 - Fixed dropped tables showing up in the sidebar even after refresh
