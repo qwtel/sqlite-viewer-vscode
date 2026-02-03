@@ -1,5 +1,7 @@
 # CHANGELOG
 ## v26.2.0 (Pre-Release)
+_Released on February 3, 2026_
+
 
 ### [PRO] Table and Column Creation
 You can add columns to existing tables, drop columns or entire tables, and edit column definitions when the table is empty.
