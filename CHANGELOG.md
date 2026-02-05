@@ -1,5 +1,7 @@
 # CHANGELOG
 ## v26.2.1 (Pre-Release)
+_Released on February 5, 2026_
+
 
 ### Additions
 - [PRO] When adding columns to an empty table that references another table's composite primary key, the table now uses a single table-level `FOREIGN KEY` constraint instead of inline `REFERENCES` on each column
