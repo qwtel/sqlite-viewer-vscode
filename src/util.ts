@@ -4,6 +4,7 @@ import { Disposable } from './dispose';
 import { ReadableStream, WritableStream } from './o/stream/web';
 import { crypto } from './o/crypto';
 import { Title } from './constants';
+import { getUriPartsFromString } from '../sqlite-viewer-core/src/utils';
 
 // A bunch of tests to figure out where we're running. Some more reliable than others.
 export const IsVSCode = vsc.env.uriScheme.includes("vscode");
@@ -203,15 +204,8 @@ export const cspUtil = {
   }
 } as const;
 
-const PathRegExp = /((?<dirname>.*)\/)?(?<filename>(?<basename>[^/]*?)(?<extname>\.[^/.]+)?)$/
-export function getUriParts(uri: string|vsc.Uri) {
-  const { dirname = '', filename = '', basename = '', extname = '' } = uri.toString().match(PathRegExp)?.groups ?? {}
-  return { 
-    dirname: decodeURIComponent(dirname), 
-    filename: decodeURIComponent(filename), 
-    basename: decodeURIComponent(basename), 
-    extname: decodeURIComponent(extname),
-  };
+export function getUriParts(uri: string | vsc.Uri) {
+  return getUriPartsFromString(uri.toString());
 }
 
 export const isAbortError = (e: unknown): e is Error =>
