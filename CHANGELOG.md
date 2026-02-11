@@ -1,7 +1,24 @@
 # CHANGELOG
+## v26.2.2 (Pre-Release)
+
+### [PRO] Inline Foreign Keys in Row Detail
+In the row detail modal (detail view), foreign key columns can now show the referenced row inline. You can expand or collapse each FK to see and edit the linked row without leaving the modal.
+
+- **Nested references** are supported: expanding an FK can reveal further FKs in that row, each with its own expand/collapse.
+- **Editing** works inline: you can change values in the referenced row and save; updates apply to the correct table.
+
+### Changes
+- [PRO] Input field placeholders for columns with default values now display the default value or expression instead of `NULL`
+- [PRO] Input field placeholders for generated columns now display the generation expression
+- [PRO] Input fields for generated columns are now disabled
+- [PRO] The file extension for hex files was renamed from `.hexblob` to `.hexdump`
+
+### Fixes
+- The right sidebar no longer loses its scroll position when it is (auto-)closed.
+- [PRO] Various invalid foreign key/autoincrement/generated statements can no longer be created via the 'Add Column' UI
+
 ## v26.2.1 (Pre-Release)
 _Released on February 5, 2026_
-
 
 ### Additions
 - [PRO] When adding columns to an empty table that references another table's composite primary key, the table now uses a single table-level `FOREIGN KEY` constraint instead of inline `REFERENCES` on each column
