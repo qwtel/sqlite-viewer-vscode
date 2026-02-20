@@ -239,11 +239,11 @@
   },
   "devDependencies": {
     "@types/vscode": "=1.83.1",
-    "bun-types": "^1.3.8",
-    "esbuild": "^0.27.2",
+    "bun-types": "^1.3.9",
+    "esbuild": "^0.27.3",
     "esbuild-plugin-alias": "^0.2.1",
     "esbuild-plugin-polyfill-node": "^0.3.0",
-    "ovsx": "^0.10.8",
+    "ovsx": "^0.10.9",
     "typescript": "^5.9.3"
   },
   "dependencies": {
@@ -251,7 +251,7 @@
     "@std/encoding": "npm:@jsr/std__encoding",
     "@vscode/codicons": "^0.0.44",
     "codicons": "npm:@vscode/codicons@^0.0.44",
-    "@vscode/extension-telemetry": "^1.4.0",
+    "@vscode/extension-telemetry": "^1.5.0",
     "@vscode/vsce": "^3.7.1",
     "@vscode/vscode-languagedetection": "^1.0.23",
     "@worker-tools/typed-event-target": "^1.0.0",
@@ -261,7 +261,7 @@
     "jose": "=5.10.0",
     "json-merge-patch": "^1.0.2",
     "json5": "^2.2.3",
-    "sql-formatter": "^15.7.0",
+    "sql-formatter": "^15.7.2",
     "whatwg-stream-to-async-iter": "^0.6.2"
   },
   "overrides": {
