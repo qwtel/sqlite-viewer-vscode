@@ -7,7 +7,14 @@ In the row detail modal (detail view), foreign key columns can now show the refe
 - **Nested references** are supported: expanding an FK can reveal further FKs in that row, each with its own expand/collapse.
 - **Editing** works inline: you can change values in the referenced row and save; updates apply to the correct table.
 
+### Additions
+- Primary key tooltips now list every table that references this column via foreign key
+- The left sidebar now supports the same keyboard selection behavior as the main table
+- Double-clicking a table or view in the left sidebar now expands or collapses it
+
 ### Changes
+- Changing focus in the main view no longer scrolls the corresponding value into view in the sidebar
+- Fieldsets in the sidebar no longer display a visual active state
 - [PRO] Input field placeholders for columns with default values now display the default value or expression instead of `NULL`
 - [PRO] Input field placeholders for generated columns now display the generation expression
 - [PRO] Input fields for generated columns are now disabled
@@ -15,6 +22,8 @@ In the row detail modal (detail view), foreign key columns can now show the refe
 
 ### Fixes
 - The right sidebar no longer loses its scroll position when it is (auto-)closed.
+- No accept-drop state when dragging a column over another table (sidebar or header).
+- [PRO] Add Column now accepts column types that contain spaces (e.g. `TEXT MARKDOWN`).
 - [PRO] Various invalid foreign key/autoincrement/generated statements can no longer be created via the 'Add Column' UI
 
 ## v26.2.1 (Pre-Release)
@@ -24,8 +33,8 @@ _Released on February 5, 2026_
 - [PRO] When adding columns to an empty table that references another table's composite primary key, the table now uses a single table-level `FOREIGN KEY` constraint instead of inline `REFERENCES` on each column
 
 ### Fixes
-- Add Table, Add Column, Drop Table, and drop column actions are now disabled when the database is read-only instead of throwing an error
 - 'Without Row ID' and 'Strict' options in the table info panel are now disabled when using the Free Version
+- [PRO] Add Table, Add Column, Drop Table, and drop column actions are now disabled when the database is read-only instead of throwing an error
 - [PRO] Fixes a bug when adding a `PRIMARY KEY` column without specifying a column type 
 - [PRO] Dropping a column that is part of a composite primary key no longer fails
 - [PRO] Fixed renaming of columns that are part of a composite primary key
@@ -45,7 +54,7 @@ You can add columns to existing tables, drop columns or entire tables, and edit 
 - **Edit column (empty tables)**: For tables with no rows, you can edit column name, type, and constraints (`NOT NULL`, `UNIQUE`, defaults, check, foreign key, etc.) and reorder columns. The table is recreated so all schema changes are applied.
 
 ### [PRO] Antifreeze Update
-Long-running SQLite operations are now automatically cancelled when you navigate to a different view, so the UI stays responsive.
+Long-running SQLite operations are now automatically cancelled when you navigate to a different view, so the UI stays responsive. This frequently happened when sorting or filtering large tables.
 
 ### Improved Keyboard Selection
 You can now select multiple rows using the keyboard by holding down shift while moving up/down using arrow keys. 
@@ -63,8 +72,8 @@ In order to avoid clogging up VS Code's undo history, the selection history is k
 Text fields in the app now have their own local undo and redo history. This means you can use standard shortcuts to undo or redo changes made while editing an input, independent of the database history.
 
 ### Additions
-- [PRO] When deleting row(s) fails due to a foreign key constraint, the error toast now offers a button to enable defer foreign keys and retry the delete.
 - Now showing row numbers for each table in the table explorer
+- [PRO] When deleting row(s) fails due to a foreign key constraint, the error toast now offers a button to enable defer foreign keys and retry the delete.
 - [PRO] Added dedicated UI for inputting booleans
 - [PRO] Added filter search box to the pragma editor
 - [PRO] Can now insert empty rows iff all columns have default values or are nullable
