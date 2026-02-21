@@ -1,7 +1,9 @@
 # CHANGELOG
+## v26.2.3 (Pre-Release)
+Fixed an issue that caused visual artifacts in hover state on in some themes 
+
 ## v26.2.2 (Pre-Release)
 _Released on February 20, 2026_
-
 
 ### [PRO] Inline Foreign Keys in Row Detail
 In the row detail modal (detail view), foreign key columns can now show the referenced row inline. You can expand or collapse each FK to see and edit the linked row without leaving the modal.
