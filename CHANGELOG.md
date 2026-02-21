@@ -1,6 +1,7 @@
 # CHANGELOG
 ## v26.2.3 (Pre-Release)
-Fixed an issue that caused visual artifacts in hover state on in some themes 
+- Resolved visual artifacts that appeared during hover on fieldsets in certain themes
+- [PRO] The "Collapse All" button for inlined foreign keys now collapses every expanded level
 
 ## v26.2.2 (Pre-Release)
 _Released on February 20, 2026_

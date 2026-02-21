@@ -8,6 +8,7 @@
         "hexdump",
         "NOCASE",
         "randomblob",
+        "resourceurls",
         "RESTOREPOINT",
         "ROWID",
         "rownr",
