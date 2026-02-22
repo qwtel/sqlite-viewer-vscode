@@ -69,6 +69,8 @@ By installing or using the PRO version of the Extension, you acknowledge that yo
 ## Appendix: Third-Party Licenses
 This distribution also includes software licensed under the following terms:
 
+SQLite : [Public Domain](https://sqlite.org/copyright.html)
+
 `solid-js` : [MIT]
 > Copyright (c) 2016-2023 Ryan Carniato
 
@@ -106,21 +108,48 @@ This distribution also includes software licensed under the following terms:
 `comlink` : [Apache-2.0]
 > Copyright 2017 Google Inc.
 
-`wa-sqlite`: [MIT]
+`wa-sqlite` : [MIT]
 > Copyright (c) 2023 Roy T. Hashimoto
 
-`tabster`: [MIT]
+`tabster` : [MIT]
 > Copyright (c) Microsoft Corporation.
 
-`sql-formatter`: [MIT]
+`sql-formatter` : [MIT]
 > Copyright (c) 2016-2020 ZeroTurnaround LLC
 > Copyright (c) 2020-2021 George Leslie-Waksman and other contributors
 > Copyright (c) 2021-Present inferrinizzard and other contributors
 
-`txiki.js`: [MIT]
+`txiki.js` : [MIT]
 > Copyright (c) 2019-present Saúl Ibarra Corretgé <s@saghul.net>
 
-SQLite : [Public Domain](https://sqlite.org/copyright.html)
+`@vscode/extension-telemetry` : [MIT]
+> Copyright (c) Microsoft Corporation. 
+
+`@vscode/vscode-languagedetection` : [MIT]
+> Copyright (c) Microsoft Corporation. 
+
+`@scure/base` : [MIT]
+> Copyright (c) 2022 Paul Miller (https://paulmillr.com)
+
+`@std/bytes`, `@std/encoding` : [MIT]
+> Copyright 2018-2022 the Deno authors.
+
+`jose` : [MIT]
+> Copyright (c) 2018 Filip Skokan 
+
+`json-merge-patch` : [MIT]
+> Copyright (c) 2015 Pierre Inglebert 
+
+`json5` : [MIT]
+> Copyright (c) 2012-2018 Aseem Kishore, and [others].
+> 
+> [others]: https://github.com/json5/json5/contributors
+
+`immutable`: [MIT]
+> Copyright (c) 2014-present, Lee Byron and other contributors.
+
+`node-sql-parser`: [Apache-2.0]
+> Copyright {yyyy} {name of copyright owner}
 
 [MIT]: https://mit-license.org
 [Apache-2.0]: http://www.apache.org/licenses/LICENSE-2.0.html

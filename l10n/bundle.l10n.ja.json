@@ -124,6 +124,7 @@
   "Couldn't interpret as '{0}'": "「{0}」として解釈できませんでした",
   "Switch to formatted date": "フォーマットされた日付に切り替え",
   "Switch to raw date": "生の日付に切り替え",
+  "Omitted front matter": "フロントマターを省略",
   "Markdown preview failed": "Markdownプレビューに失敗しました",
   "Retry": "再試行",
   "Switch to plain text": "プレーンテキストに切り替え",

@@ -68,6 +68,26 @@ export const DefaultValueExpressionPresets: Record<string, string> = {
   "Empty JSONB object": "jsonb('{}')",
 };
 
+/** Default CSS rules for markdown preview (selector → declaration block). Rules using --x-* vars are fixed in the UI. */
+export const DefaultMarkdownPreviewStyles: Record<string, string> = {
+  "p": "margin:0.6em 0",
+  "h1,h2,h3,h4,h5,h6": "margin:0.9em 0 0.45em;line-height:1.25",
+  "h1": "font-size:1.25em",
+  "h2": "font-size:1.1em",
+  "h3": "font-size:1em",
+  "h4,h5,h6": "font-size:0.95em",
+  "ul,ol": "padding-left:1.5em;margin:0.6em 0",
+  "li": "margin:0.25em 0",
+  "blockquote": "margin:0.75em 0;padding:0.25em 0 0.25em 0.75em;opacity:0.9",
+  "hr": "border:0;margin:1em 0",
+  "table": "border-collapse:collapse;display:block;overflow:auto;scrollbar-width:thin",
+  "thead th,tbody th,tbody td": "padding:0.25em 0.5em;word-break:normal;overflow-wrap:normal;white-space:normal",
+  "code": "padding:0.1em 0.25em;border-radius:3px",
+  "pre": "overflow:auto;margin:0.6em 0;padding:0.6em;border-radius:4px;scrollbar-width:thin",
+  "pre code": "padding:0;background:none",
+  "img": "max-width:100%;height:auto",
+};
+
 // Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
 // export interface CustomColumnType {
 //   value: string;

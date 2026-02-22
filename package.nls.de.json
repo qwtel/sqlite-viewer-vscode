@@ -23,5 +23,7 @@
   "sqlite-viewer.config.customColumnTypes.uiAffinity.description": "UI-Affinität für spezielle Behandlung (bestimmt, welche UI-Steuerelemente angezeigt werden)",
   "sqlite-viewer.config.customColumnTypes.codicon.description": "Codicon-Klassenname (z. B. 'codicon-markdown', 'codicon-tag')",
   "sqlite-viewer.config.customColumnTypes.extname.description": "Dateiendung (z. B. '.md', '.txt')",
-  "sqlite-viewer.config.customColumnTypes.mimeType.description": "MIME-Typ (z. B. 'text/markdown', 'text/plain')"
+  "sqlite-viewer.config.customColumnTypes.mimeType.description": "MIME-Typ (z. B. 'text/markdown', 'text/plain')",
+  "sqlite-viewer.config.defaultValueExpressionPresets.description": "Benutzerdefinierte Standardwert-Ausdrucks-Vorlagen für die Spaltenerstellung. Schlüssel = im Dropdown angezeigte Bezeichnung, Wert = SQL-Ausdruck",
+  "sqlite-viewer.config.markdownPreviewStyles.description": "Benutzerdefiniertes CSS für die Markdown-Vorschau in Zelleninhalten. Schlüssel = CSS-Selektor, Wert = Deklarationsblock (z. B. \"margin:0.6em 0\")."
 }

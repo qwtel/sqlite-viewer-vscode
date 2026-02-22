@@ -245,6 +245,10 @@ export class VscodeFns implements ToastService {
     // Placeholder, in case we ever need to update the presets from within the webview
   }
 
+  updateMarkdownPreviewStyles(styles: Record<string, string>) {
+    // Placeholder; host pushes config updates to webview via WebviewFns
+  }
+
   // Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
   // updateCustomColumnTypes(types: CustomColumnType[]) {
   //   // Placeholder, in case we ever need to update the column types from within the webview

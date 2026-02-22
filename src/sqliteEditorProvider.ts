@@ -9,7 +9,7 @@ import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
 import { crypto } from './o/crypto';
-import { ConfigurationSection, CopilotChatId, ExtensionId, FistInstallMs, FullExtensionId, Ns, SidebarLeft, SidebarRight, DefaultCheckConstraintPresets, DefaultForeignKeyClausePresets, DefaultValueExpressionPresets } from './constants';
+import { ConfigurationSection, CopilotChatId, ExtensionId, FistInstallMs, FullExtensionId, Ns, SidebarLeft, SidebarRight, DefaultCheckConstraintPresets, DefaultForeignKeyClausePresets, DefaultValueExpressionPresets, DefaultMarkdownPreviewStyles } from './constants';
 // Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
 // import { ..., DefaultCustomColumnTypes } from './constants';
 import { Disposable } from './dispose';
@@ -41,6 +41,7 @@ export type VSCODE_ENV = {
   checkConstraintPresets?: string,
   foreignKeyClausePresets?: string,
   defaultValueExpressionPresets?: string,
+  markdownPreviewStyles?: string,
   // Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
   // customColumnTypes?: string,
 };
@@ -121,6 +122,13 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
         const presets = toPOJO(config.get('defaultValueExpressionPresets', DefaultValueExpressionPresets));
         for (const remote of this.#getWebviewRemotes(document.uri)) {
           remote.updateDefaultValueExpressionPresets(presets).catch(console.warn);
+        }
+      }
+
+      if (e.affectsConfiguration(`${ConfigurationSection}.markdownPreviewStyles`)) {
+        const styles = toPOJO(config.get('markdownPreviewStyles', DefaultMarkdownPreviewStyles));
+        for (const remote of this.#getWebviewRemotes(document.uri)) {
+          remote.updateMarkdownPreviewStyles(styles).catch(console.warn);
         }
       }
 
@@ -235,6 +243,7 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
     const checkConstraintPresets = config.get('checkConstraintPresets', DefaultCheckConstraintPresets);
     const foreignKeyClausePresets = config.get('foreignKeyClausePresets', DefaultForeignKeyClausePresets);
     const defaultValueExpressionPresets = config.get('defaultValueExpressionPresets', DefaultValueExpressionPresets);
+    const markdownPreviewStyles = config.get('markdownPreviewStyles', DefaultMarkdownPreviewStyles);
     // Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
     // const customColumnTypes = config.get('customColumnTypes', DefaultCustomColumnTypes);
     const vscodeEnv = {
@@ -257,6 +266,7 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
       checkConstraintPresets: doTry(() => base64.encode(v8.serialize(toPOJO(checkConstraintPresets)))),
       foreignKeyClausePresets: doTry(() => base64.encode(v8.serialize(toPOJO(foreignKeyClausePresets)))),
       defaultValueExpressionPresets: doTry(() => base64.encode(v8.serialize(toPOJO(defaultValueExpressionPresets)))),
+      markdownPreviewStyles: doTry(() => base64.encode(v8.serialize(toPOJO(markdownPreviewStyles)))),
       // Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
       // customColumnTypes: doTry(() => base64.encode(v8.serialize(toPOJO(customColumnTypes)))),
     } satisfies VSCODE_ENV;

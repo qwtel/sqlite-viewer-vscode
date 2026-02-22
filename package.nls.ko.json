@@ -23,5 +23,7 @@
   "sqlite-viewer.config.customColumnTypes.uiAffinity.description": "특별 처리용 UI 선호도(표시할 UI 컨트롤 결정)",
   "sqlite-viewer.config.customColumnTypes.codicon.description": "Codicon 클래스 이름(예: 'codicon-markdown', 'codicon-tag')",
   "sqlite-viewer.config.customColumnTypes.extname.description": "파일 확장자(예: '.md', '.txt')",
-  "sqlite-viewer.config.customColumnTypes.mimeType.description": "MIME 유형(예: 'text/markdown', 'text/plain')"
+  "sqlite-viewer.config.customColumnTypes.mimeType.description": "MIME 유형(예: 'text/markdown', 'text/plain')",
+  "sqlite-viewer.config.defaultValueExpressionPresets.description": "열 생성용 사용자 지정 기본값 식 프리셋. 키 = 드롭다운에 표시되는 레이블, 값 = SQL 식",
+  "sqlite-viewer.config.markdownPreviewStyles.description": "셀 내용의 Markdown 미리보기용 사용자 지정 CSS. 키 = CSS 선택자, 값 = 선언 블록(예: \"margin:0.6em 0\")."
 }

@@ -124,6 +124,7 @@
   "Couldn't interpret as '{0}'": "Não foi possível interpretar como '{0}'",
   "Switch to formatted date": "Alternar para data formatada",
   "Switch to raw date": "Alternar para data bruta",
+  "Omitted front matter": "Front matter omitido",
   "Markdown preview failed": "Falha na visualização de Markdown",
   "Retry": "Tentar novamente",
   "Switch to plain text": "Alternar para texto sem formatação",

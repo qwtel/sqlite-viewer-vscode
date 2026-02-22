@@ -124,6 +124,7 @@
   "Couldn't interpret as '{0}'": "({0})으로 해석할 수 없습니다",
   "Switch to formatted date": "형식화된 날짜로 전환",
   "Switch to raw date": "원시 날짜로 전환",
+  "Omitted front matter": "프론트 매터 생략됨",
   "Markdown preview failed": "Markdown 미리보기에 실패했습니다",
   "Retry": "재시도",
   "Switch to plain text": "일반 텍스트로 전환",

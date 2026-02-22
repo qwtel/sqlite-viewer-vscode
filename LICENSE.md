@@ -134,10 +134,6 @@ SQLite : [Public Domain](https://sqlite.org/copyright.html)
 > 
 > [others]: https://github.com/json5/json5/contributors
 
-`gray-matter-es` : [MIT]
-> Copyright (c) 2014-present, Jon Schlinkert.
-> Copyright (c) 2026 ryoppippi
-
 `immutable`: [MIT]
 > Copyright (c) 2014-present, Lee Byron and other contributors.
 

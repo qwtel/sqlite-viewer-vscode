@@ -23,5 +23,7 @@
   "sqlite-viewer.config.customColumnTypes.uiAffinity.description": "特別な処理用のUIアフィニティ（表示するUIコントロールを決定）",
   "sqlite-viewer.config.customColumnTypes.codicon.description": "Codiconクラス名（例: 'codicon-markdown', 'codicon-tag'）",
   "sqlite-viewer.config.customColumnTypes.extname.description": "ファイル拡張子（例: '.md', '.txt'）",
-  "sqlite-viewer.config.customColumnTypes.mimeType.description": "MIMEタイプ（例: 'text/markdown', 'text/plain'）"
+  "sqlite-viewer.config.customColumnTypes.mimeType.description": "MIMEタイプ（例: 'text/markdown', 'text/plain'）",
+  "sqlite-viewer.config.defaultValueExpressionPresets.description": "列作成用のカスタムデフォルト値式プリセット。キー＝ドロップダウンに表示するラベル、値＝SQL式",
+  "sqlite-viewer.config.markdownPreviewStyles.description": "セル内容のMarkdownプレビュー用カスタムCSS。キー＝CSSセレクター、値＝宣言ブロック（例: \"margin:0.6em 0\"）。"
 }
