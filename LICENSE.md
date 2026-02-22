@@ -140,6 +140,13 @@ SQLite : [Public Domain](https://sqlite.org/copyright.html)
 `node-sql-parser`: [Apache-2.0]
 > Copyright {yyyy} {name of copyright owner}
 
+`dompurify` : [Apache-2.0]
+> Copyright 2025 Dr.-Ing. Mario Heiderich, Cure53
+
+`marked` : [MIT]
+> Copyright (c) 2018+, MarkedJS (https://github.com/markedjs/)
+> Copyright (c) 2011-2018, Christopher Jeffrey (https://github.com/chjj/)
+
 [MIT]: https://mit-license.org
 [Apache-2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
 [BSD-3-Clause]: https://choosealicense.com/licenses/bsd-3-clause/
