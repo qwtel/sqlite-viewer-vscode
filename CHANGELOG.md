@@ -6,16 +6,20 @@ Columns that store markdown can now be viewed with a rendered preview in the row
 
 When you open a cell in a markdown column in VS Code, the file opens with a `.md` extension by default, so the editor uses markdown highlighting and tooling without relying on language detection.
 
+### Additions
+- [PRO] Backspace now sets the focused column to NULL for all selected rows
+
 ### Changes
 - Resized textarea heights are now remembered for the duration of the session
 - Opening a DB now selects the first table (not the first item, which could be a view)
-- Pragma Editor Optimize action now defaults to "Dry Run"
+- [PRO] Pragma Editor Optimize action now defaults to "Dry Run"
 
 ### Fixes
+- [PRO] Batch edit in row detail now updates all selected rows correctly
 - [PRO] Fixed an issue where editing a cell via "Open in VS Code" could leave the selection stuck on "No row selected"
 - Ctrl+A (Cmd+A) in sidebar inputs selects all text in that input only
 - View row counts in the explorer show "∞" ("N/A") for unopened views instead of 0
-- Deprecated pragmas are no longer shown in the Pragma Editor
+- [PRO] Deprecated pragmas are no longer shown in the Pragma Editor
 
 ## v26.2.3 (Pre-Release)
 _Released on February 21, 2026_
