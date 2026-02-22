@@ -1,6 +1,6 @@
 {
   "sqlite-viewer.customEditor.option.displayName": "SQLite Viewer",
-  "sqlite-viewer.customEditor.view.displayName": "SQLite Viewer (autodetectado)",
+  "sqlite-viewer.customEditor.view.displayName": "SQLite Viewer (detección automática)",
   "sqlite-viewer.customEditor.readonly.displayName": "SQLite Viewer (solo lectura)",
   "sqlite-viewer.customEditor.wasm.displayName": "SQLite Viewer (solo lectura, en memoria)",
   "sqlite-viewer.config.maxFileSize.markdownDescription": "El tamaño máximo de archivo en MB que la extensión intentará cargar. Establezca en 0 para desactivar el límite. El límite interno es de 4GB, pero los límites de la plataforma pueden aplicarse antes.\n\n__Advertencia__: Abrir archivos grandes puede causar un rendimiento deficiente, bloqueos y presión de memoria en todo el sistema.\n\n[Actualizar a PRO](https://vscode.sqliteviewer.app) para eliminar todas las restricciones de tamaño y desbloquear funciones adicionales.",

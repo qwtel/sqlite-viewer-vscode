@@ -1,4 +1,22 @@
 # CHANGELOG
+## v26.2.4 (Pre-Release)
+
+### [PRO] Markdown Preview
+Columns that store markdown can now be viewed with a rendered preview in the row detail modal. A switch lets you toggle between plain text and the rendered view; You can treat any `TEXT` column as markdown by cycling its type in the column header (same gesture as for date/datetime). Declared types such as `TEXT MARKDOWN` or `MDTEXT` are recognized by default.
+
+When you open a cell in a markdown column in VS Code, the file opens with a `.md` extension by default, so the editor uses markdown highlighting and tooling without relying on language detection.
+
+### Changes
+- Resized textarea heights are now remembered for the duration of the session
+- Opening a DB now selects the first table (not the first item, which could be a view)
+- Pragma Editor Optimize action now defaults to "Dry Run"
+
+### Fixes
+- [PRO] Fixed an issue where editing a cell via "Open in VS Code" could leave the selection stuck on "No row selected"
+- Ctrl+A (Cmd+A) in sidebar inputs selects all text in that input only
+- View row counts in the explorer show "∞" ("N/A") for unopened views instead of 0
+- Deprecated pragmas are no longer shown in the Pragma Editor
+
 ## v26.2.3 (Pre-Release)
 _Released on February 21, 2026_
 
