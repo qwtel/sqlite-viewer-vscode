@@ -1,5 +1,7 @@
 # CHANGELOG
 ## v26.2.4 (Pre-Release)
+_Released on February 23, 2026_
+
 
 ### [PRO] Markdown Preview
 Columns that store markdown can now be viewed with a rendered preview in the row detail modal. A switch lets you toggle between plain text and the rendered view; You can treat any `TEXT` column as markdown by cycling its type in the column header (same gesture as for date/datetime). Declared types such as `TEXT MARKDOWN` or `MDTEXT` are recognized by default.
