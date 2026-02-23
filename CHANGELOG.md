@@ -8,11 +8,14 @@ When you open a cell in a markdown column in VS Code, the file opens with a `.md
 
 ### Additions
 - [PRO] Backspace now sets the focused column to NULL for all selected rows
+- [PRO] In the row detail modal, date/time columns now show the same date display as in the table
 
 ### Changes
 - Resized textarea heights are now remembered for the duration of the session
 - Opening a DB now selects the first table (not the first item, which could be a view)
+- [PRO] All buttons that cycle properties now reset to their default value on right-click
 - [PRO] Pragma Editor Optimize action now defaults to "Dry Run"
+- [PRO] Date/raw toggle in modal is now per column
 
 ### Fixes
 - [PRO] Batch edit in row detail now updates all selected rows correctly
