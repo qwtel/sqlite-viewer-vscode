@@ -1,7 +1,16 @@
 # CHANGELOG
 ## v26.8.0
+Bump the latest pre-release to the main channel.
 
-Bump latest pre-release to main channel.
+Major new features from the pre-release branch are included in this update:
+
+- [[PRO] Table and Column Creation](#pro-table-and-column-creation) — Add, drop, and edit tables and columns, including constraints for empty tables.
+- [[PRO] Antifreeze Update](#pro-antifreeze-update) — Long-running SQLite operations are cancelled when navigating to another view, keeping the UI responsive.
+- [Improved Keyboard Selection](#improved-keyboard-selection) — Select rows with Shift+Arrow and use Enter or Escape for common selection actions.
+- [Row Selection Undo History](#row-selection-undo-history) — Undo and redo row selections independently from document edits.
+- [[PRO] Text Input Undo History](#pro-text-input-undo-history) — Undo and redo text-field edits independently from database history.
+- [[PRO] Inline Foreign Keys in Row Detail](#pro-inline-foreign-keys-in-row-detail) — Expand, edit, and save referenced rows directly in the detail modal, including nested references.
+- [[PRO] Markdown Preview](#pro-markdown-preview) — Render markdown stored in text columns in the row detail modal and open it with Markdown tooling in VS Code.
 
 ## v26.2.5 (Pre-Release)
 _Released on February 23, 2026_

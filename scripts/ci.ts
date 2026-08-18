@@ -48,9 +48,9 @@ if (import.meta.main) {
 
   for (const [i, t] of [...targets.entries()]) {
     const target = (tool === "ovsx" && t === "web") ? undefined : t;
-    const env = i === 0 
-      ? { ...Bun.env, VSCODE_EXT_TOOL: tool, VSCODE_EXT_TARGET: target, } 
-      : { ...Bun.env, VSCODE_EXT_TOOL: tool, VSCODE_EXT_TARGET: target, VSCODE_EXT_SKIP_BUILD: "1" }
+    const env = i === 0
+      ? { ...Bun.env, VSCODE_EXT_TOOL: tool, VSCODE_EXT_TARGET: t, }
+      : { ...Bun.env, VSCODE_EXT_TOOL: tool, VSCODE_EXT_TARGET: t, VSCODE_EXT_SKIP_BUILD: "1" }
     await packageExt({ tool, kind, target, 'pre-release': preRelease }, env);
   }
 }
