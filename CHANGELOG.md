@@ -1,5 +1,7 @@
 # CHANGELOG
 ## v26.8.0
+_Released on August 18, 2026_
+
 Bump the latest pre-release to the main channel.
 
 Major new features from the pre-release branch are included in this update:
