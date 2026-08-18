@@ -1,7 +1,7 @@
 import "./polyfills"
 import * as vsc from 'vscode';
 import { TelemetryReporter } from '@vscode/extension-telemetry';
-import { calcDaysSinceIssued, deleteLicenseKeyCommand, enterAccessTokenCommand, enterLicenseKeyCommand, getPayload, refreshAccessToken, verifyToken, exportTableCommand } from './commands';
+import { deleteLicenseKeyCommand, enterAccessTokenCommand, enterLicenseKeyCommand, refreshAccessToken, verifyToken, exportTableCommand, type TokenPayload } from './commands';
 import { IsVSCode } from './util';
 import { AccessToken, ExtensionId, FileNestingPatternsAdded, FistInstallMs, FullExtensionId, LicenseKey, NestingPattern, SyncedKeys, TelemetryConnectionString, Title } from './constants';
 import { disposeAll } from './dispose';
@@ -48,21 +48,6 @@ export async function activate(context: vsc.ExtensionContext) {
 
 const globalProviderSubs = new WeakSet<vsc.Disposable>();
 
-const showWarningAndReturn = <T>(accessToken?: T) => (err: unknown) => {
-  if (err instanceof Error) vsc.window.showWarningMessage(err.message); else console.error(err)
-  return accessToken;
-}
-
-const showWarningAndClearToken = (err: unknown) => {
-  if (err instanceof Error) vsc.window.showWarningMessage(err.message); else console.error(err)
-  return undefined;
-}
-
-async function clearAccessToken(context: vsc.ExtensionContext) {
-  await context.globalState.update(AccessToken, '');
-  return undefined;
-}
-
 export async function activateProviders(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
   const prevSubs = context.subscriptions.filter(x => globalProviderSubs.has(x));
   for (const sub of prevSubs) context.subscriptions.splice(context.subscriptions.indexOf(sub), 1);
@@ -70,26 +55,20 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
 
   let verified = false;
   let accessToken = context.globalState.get<string>(AccessToken);
-  let licenseKey = context.globalState.get<string>(LicenseKey);
+  const licenseKey = context.globalState.get<string>(LicenseKey);
+  let payload: TokenPayload|null = null;
   try {
-    const payload = getPayload(accessToken);
-    if (!licenseKey && accessToken && !await verifyToken(accessToken)) {
-      accessToken = await clearAccessToken(context);
+    payload = accessToken ? await verifyToken(accessToken) : null;
+    if (accessToken && !payload) {
+      await context.globalState.update(AccessToken, '');
+      accessToken = undefined;
     }
-    if (licenseKey) {
-      const daysSinceIssued = accessToken && payload?.exp ? calcDaysSinceIssued(payload.iat) : undefined;
-      const freshAccessTokenPromise = refreshAccessToken(context, licenseKey, accessToken);
-      if (!accessToken || (daysSinceIssued ?? Infinity) > 14) {
-        accessToken = await freshAccessTokenPromise.catch(showWarningAndClearToken);
-      } else {
-        freshAccessTokenPromise.catch(showWarningAndReturn(accessToken));
-      }
-    }
-    verified = !!accessToken && !!(await verifyToken(accessToken));
-    if (!verified) accessToken = undefined;
+
+    verified = !!accessToken && !!payload;
   } catch (err) {
     if (err instanceof Error) vsc.window.showWarningMessage(err.message); else console.error(err)
   }
+  if (!verified) accessToken = undefined;
 
   const subs = [];
 
@@ -104,6 +83,17 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
 
   for (const sub of subs) globalProviderSubs.add(sub);
   context.subscriptions.push(...subs);
+
+  if (licenseKey && payload?.ent !== 1) {
+    void refreshAccessToken(context, licenseKey, accessToken)
+      .then(async freshAccessToken => {
+        if (!freshAccessToken || freshAccessToken === accessToken) return;
+        if (context.globalState.get<string>(LicenseKey) !== licenseKey) return;
+        await context.globalState.update(AccessToken, freshAccessToken);
+        await activateProviders(context, reporter);
+      })
+      .catch(console.warn);
+  }
 }
 
 // https://stackoverflow.com/a/66303259/3073272

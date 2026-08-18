@@ -6,6 +6,8 @@ import { AccessToken, getLandingPageOrigin, JWTPublicKeySPKI, LicenseKey } from 
 import { activateProviders } from './extension';
 import { getShortMachineId } from './util';
 
+export type TokenPayload = jose.JWTPayload & { mid: string, ent?: 1 };
+
 const licenseKeyRegex = /[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}/i;
 const legacyLicenseKeyRegex = /[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}-[A-Z0-9]{8}/i;
 
@@ -60,12 +62,8 @@ export async function enterLicenseKeyCommand(context: vsc.ExtensionContext, repo
   } catch {
     throw Error(l10n.t('Failed to parse response'));
   }
-				
-  const payload = jose.decodeJwt(data.token);
+  const payload = await verifyToken(data.token, shortMachineId);
   if (!payload) throw Error(l10n.t('Invalid access token'));
-  if (payload.mid !== shortMachineId) {
-    throw Error(l10n.t('Machine ID in token does not match this device. Please retry activation.'));
-  }
 
   await Promise.all([
     context.globalState.update(LicenseKey, licenseKey),
@@ -115,16 +113,8 @@ export async function enterAccessTokenCommand(context: vsc.ExtensionContext, rep
   if (!accessToken) throw Error(l10n.t('No access token'));
   if (!jwtRegex.test(accessToken)) throw Error(l10n.t('Invalid access token format'));
 
-  let payload;
-  try {
-    payload = await verifyToken<Payload>(accessToken, shortMachineId);
-  } catch (err) {
-    throw Error(l10n.t('Invalid access token', { cause: err }));
-  }
+  const payload = await verifyToken(accessToken, shortMachineId);
   if (!payload) throw Error(l10n.t('Invalid access token'));
-  if (payload.mid !== shortMachineId) {
-    throw Error(l10n.t('Machine ID in token does not match this device. Please retry activation.'));
-  }
 
   await context.globalState.update(AccessToken, accessToken);
   await activateProviders(context, reporter);
@@ -156,10 +146,6 @@ export function calcDaysSinceIssued(issuedAt?: number) {
   return diffDays;
 }
 
-export function getPayload(accessToken?: string) {
-  return !!accessToken ? jose.decodeJwt(accessToken) : null;
-}
-
 function abortControllerTimeout(n: number) {
   const ctrl = new AbortController();
   setTimeout(() => ctrl.abort(), n);
@@ -172,22 +158,23 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, licenseK
     const baseURL = getLandingPageOriginForContext(context);
     const shortMachineId = await getShortMachineId();
 
-    const payload = getPayload(accessToken);
-    if (payload && 'ent' in payload) return accessToken;
+    const payload = accessToken ? await verifyToken(accessToken, shortMachineId) : null;
+    if (accessToken && payload?.ent === 1) return accessToken;
 
-    const daysSinceIssued = accessToken ? calcDaysSinceIssued(payload?.iat) : undefined;
-    if ((daysSinceIssued ?? Infinity) > 14 || (payload?.mid && payload.mid !== shortMachineId)) {
+    const daysSinceIssued = payload ? calcDaysSinceIssued(payload.iat) : null;
+    if (!accessToken || !payload || daysSinceIssued === null || daysSinceIssued > 14) {
       response = await fetch(new URL('/api/register', baseURL), {
         method: 'POST',
         headers: [['Content-Type', 'application/x-www-form-urlencoded']],
         body: new URLSearchParams({ 'machine_id': shortMachineId, 'license_key': licenseKey }),
         signal: abortControllerTimeout(5000),
       });
-    } else if ((daysSinceIssued ?? Infinity) > 1 && accessToken) {
+    } else if (daysSinceIssued > 1) {
       response = await fetch(new URL('/api/refresh', baseURL), {
         method: 'POST',
         headers: [['Content-Type', 'application/x-www-form-urlencoded']],
         body: new URLSearchParams({ 'machine_id': shortMachineId, 'license_key': licenseKey, 'access_token': accessToken }),
+        signal: abortControllerTimeout(5000),
       });
     } else {
       return accessToken;
@@ -209,32 +196,23 @@ export async function refreshAccessToken(context: vsc.ExtensionContext, licenseK
     throw new Error(l10n.t('Failed to parse response'));
   }
 
-  // const freshPayload = jose.decodeJwt(data.token);
-  // if (!freshPayload) throw Error(l10n.t('Invalid access token'));
-  // if (freshPayload.mid !== await getShortMachineId()) {
-  //   throw Error(l10n.t('Machine ID in token does not match this device, this should never happen!'));
-  // }
-
-  // console.log(data);
-  Promise.resolve(context.globalState.update(AccessToken, data.token)).catch(console.warn);
+  const freshPayload = await verifyToken(data.token);
+  if (!freshPayload) throw Error(l10n.t('Invalid access token'));
   return data.token;
 }
 
-export async function verifyToken<PayloadType = jose.JWTPayload>(
+export async function verifyToken(
   accessToken: string,
   expectedMid: string|PromiseLike<string> = getShortMachineId()
-): Promise<PayloadType & jose.JWTPayload|null> {
+): Promise<TokenPayload|null> {
   try {
     const jwtKey = await jose.importSPKI(JWTPublicKeySPKI, 'ES256');
-    const { payload } = await jose.jwtVerify<PayloadType>(accessToken, jwtKey);
-    const mid = await expectedMid;
-    if (mid && payload.mid && payload.mid !== mid) {
-      return null;
-    }
-    return payload;
+    const { payload } = await jose.jwtVerify(accessToken, jwtKey, { algorithms: ['ES256'] });
+    if (payload.mid !== await expectedMid) return null;
+    if (typeof payload.iat !== 'number') return null;
+    if (payload.ent !== 1 && typeof payload.exp !== 'number') return null;
+    return payload as TokenPayload;
   } catch {
     return null;
   }
 }
-
-type Payload = { mid: string, ent?: 1 }
