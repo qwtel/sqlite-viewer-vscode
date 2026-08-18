@@ -104,6 +104,9 @@ export class ContentCache implements vsc.Disposable {
  * This is especially useful considering how badly implemented object support in vscode's `postMessage` is: No structured clone, no message channels, 
  * and randomly dropped `Uint8Array`s if there's too many in one message.
  */
+const kWebviewWireHighWaterMarkChunks = 128;
+const kWebviewWireMaxPushBacklogBytes = 32 * 1024 * 1024;
+
 export class WebviewStream extends Disposable {
   #readable;
   #writable;
@@ -111,6 +114,8 @@ export class WebviewStream extends Disposable {
   #writableController!: WritableStreamDefaultController;
   #readableClosed = false;
   #writableClosed = false;
+  #pending: Uint8Array[] = [];
+  #pendingBytes = 0;
   constructor(private readonly webviewPanel: vsc.WebviewPanel) {
     super();
     this.#readable = new ReadableStream<Uint8Array>({
@@ -119,21 +124,30 @@ export class WebviewStream extends Disposable {
         this._register(this.webviewPanel.webview.onDidReceiveMessage(data => {
           // const [header, code, port1, port2, tl, payload] = cborDecoder.decode(data);
           // console.log("Receiving...", [header, code, port1?.toString(16), port2?.toString(16), tl, payload && { byteLength: payload?.byteLength }])
-          if (data instanceof Uint8Array) {
-            controller.enqueue(data);
-          } else {
-            controller.error(new Error(`Expected Uint8Array, got ${typeof data}`));
+          if (!(data instanceof Uint8Array)) {
+            this.#cleanup(new Error(`Expected Uint8Array, got ${typeof data}`));
+            return;
           }
+          if (this.#pendingBytes + data.byteLength > kWebviewWireMaxPushBacklogBytes) {
+            this.#cleanup(new Error('Webview transport backlog exceeded'));
+            return;
+          }
+          this.#pending.push(data);
+          this.#pendingBytes += data.byteLength;
+          this.#flushReadable();
         }));
         this._register(this.webviewPanel.onDidDispose(() => {
           this.#cleanup(new DOMException('Underlying webviewPanel disposed', 'AbortError'))
         }));
       },
+      pull: () => {
+        this.#flushReadable();
+      },
       cancel: (reason) => {
         this.#readableClosed = true;
         this.#cleanup(reason);
       },
-    });
+    }, { highWaterMark: kWebviewWireHighWaterMarkChunks });
     this.#writable = new WritableStream<Uint8Array>({
       start: (controller) => {
         this.#writableController = controller;
@@ -158,10 +172,29 @@ export class WebviewStream extends Disposable {
         this.#writableClosed = true;
         this.#cleanup(reason);
       },
-    });
+    }, { highWaterMark: kWebviewWireHighWaterMarkChunks });
   }
+
+  #flushReadable() {
+    const controller = this.#readableController;
+    if (this.#readableClosed) return;
+    while (this.#pending.length > 0) {
+      const want = controller.desiredSize;
+      if (want !== null && want <= 0) break;
+      const chunk = this.#pending.shift()!;
+      this.#pendingBytes -= chunk.byteLength;
+      try {
+        controller.enqueue(chunk);
+      } catch {
+        break;
+      }
+    }
+  }
+
   #cleanup(reason?: any) {
     super.dispose();
+    this.#pending.length = 0;
+    this.#pendingBytes = 0;
     if (!this.#readableClosed) {
       this.#readableClosed = true;
       if (reason != null)
@@ -173,8 +206,10 @@ export class WebviewStream extends Disposable {
       this.#writableClosed = true;
       if (this.#writable.locked || reason)
         this.#writableController.error(reason ?? new DOMException('WebviewStream disposed', 'AbortError'));
-      else
-        this.#writable.getWriter().close().catch(() => {});
+      else {
+        const writer = this.#writable.getWriter();
+        writer.close().catch(() => {}).finally(() => writer.releaseLock());
+      }
     }
   }
   get readable() { return this.#readable }
@@ -189,7 +224,8 @@ export const cspUtil = {
   styleSrc: 'style-src',
   imgSrc: 'img-src',
   fontSrc: 'font-src',
-  frameSrc: 'frame-src',
+  connectSrc: 'connect-src',
+  mediaSrc: 'media-src',
   childSrc: 'child-src',
   self: "'self'",
   data: 'data:',
@@ -227,7 +263,7 @@ export function cancelTokenToAbortSignal<T extends vsc.CancellationToken|null|un
 export const encodeUtf8 = TextEncoder.prototype.encode.bind(new TextEncoder());
 export const shortHash = async (str: string) => base58.encode(new Uint8Array(await crypto.subtle.digest('SHA-256', encodeUtf8(str))).subarray(0, 6));
 export const hash64 = async (str: string, n = 6) => base64urlnopad.encode(new Uint8Array(await crypto.subtle.digest('SHA-256', encodeUtf8(str))).subarray(0, n));
-export const getShortMachineId = async () => shortHash(vsc.env.machineId);
+export const getShortMachineId = () => shortHash(vsc.env.machineId);
 
 export const generateSQLiteDocumentKey = async (uri: vsc.Uri): Promise<string> => {
   const { basename, extname } = getUriParts(uri);

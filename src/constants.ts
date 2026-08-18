@@ -36,6 +36,15 @@ hixfUOoecMEXQ2c2wy95T/JgmiRh9MxPTdRwoSO1Ub1nVFII2s1d8E2RCw==
 
 export const CopilotChatId = 'github.copilot-chat';
 
+const LandingPageDevelopmentOrigin = 'http://localhost:8788';
+const LandingPagePreviewOrigin = 'https://preview.sqlite-viewer-pro-landing-page.pages.dev';
+const LandingPageProductionOrigin = 'https://vscode.sqliteviewer.app';
+
+export function getLandingPageOrigin(development: boolean, preRelease = false) {
+  if (development) return LandingPageDevelopmentOrigin;
+  return preRelease ? LandingPagePreviewOrigin : LandingPageProductionOrigin;
+}
+
 // Default presets for column creation
 export const DefaultCheckConstraintPresets: Record<string, string> = {
   "Valid datetime": "datetime(\"{column}\") IS NOT NULL",
@@ -80,10 +89,10 @@ export const DefaultMarkdownPreviewStyles: Record<string, string> = {
   "li": "margin:0.25em 0",
   "blockquote": "margin:0.75em 0;padding:0.25em 0 0.25em 0.75em;opacity:0.9",
   "hr": "border:0;margin:1em 0",
-  "table": "border-collapse:collapse;display:block;overflow:auto;scrollbar-width:thin",
+  "table": "border-collapse:collapse;display:block;overflow:auto",
   "thead th,tbody th,tbody td": "padding:0.25em 0.5em;word-break:normal;overflow-wrap:normal;white-space:normal",
   "code": "padding:0.1em 0.25em;border-radius:3px",
-  "pre": "overflow:auto;margin:0.6em 0;padding:0.6em;border-radius:4px;scrollbar-width:thin",
+  "pre": "overflow:auto;margin:0.6em 0;padding:0.6em;border-radius:4px",
   "pre code": "padding:0;background:none",
   "img": "max-width:100%;height:auto",
 };

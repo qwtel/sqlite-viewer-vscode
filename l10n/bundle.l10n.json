@@ -158,6 +158,7 @@
   "Download": "Download",
   "ReadOnly": "ReadOnly",
   "Loading…": "Loading…",
+  "Failed to load the upgrade page.": "Failed to load the upgrade page.",
   "Writable": "Writable",
   "NotNull": "NotNull",
   "Previous row": "Previous row",
@@ -336,5 +337,10 @@
   "Successfully exported {0} rows to {1}": "Successfully exported {0} rows to {1}",
   "Open File": "Open File",
   "Export cancelled": "Export cancelled",
-  "Export failed: {0}": "Export failed: {0}"
+  "Export failed: {0}": "Export failed: {0}",
+  "Open or drop a SQLite file.": "Open or drop a SQLite file.",
+  "You can also view a sample:": "You can also view a sample:",
+  "Load a sample": "Load a sample",
+  "Recently Opened": "Recently Opened",
+  "Loading sample…": "Loading sample…"
 }

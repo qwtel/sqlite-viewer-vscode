@@ -158,6 +158,7 @@
   "Download": "Herunterladen",
   "ReadOnly": "Schreibgeschützt",
   "Loading…": "Lädt…",
+  "Failed to load the upgrade page.": "Die Upgrade-Seite konnte nicht geladen werden.",
   "Writable": "Beschreibbar",
   "NotNull": "NichtNull",
   "Previous row": "Vorherige Zeile",

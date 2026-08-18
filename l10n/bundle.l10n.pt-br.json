@@ -158,6 +158,7 @@
   "Download": "Baixar",
   "ReadOnly": "SomenteLeitura",
   "Loading…": "Carregando…",
+  "Failed to load the upgrade page.": "Não foi possível carregar a página de upgrade.",
   "Writable": "Gravável",
   "NotNull": "NãoNulo",
   "Previous row": "Linha anterior",

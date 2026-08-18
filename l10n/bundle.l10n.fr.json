@@ -158,6 +158,7 @@
   "Download": "Télécharger",
   "ReadOnly": "LectureSeule",
   "Loading…": "Chargement…",
+  "Failed to load the upgrade page.": "Impossible de charger la page de mise à niveau.",
   "Writable": "Écriture",
   "NotNull": "NonNul",
   "Previous row": "Ligne précédente",

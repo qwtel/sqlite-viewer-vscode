@@ -10,7 +10,8 @@ const __dirname = path.dirname(__filename);
 const resolve = (...args: string[]) => path.resolve(__dirname, '..', ...args);
 
 const DEV = !!import.meta.env.DEV;
-console.log({ DEV })
+const PRE_RELEASE = Bun.env.VSCODE_EXT_PRE_RELEASE === '1';
+console.log({ DEV, PRE_RELEASE })
 const outDir = resolve('out')
 
 function envToDefine(env: Record<string, any>): Record<`import.meta.env.${string}`, string> {
@@ -37,6 +38,7 @@ const baseConfig = {
   define: {
     ...envToDefine({
       DEV,
+      VSCODE_PRE_RELEASE: PRE_RELEASE,
       VITE_VSCODE: true,
     }),
   },

@@ -158,6 +158,7 @@
   "Download": "다운로드",
   "ReadOnly": "읽기전용",
   "Loading…": "로딩 중…",
+  "Failed to load the upgrade page.": "업그레이드 페이지를 불러오지 못했습니다.",
   "Writable": "쓰기가능",
   "NotNull": "Null이아님",
   "Previous row": "이전 행",

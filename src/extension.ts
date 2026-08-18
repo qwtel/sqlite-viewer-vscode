@@ -53,6 +53,16 @@ const showWarningAndReturn = <T>(accessToken?: T) => (err: unknown) => {
   return accessToken;
 }
 
+const showWarningAndClearToken = (err: unknown) => {
+  if (err instanceof Error) vsc.window.showWarningMessage(err.message); else console.error(err)
+  return undefined;
+}
+
+async function clearAccessToken(context: vsc.ExtensionContext) {
+  await context.globalState.update(AccessToken, '');
+  return undefined;
+}
+
 export async function activateProviders(context: vsc.ExtensionContext, reporter: TelemetryReporter) {
   const prevSubs = context.subscriptions.filter(x => globalProviderSubs.has(x));
   for (const sub of prevSubs) context.subscriptions.splice(context.subscriptions.indexOf(sub), 1);
@@ -60,17 +70,23 @@ export async function activateProviders(context: vsc.ExtensionContext, reporter:
 
   let verified = false;
   let accessToken = context.globalState.get<string>(AccessToken);
+  let licenseKey = context.globalState.get<string>(LicenseKey);
   try {
-    const licenseKey = context.globalState.get<string>(LicenseKey);
+    const payload = getPayload(accessToken);
+    if (!licenseKey && accessToken && !await verifyToken(accessToken)) {
+      accessToken = await clearAccessToken(context);
+    }
     if (licenseKey) {
-      const payload = getPayload(accessToken);
-      const daysSinceIssued = accessToken && payload?.exp && calcDaysSinceIssued(payload.iat);
-      const freshAccessTokenPromise = refreshAccessToken(context, licenseKey, accessToken).catch(showWarningAndReturn(accessToken));
-      if (!accessToken || (daysSinceIssued && daysSinceIssued > 14)) {
-        accessToken = await freshAccessTokenPromise;
+      const daysSinceIssued = accessToken && payload?.exp ? calcDaysSinceIssued(payload.iat) : undefined;
+      const freshAccessTokenPromise = refreshAccessToken(context, licenseKey, accessToken);
+      if (!accessToken || (daysSinceIssued ?? Infinity) > 14) {
+        accessToken = await freshAccessTokenPromise.catch(showWarningAndClearToken);
+      } else {
+        freshAccessTokenPromise.catch(showWarningAndReturn(accessToken));
       }
     }
     verified = !!accessToken && !!(await verifyToken(accessToken));
+    if (!verified) accessToken = undefined;
   } catch (err) {
     if (err instanceof Error) vsc.window.showWarningMessage(err.message); else console.error(err)
   }

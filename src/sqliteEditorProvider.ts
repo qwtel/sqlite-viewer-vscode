@@ -9,7 +9,21 @@ import * as Caplink from "../sqlite-viewer-core/src/caplink";
 import { WireEndpoint } from '../sqlite-viewer-core/src/vendor/postmessage-over-wire/comlinked'
 
 import { crypto } from './o/crypto';
-import { ConfigurationSection, CopilotChatId, ExtensionId, FistInstallMs, FullExtensionId, Ns, SidebarLeft, SidebarRight, DefaultCheckConstraintPresets, DefaultForeignKeyClausePresets, DefaultValueExpressionPresets, DefaultMarkdownPreviewStyles } from './constants';
+import {
+  ConfigurationSection,
+  CopilotChatId,
+  DefaultCheckConstraintPresets,
+  DefaultForeignKeyClausePresets,
+  DefaultMarkdownPreviewStyles,
+  DefaultValueExpressionPresets,
+  ExtensionId,
+  FistInstallMs,
+  FullExtensionId,
+  getLandingPageOrigin,
+  Ns,
+  SidebarLeft,
+  SidebarRight,
+} from './constants';
 // Temporarily disabled - see CUSTOM_COLUMN_TYPES.md
 // import { ..., DefaultCustomColumnTypes } from './constants';
 import { Disposable } from './dispose';
@@ -25,6 +39,10 @@ export type VSCODE_ENV = {
   appHost: string,
   uriScheme: string,
   extensionUrl: string,
+  extensionVersion: string,
+  landingPageOrigin: string,
+  landingPageImageOrigin: string,
+  landingPageScriptNonce: string,
   accessToken?: string,
   uiKind?: 'desktop'|'web',
   machineId: string,
@@ -199,7 +217,12 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
 
     Caplink.expose(document.vscodeFns, webviewEndpoint);
 
-    webviewPanel.webview.options = { enableScripts: true };
+    webviewPanel.webview.options = {
+      enableScripts: true,
+      ...(this.context.extensionMode === vsc.ExtensionMode.Development && {
+        portMapping: [{ webviewPort: 8788, extensionHostPort: 8788 }],
+      }),
+    };
     webviewPanel.webview.html = await this.#getHtmlForWebview(webviewPanel, document, webviewId);
 
     document.hasActiveEditor = webviewPanel.active;
@@ -216,17 +239,32 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
     const codiconsUri = vsc.Uri.joinPath(this.context.extensionUri, 'node_modules', 'codicons', 'dist', 'codicon.css');
 
     const assetAsWebviewUri = (x: string) => webview.asWebviewUri(vsc.Uri.joinPath(buildUri, x));
+    const landingPageOrigin = getLandingPageOrigin(
+      this.context.extensionMode === vsc.ExtensionMode.Development,
+      import.meta.env.VSCODE_PRE_RELEASE == 'true',
+    );
+    const landingPageAssetSource = new URL('/dist/', landingPageOrigin).href;
+    const landingPageImageOrigin = 'https://www.gravatar.com';
+    const landingPageImageSource = `${landingPageImageOrigin}/avatar/`;
+    const landingPageScriptNonce = crypto.randomUUID().replaceAll('-', '');
 
     const html = new TextDecoder().decode(await vsc.workspace.fs.readFile(vsc.Uri.joinPath(buildUri, 'index.html')));
 
     const cspObj = {
       [cspUtil.defaultSrc]: [webview.cspSource],
-      [cspUtil.scriptSrc]: [webview.cspSource, cspUtil.wasmUnsafeEval],
+      [cspUtil.scriptSrc]: [webview.cspSource, cspUtil.wasmUnsafeEval, `'nonce-${landingPageScriptNonce}'`],
       [cspUtil.styleSrc]: [webview.cspSource, cspUtil.inlineStyle],
-      [cspUtil.imgSrc]: [webview.cspSource, cspUtil.data, cspUtil.blob],
-      [cspUtil.fontSrc]: [webview.cspSource],
-      [cspUtil.frameSrc]: [this.context.extensionMode === vsc.ExtensionMode.Development ? '*' : 'https://vscode.sqliteviewer.app'],
-      [cspUtil.childSrc]: [cspUtil.blob],
+      [cspUtil.imgSrc]: [
+        webview.cspSource,
+        cspUtil.data,
+        cspUtil.blob,
+        landingPageAssetSource,
+        landingPageImageSource,
+      ],
+      [cspUtil.fontSrc]: [webview.cspSource, landingPageAssetSource],
+      [cspUtil.connectSrc]: [webview.cspSource, cspUtil.data, landingPageOrigin],
+      [cspUtil.mediaSrc]: [webview.cspSource, cspUtil.data, cspUtil.blob, landingPageAssetSource],
+      [cspUtil.childSrc]: [webview.cspSource, cspUtil.blob],
     };
 
     // Only set csp for hosts that are known to correctly set `webview.cspSource`
@@ -250,6 +288,10 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
       webviewId,
       browserExt: toBoolString(!!import.meta.env.VSCODE_BROWSER_EXT),
       uriScheme, appHost, appName, extensionUrl,
+      extensionVersion: this.context.extension.packageJSON.version as string,
+      landingPageOrigin,
+      landingPageImageOrigin,
+      landingPageScriptNonce,
       accessToken: this.accessToken,
       uiKind: uiKindToString(uiKind),
       machineId: vsc.env.machineId,

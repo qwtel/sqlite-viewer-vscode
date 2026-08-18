@@ -25,6 +25,17 @@
           "DEV": "1"
         }
       }
+    },
+    {
+      "label": "compile:local-production",
+      "type": "shell",
+      "command": "bun run clean && bun run compile:ext && bun run compile:app",
+      "options": {
+        "env": {
+          "DEV": ""
+        }
+      },
+      "problemMatcher": []
     }
   ]
 }

@@ -66,6 +66,7 @@ export const packageExt = async (opts: {
       ...env, 
       TJS_ZIG_OUT: resolve("zig-build-txiki/zig-out"), 
       VSCODE_EXT_TARGET: tool === "ovsx" ? env.VSCODE_EXT_TARGET ?? target : target,
+      VSCODE_EXT_PRE_RELEASE: preRelease ? '1' : '0',
     },
     stdout: "inherit",
     stderr: "inherit",

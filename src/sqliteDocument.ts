@@ -7,7 +7,7 @@ import * as vsc from 'vscode';
 
 import * as Caplink from "../sqlite-viewer-core/src/caplink";
 
-import { ConfigurationSection, FullExtensionId } from './constants';
+import { ConfigurationSection, FullExtensionId, Title } from './constants';
 import { Disposable } from './dispose';
 import { cancelTokenToAbortSignal, getUriParts, generateSQLiteDocumentKey } from './util';
 import { VscodeFns } from './vscodeFns';
@@ -27,6 +27,7 @@ export const RemoteWorkspaceMode = !!vsc.env.remoteName && Extension?.extensionK
 export const ReadWriteMode = LocalMode || RemoteWorkspaceMode;
 
 const MaxHistory = 100;
+const WarnedWasmModeReasons = new Set<string>();
 
 export const GlobalSQLiteDocuments = new Map<string, SQLiteDocument>();
 
@@ -34,6 +35,41 @@ export function getInstantCommit() {
   const config = vsc.workspace.getConfiguration(ConfigurationSection);
   const value = config.get<string>('instantCommit', 'never');
   return value === 'always' || (value === 'remote-only' && RemoteWorkspaceMode)
+}
+
+function getWasmModeReason() {
+  if (import.meta.env.VSCODE_BROWSER_EXT) {
+    return vsc.l10n.t('the browser extension cannot use the native SQLite engine');
+  }
+  if (!ReadWriteMode) {
+    return vsc.l10n.t('the extension is not running in a local or workspace extension host');
+  }
+  return vsc.l10n.t('the native SQLite engine is unavailable');
+}
+
+function getWasmModeDetail() {
+  return [
+    `browserExt: ${!!import.meta.env.VSCODE_BROWSER_EXT}`,
+    `readWriteMode: ${ReadWriteMode}`,
+    `localMode: ${LocalMode}`,
+    `remoteWorkspaceMode: ${RemoteWorkspaceMode}`,
+    `remoteName: ${vsc.env.remoteName ?? 'none'}`,
+    `extensionKind: ${Extension?.extensionKind ?? 'unknown'}`,
+  ].join('\n');
+}
+
+function showWasmModeWarningOnce(filename: string) {
+  const reason = getWasmModeReason();
+  const detail = getWasmModeDetail();
+  const key = `${reason}\n${detail}`;
+  if (WarnedWasmModeReasons.has(key)) return;
+  WarnedWasmModeReasons.add(key);
+
+  console.warn(`[${Title}] Opening '${filename}' in read-only WASM mode: ${reason}\n${detail}`);
+  vsc.window.showWarningMessage(
+    vsc.l10n.t("SQLite Viewer opened '{0}' in read-only mode because {1}.", filename, reason),
+    { detail },
+  );
 }
 
 export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
@@ -53,6 +89,9 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
       : createWebWorker;
 
     const { filename } = getUriParts(uri);
+    if (createWorker === createWebWorker && !readOnly && verified) {
+      showWasmModeWarningOnce(filename);
+    }
     const instantCommit = getInstantCommit();
 
     let workerFns, importDb, dbRemote;

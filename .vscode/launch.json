@@ -39,6 +39,23 @@
       }
     },
     {
+      "name": "Run Extension (Local Production)",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--disable-extensions",
+        "--extensionDevelopmentPath=${workspaceRoot}"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/out/**/*.js"
+      ],
+      "preLaunchTask": "compile:local-production",
+      "env": {
+        "DEV": ""
+      }
+    },
+    {
       "name": "Run Extension (Web, no extensions)",
       "type": "extensionHost",
       "request": "launch",
