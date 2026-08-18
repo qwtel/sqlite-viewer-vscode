@@ -11,5 +11,7 @@
 		"noEmit": true,
 		"allowImportingTsExtensions": true
 	},
-	"exclude": [],
+	"exclude": [
+		"sqlite-viewer-core/pro/src/env.d.ts"
+	],
 }
