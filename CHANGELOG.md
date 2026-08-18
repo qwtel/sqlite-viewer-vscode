@@ -1,4 +1,8 @@
 # CHANGELOG
+## v26.8.0
+
+Bump latest pre-release to main channel.
+
 ## v26.2.5 (Pre-Release)
 _Released on February 23, 2026_
 
