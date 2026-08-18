@@ -245,8 +245,8 @@
     "compile:tjs": "cd sqlite-viewer-core && npm run build-tjs",
     "compile:bin": "npm run compile:tjs && bun run scripts/bin.ts",
     "compile": "$([ -n \"$DEV\" ] && npm run build:zig:bin || true) && npm run clean && npm run compile:bin && npm run compile:ext && npm run compile:app",
-    "build:zig:bin": "cd zig-build-txiki && zig build --summary all",
-    "build:zig:matrix": "cd zig-build-txiki && zig build --summary all -Dno-wasm -Doptimize=ReleaseSmall -Dmatrix",
+    "build:zig:bin": "cd zig-build-txiki && DEVELOPER_DIR=/nonexistent ZIG_LIB_DIR=../node_modules/@zigc/lib zig build --summary all",
+    "build:zig:matrix": "cd zig-build-txiki && DEVELOPER_DIR=/nonexistent ZIG_LIB_DIR=../node_modules/@zigc/lib zig build --summary all -Dno-wasm -Doptimize=ReleaseSmall -Dmatrix",
     "build:zig": "npm run build:zig:bin && npm run build:zig:matrix",
     "build": "npm run build:zig && npm run compile",
     "postinstall": "npm run build:zig && bun run scripts/copy-file-type-supported.ts",
@@ -265,6 +265,7 @@
   },
   "devDependencies": {
     "@types/vscode": "=1.83.1",
+    "@zigc/cli": "0.15.1",
     "bun-types": "^1.3.9",
     "esbuild": "^0.27.3",
     "esbuild-plugin-alias": "^0.2.1",
