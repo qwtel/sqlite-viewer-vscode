@@ -1,3 +1,4 @@
+/// <reference types="bun-types" />
 import esbuild, { BuildOptions } from "esbuild";
 import { polyfillNode } from "esbuild-plugin-polyfill-node";
 

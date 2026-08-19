@@ -15,7 +15,7 @@ const { l10n } = vsc;
 
 const getLandingPageOriginForContext = (context: vsc.ExtensionContext) => getLandingPageOrigin(
   context.extensionMode === vsc.ExtensionMode.Development,
-  import.meta.env.VSCODE_PRE_RELEASE == 'true',
+  import.meta.env.VSCODE_PRE_RELEASE,
 );
 
 export { exportTableCommand } from '../sqlite-viewer-core/pro/src/exportCommand';

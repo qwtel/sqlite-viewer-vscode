@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import type { WorkerFns } from '../sqlite-viewer-core/src/worker-db';
 import type { TelemetryReporter } from '@vscode/extension-telemetry';
 

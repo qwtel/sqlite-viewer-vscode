@@ -9,9 +9,11 @@
 		"strict": true,
 		"rootDir": ".",
 		"noEmit": true,
-		"allowImportingTsExtensions": true
+		"allowImportingTsExtensions": true,
+		"types": []
 	},
-	"exclude": [
+	"include": [
+		"src/**/*",
 		"sqlite-viewer-core/pro/src/env.d.ts"
-	],
+	]
 }

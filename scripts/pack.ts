@@ -53,6 +53,17 @@ export const packageExt = async (opts: {
     console.warn(`Running '${kind}' without target`);
   }
 
+  if (!env.VSCODE_EXT_SKIP_BUILD) {
+    const build = Bun.spawn(['bun', 'run', 'scripts/esbuild.ts'], {
+      cwd: resolve(),
+      env: { ...env, VSCODE_EXT_PRE_RELEASE: preRelease ? '1' : '0' },
+      stdout: 'inherit',
+      stderr: 'inherit',
+    });
+    const exitCode = await build.exited;
+    if (exitCode !== 0) throw new Error(`Failed to compile extension with exit code ${exitCode}`);
+  }
+
   const cmd = [
     tool, 
     kind,

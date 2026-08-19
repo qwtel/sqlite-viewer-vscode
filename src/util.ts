@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import * as vsc from 'vscode';
 import { base58, base64urlnopad } from '@scure/base';
 import { Disposable } from './dispose';

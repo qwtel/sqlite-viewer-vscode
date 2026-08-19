@@ -1,3 +1,4 @@
+/// <reference types="node" />
 type ReceiverEndpoint = Pick<EventTarget, "addEventListener"|"removeEventListener">;
 interface Endpoint extends ReceiverEndpoint {
   postMessage(message: any, transfer?: Transferable[]): void;

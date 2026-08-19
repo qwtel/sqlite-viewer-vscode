@@ -241,7 +241,7 @@ export class SQLiteReadonlyEditorProvider extends Disposable implements vsc.Cust
     const assetAsWebviewUri = (x: string) => webview.asWebviewUri(vsc.Uri.joinPath(buildUri, x));
     const landingPageOrigin = getLandingPageOrigin(
       this.context.extensionMode === vsc.ExtensionMode.Development,
-      import.meta.env.VSCODE_PRE_RELEASE == 'true',
+      import.meta.env.VSCODE_PRE_RELEASE,
     );
     const landingPageAssetSource = new URL('/dist/', landingPageOrigin).href;
     const landingPageImageOrigin = 'https://www.gravatar.com';
