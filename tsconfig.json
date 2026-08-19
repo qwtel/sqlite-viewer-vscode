@@ -13,7 +13,6 @@
 		"types": []
 	},
 	"include": [
-		"src/**/*",
-		"sqlite-viewer-core/pro/src/env.d.ts"
+		"src/**/*"
 	]
 }
