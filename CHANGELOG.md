@@ -1,4 +1,8 @@
 # CHANGELOG
+## v26.8.1 (Pre-Release)
+
+Fixed minor issues affecting stability and reliability. Includes various dependency and maintenance updates.
+
 ## v26.8.0
 _Released on August 18, 2026_
 
