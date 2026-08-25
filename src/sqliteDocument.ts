@@ -81,7 +81,7 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
     openContext: vsc.CustomDocumentOpenContext,
     token?: vsc.CancellationToken,
   ): Promise<SQLiteDocument> {
-    const { reporter, verified, context: { extensionUri } } = provider;
+    const { reporter, verified, accessToken, context: { extensionUri } } = provider;
     let { readOnly } = provider;
 
     const createWorker = !import.meta.env.VSCODE_BROWSER_EXT && verified && ReadWriteMode // Do not change this line
@@ -96,13 +96,13 @@ export class SQLiteDocument extends Disposable implements vsc.CustomDocument {
 
     let workerFns, importDb, dbRemote;
     try {
-      ({ workerFns, importDb } = createWorker(extensionUri, reporter));
+      ({ workerFns, importDb } = createWorker(extensionUri, accessToken, reporter));
       ({ dbRemote, readOnly } = await importDb(uri, filename, readOnly, instantCommit));
     } catch (err) {
       // In case something goes wrong, try to create using the WASM worker
       if (createWorker !== createWebWorker) {
         try {
-          ({ workerFns, importDb } = createWebWorker(extensionUri, reporter));
+          ({ workerFns, importDb } = createWebWorker(extensionUri, accessToken, reporter));
           ({ dbRemote, readOnly } = await importDb(uri, filename, readOnly));
           if (err instanceof Error) {
             vsc.window.showWarningMessage(vsc.l10n.t("[{0}] occurred while trying to open '{1}'", err.message, filename), {

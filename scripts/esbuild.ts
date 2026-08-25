@@ -39,8 +39,9 @@ const baseConfig = {
   define: {
     ...envToDefine({
       DEV,
-      VSCODE_PRE_RELEASE: PRE_RELEASE,
       VITE_VSCODE: true,
+      WORKER_AUTH_REQUIRED: false,
+      VSCODE_PRE_RELEASE: PRE_RELEASE,
     }),
   },
 } satisfies BuildOptions;
@@ -54,6 +55,8 @@ const baseWorkerConfig = {
     ...envToDefine({
       DEV,
       VITE_VSCODE: true,
+      WORKER_AUTH_REQUIRED: false,
+      VSCODE_PRE_RELEASE: PRE_RELEASE,
     }),
     'import.meta.url': '"file:./sqlite-viewer-core/vscode/build/assets/"',
   },

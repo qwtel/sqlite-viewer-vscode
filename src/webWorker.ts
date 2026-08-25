@@ -28,6 +28,7 @@ function roundToNearestOOM(num: number) {
 
 export function createWebWorker(
   extensionUri: vsc.Uri,
+  _accessToken?: string,
   _reporter?: TelemetryReporter,
 ): WorkerBundle {
   const workerPath = import.meta.env.VSCODE_BROWSER_EXT
