@@ -1,7 +1,11 @@
 # CHANGELOG
+## v26.8.2 (Pre-Release)
+
+- Updated SQLite and SQLite WASM to 3.53.4
+- Fixed an issue where the right sidebar did not auto-hide when the table area became too narrow
+
 ## v26.8.1 (Pre-Release)
 _Released on August 19, 2026_
-
 
 Fixed minor issues affecting stability and reliability. Includes various dependency and maintenance updates.
 
