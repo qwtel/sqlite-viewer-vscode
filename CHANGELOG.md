@@ -3,6 +3,7 @@
 
 - Updated SQLite and SQLite WASM to 3.53.4
 - Fixed an issue where the right sidebar did not auto-hide when the table area became too narrow
+- [PRO] "Open in VS Code Tab to the Side" now opens detected JSON cells with the correct JSON or JSONC language mode
 
 ## v26.8.1 (Pre-Release)
 _Released on August 19, 2026_
