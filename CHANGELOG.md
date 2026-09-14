@@ -1,5 +1,7 @@
 # CHANGELOG
 ## v26.9.0
+_Released on September 14, 2026_
+
 Bump the latest pre-release to the main channel.
 
 - Updated SQLite and SQLite WASM to 3.53.4
