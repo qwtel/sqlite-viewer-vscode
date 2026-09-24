@@ -1,3 +1,11 @@
+# Activate SQLite Viewer PRO
+
+If you have a PRO license key, open the VS Code Command Palette and run **SQLite Viewer: Activate License Key**. Alternatively, open the **Upgrade to PRO** dialog in a SQLite Viewer tab, scroll to the bottom, and select **Enter License Key**. Paste your key into the input field at the top of the VS Code window and press Enter.
+
+For more information, see the [activation instructions in the SQLite Viewer FAQ](https://vscode.sqliteviewer.app/#faq).
+
+---
+
 # Publisher Terms of Use for SQLite Viewer
 
 Last updated: 5 Oct 2024
