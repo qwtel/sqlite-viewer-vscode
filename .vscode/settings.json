@@ -21,5 +21,6 @@
         "tabbability",
         "Tabster",
         "UNDOPOINT"
-    ]
+    ],
+    "cmake.sourceDirectory": "/Users/qwtel/GitHub/sqlite-viewer-vscode/zig-build-txiki"
 }

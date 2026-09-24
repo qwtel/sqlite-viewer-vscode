@@ -284,7 +284,7 @@
     "@vscode/vscode-languagedetection": "^1.0.23",
     "@worker-tools/typed-event-target": "^1.0.0",
     "@workers/typed-event-target": "npm:@jsr/workers__typed-event-target@^1.0.0",
-    "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.5.7",
+    "@workers/v8-value-serializer": "npm:@jsr/workers__v8-value-serializer@^0.5.9",
     "file-type": "=19.6.0",
     "jose": "=5.10.0",
     "json-merge-patch": "^1.0.2",
