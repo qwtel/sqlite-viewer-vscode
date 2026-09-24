@@ -1,4 +1,4 @@
-# Publisher Terms of Use for SQLite Viewer Business Edition
+# Terms of Use for SQLite Viewer PRO Business Edition
 
 _Last updated: 25 Oct 2024_
 
@@ -108,19 +108,21 @@ SQLite : [Public Domain](https://sqlite.org/copyright.html)
 `comlink` : [Apache-2.0]
 > Copyright 2017 Google Inc.
 
-`wa-sqlite` : [MIT]
+`wa-sqlite`: [MIT]
 > Copyright (c) 2023 Roy T. Hashimoto
 
-`tabster` : [MIT]
+`tabster`: [MIT]
 > Copyright (c) Microsoft Corporation.
 
 `sql-formatter` : [MIT]
 > Copyright (c) 2016-2020 ZeroTurnaround LLC
+>
 > Copyright (c) 2020-2021 George Leslie-Waksman and other contributors
+>
 > Copyright (c) 2021-Present inferrinizzard and other contributors
 
 `txiki.js` : [MIT]
-> Copyright (c) 2019-present Saúl Ibarra Corretgé <s@saghul.net>
+> Copyright (c) 2019-present Saúl Ibarra Corretgé &lt;s@saghul.net&gt;
 
 `@vscode/extension-telemetry` : [MIT]
 > Copyright (c) Microsoft Corporation. 
@@ -143,7 +145,11 @@ SQLite : [Public Domain](https://sqlite.org/copyright.html)
 `json5` : [MIT]
 > Copyright (c) 2012-2018 Aseem Kishore, and [others].
 > 
-> [others]: https://github.com/json5/json5/contributors
+> \[others\]: https://github.com/json5/json5/contributors
+>
+> Copyright (c) 2014-present, Jon Schlinkert.
+>
+> Copyright (c) 2026 ryoppippi
 
 `immutable`: [MIT]
 > Copyright (c) 2014-present, Lee Byron and other contributors.
@@ -156,6 +162,7 @@ SQLite : [Public Domain](https://sqlite.org/copyright.html)
 
 `marked` : [MIT]
 > Copyright (c) 2018+, MarkedJS (https://github.com/markedjs/)
+>
 > Copyright (c) 2011-2018, Christopher Jeffrey (https://github.com/chjj/)
 
 [MIT]: https://mit-license.org
